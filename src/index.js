@@ -1,7 +1,5 @@
 "use strict";
 
-const fragment_glsl = require("./fragment.glsl").default;
-
 window.addEventListener("load", ev => {
     // webgl setup
     const canvas = document.createElement("canvas");
@@ -75,11 +73,12 @@ window.addEventListener("load", ev => {
         return shader;
     };
     const loadProgram = () => Promise.all([
-        fetch("vertex.glsl").then(res => res.text()).then(
+        /*fetch("vertex.glsl").then(res => res.text()).then(
             src => loadShader(src, gl.VERTEX_SHADER)),
-        /*fetch("fragment.glsl").then(res => res.text()).then(
+        fetch("fragment.glsl").then(res => res.text()).then(
             src => loadShader(src, gl.FRAGMENT_SHADER))*/
-        loadShader(fragment_glsl, gl.FRAGMENT_SHADER)
+        loadShader(require("./vertex.glsl").default, gl.VERTEX_SHADER),
+        loadShader(require("./fragment.glsl").default, gl.FRAGMENT_SHADER)
     ]).then(shaders => {
         const program = gl.createProgram();
         shaders.forEach(shader => gl.attachShader(program, shader));

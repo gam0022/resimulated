@@ -68,6 +68,3 @@ typings/
 .yarn-integrity
 .env
 .next
-
-# nose.js
-/dist

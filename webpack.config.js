@@ -14,4 +14,12 @@ module.exports = {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  module: {
+    rules: [
+      {
+        test: /\.glsl$/i,
+        use: 'raw-loader',
+      },
+    ],
+  },
 };

@@ -124,30 +124,15 @@ class ShaderPlayer {
             uniforms.iFrame.value++;
 
             Object.keys(uniforms).forEach((key) => {
-                //const t = uniforms[key].type;
-                //const method = t.match(/vec/) ? `${t[t.length - 1]}fv` : `1${t[0]}`;
-                //gl[`uniform${method}`](uniforms[key].location, uniforms[key].value);
-                switch(uniforms[key].type) {
-                    case "float":
-                        gl.uniform1f(uniforms[key].location, uniforms[key].value);
-                        break;
-
-                    case "vec2":
-                        gl.uniform2fv(uniforms[key].location, uniforms[key].value);
-                        break;
-
-                    case "vec3":
-                        gl.uniform3fv(uniforms[key].location, uniforms[key].value);
-                        break;
-                    
-                    case "vec4":
-                        gl.uniform4fv(uniforms[key].location, uniforms[key].value);
-                        break;
-
-                    case "int":
-                        gl.uniform1i(uniforms[key].location, uniforms[key].value);
-                        break;
+                const methods: {[index: string]:any} = {
+                    float: gl.uniform1f,
+                    vec2: gl.uniform2fv,
+                    vec3: gl.uniform3fv,
+                    vec4: gl.uniform4fv,
+                    int: gl.uniform1i,
                 }
+                const uniform = uniforms[key];
+                methods[uniform.type](uniform.location, uniform.value);
             });
 
             // draw the buffer with VAO

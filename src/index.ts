@@ -123,29 +123,16 @@ class ShaderPlayer {
             uniforms.iTimeDelta.value = (timestamp - lastTimestamp) * 0.001;
             uniforms.iFrame.value++;
 
-            Object.values(uniforms).forEach((uniform) => {
-                switch (uniform.type) {
-                    case "float":
-                        gl.uniform1f(uniform.location, uniform.value);
-                        break;
-
-                    case "vec2":
-                        gl.uniform2fv(uniform.location, uniform.value);
-                        break;
-
-                    case "vec3":
-                        gl.uniform3fv(uniform.location, uniform.value);
-                        break;
-
-                    case "vec4":
-                        gl.uniform4fv(uniform.location, uniform.value);
-                        break;
-
-                    case "int":
-                        gl.uniform1i(uniform.location, uniform.value);
-                        break;
+            for (const [key, uniform] of Object.entries(uniforms)) {
+                const methods: { [index: string]: any } = {
+                    float: gl.uniform1f,
+                    vec2: gl.uniform2fv,
+                    vec3: gl.uniform3fv,
+                    vec4: gl.uniform4fv,
+                    int: gl.uniform1i,
                 }
-            });
+                methods[uniform.type].call(gl, uniform.location, uniform.value);
+            }
 
             // draw the buffer with VAO
             // NOTE: binding vert and index buffer is not required

@@ -8,18 +8,19 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
-  /*entry: {
-    app: './src/index.js',
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ],
   },
-  output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },*/
   module: {
     rules: [
       {
         test: /\.glsl$/i,
         use: 'raw-loader',
+      },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
     ],
   },

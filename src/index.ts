@@ -1,5 +1,3 @@
-"use strict";
-
 class ShaderPlayer {
     constructor() {
         // webgl setup
@@ -10,6 +8,11 @@ class ShaderPlayer {
 
         // webgl2 enabled default from: firefox-51, chrome-56
         const gl = canvas.getContext("webgl2");
+        if (!gl) {
+            console.log("WebGL 2 is not supported...");
+            return;
+        }
+
         gl.enable(gl.CULL_FACE);
 
         // drawing data (as viewport square)
@@ -27,7 +30,7 @@ class ShaderPlayer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-        const uniforms = {
+        const uniforms: {[index: string]:any} = {
             iResolution: {
                 type: 'vec3',
                 value: [512, 512, 0],
@@ -52,7 +55,7 @@ class ShaderPlayer {
 
         // opengl3 VAO
         const vertexArray = gl.createVertexArray();
-        const setupVAO = (program) => {
+        const setupVAO = (program: WebGLProgram) => {
             // setup buffers and attributes to the VAO
             gl.bindVertexArray(vertexArray);
             // bind buffer data
@@ -71,14 +74,14 @@ class ShaderPlayer {
             //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         };
 
-        const setupUniforms = (program) => {
+        const setupUniforms = (program: WebGLProgram) => {
             Object.keys(uniforms).forEach((key, i) => {
                 uniforms[key].location = gl.getUniformLocation(program, key);
             });
         };
 
         // shader loader
-        const loadShader = (src, type) => {
+        const loadShader = (src: string, type: number) => {
             const shader = gl.createShader(type);
             gl.shaderSource(shader, src);
             gl.compileShader(shader);
@@ -106,13 +109,13 @@ class ShaderPlayer {
         });
 
         // initialize data variables for the shader program
-        const initVariables = (program) => {
+        const initVariables = (program: WebGLProgram) => {
             setupVAO(program);
             setupUniforms(program);
             return program;
         };
 
-        const render = (program, timestamp, lastTimestamp) => {
+        const render = (program: WebGLProgram, timestamp: number, lastTimestamp: number) => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.useProgram(program);
 
@@ -121,9 +124,30 @@ class ShaderPlayer {
             uniforms.iFrame.value++;
 
             Object.keys(uniforms).forEach((key) => {
-                const t = uniforms[key].type;
-                const method = t.match(/vec/) ? `${t[t.length - 1]}fv` : `1${t[0]}`;
-                gl[`uniform${method}`](uniforms[key].location, uniforms[key].value);
+                //const t = uniforms[key].type;
+                //const method = t.match(/vec/) ? `${t[t.length - 1]}fv` : `1${t[0]}`;
+                //gl[`uniform${method}`](uniforms[key].location, uniforms[key].value);
+                switch(uniforms[key].type) {
+                    case "float":
+                        gl.uniform1f(uniforms[key].location, uniforms[key].value);
+                        break;
+
+                    case "vec2":
+                        gl.uniform2fv(uniforms[key].location, uniforms[key].value);
+                        break;
+
+                    case "vec3":
+                        gl.uniform3fv(uniforms[key].location, uniforms[key].value);
+                        break;
+                    
+                    case "vec4":
+                        gl.uniform4fv(uniforms[key].location, uniforms[key].value);
+                        break;
+
+                    case "int":
+                        gl.uniform1i(uniforms[key].location, uniforms[key].value);
+                        break;
+                }
             });
 
             // draw the buffer with VAO
@@ -137,18 +161,18 @@ class ShaderPlayer {
             gl.useProgram(null);
         };
 
-        const startRendering = (program) => {
+        const startRendering = (program: WebGLProgram) => {
             let lastTimestamp = 0;
-            const update = (timestamp) => {
+            const update = (timestamp: number) => {
                 render(program, timestamp, lastTimestamp);
                 requestAnimationFrame(update);
                 lastTimestamp = timestamp;
             };
-            update();
+            update(0);
         };
 
         // (not used because of it runs forever)
-        const cleanupResources = (program) => {
+        const cleanupResources = (program: WebGLProgram) => {
             gl.deleteBuffer(vertBuf);
             gl.deleteBuffer(indexBuf);
             gl.deleteVertexArray(vertexArray);

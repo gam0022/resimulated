@@ -30,7 +30,7 @@ class ShaderPlayer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-        const uniforms: {[index: string]:any} = {
+        const uniforms: { [index: string]: any } = {
             iResolution: {
                 type: 'vec3',
                 value: [512, 512, 0],
@@ -124,7 +124,7 @@ class ShaderPlayer {
             uniforms.iFrame.value++;
 
             Object.keys(uniforms).forEach((key) => {
-                const methods: {[index: string]:any} = {
+                const methods: { [index: string]: any } = {
                     float: gl.uniform1f,
                     vec2: gl.uniform2fv,
                     vec3: gl.uniform3fv,

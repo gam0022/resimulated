@@ -25,6 +25,29 @@ window.addEventListener("load", ev => {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
+    const uniforms = {
+        iResolution: {
+            type: 'vec3',
+            value: [512, 512, 0],
+        },
+        iTime: {
+            type: 'float',
+            value: 0,
+        },
+        iTimeDelta: {
+            type: 'float',
+            value: 0,
+        },
+        iFrame: {
+            type: 'int',
+            value: 0,
+        },
+        iMouse: {
+            type: 'vec4',
+            value: [0, 0, 0, 0],
+        },
+    };
+
     // opengl3 uniform buffer
     // NOTE: each data attribute required 16 byte
     const screenData = new Float32Array([canvas.width, canvas.height, 0, 0]);
@@ -60,6 +83,12 @@ window.addEventListener("load", ev => {
         //gl.bindBuffer(gl.ARRAY_BUFFER, null);
         //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     };
+
+    const setupUniforms = (program) => {
+        Object.keys(uniforms).forEach((key, i) => {
+            uniforms[key].location = gl.getUniformLocation(program, key);
+        });
+    };
     
     // shader loader
     const loadShader = (src, type) => {
@@ -92,10 +121,11 @@ window.addEventListener("load", ev => {
     // initialize data variables for the shader program
     const initVariables = (program) => {
         setupVAO(program);
+        setupUniforms(program);
         return program;
     };
 
-    const render = (program, count) => {
+    const render = (program, count, timestamp) => {
         // set timer variable to update the uniform buffer
         timerData[0] = count;
         gl.bindBuffer(gl.UNIFORM_BUFFER, timerBuf);
@@ -103,7 +133,7 @@ window.addEventListener("load", ev => {
         gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 
         // uniform buffer binding
-        let uniformIndex = 0;
+        /*let uniformIndex = 0;
         const screenId = gl.getUniformBlockIndex(program, "Screen");
         //console.log("screen uniform size", gl.getActiveUniformBlockParameter(
         //    program, screenId, gl.UNIFORM_BLOCK_DATA_SIZE)); //=> 4x4=16
@@ -114,12 +144,23 @@ window.addEventListener("load", ev => {
         //console.log("timer uniform size", gl.getActiveUniformBlockParameter(
         //    program, timerId, gl.UNIFORM_BLOCK_DATA_SIZE)); //=> 4x4=16
         gl.uniformBlockBinding(program, timerId, ++uniformIndex);
-        gl.bindBufferBase(gl.UNIFORM_BUFFER, uniformIndex, timerBuf);
+        gl.bindBufferBase(gl.UNIFORM_BUFFER, uniformIndex, timerBuf);*/        
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(program);
         // draw the buffer with VAO
         // NOTE: binding vert and index buffer is not required
+
+        uniforms.iTime.value = timestamp * 0.001;
+        // uniforms.iTimeDelta.value = delta;
+        uniforms.iFrame.value++;
+
+        Object.keys(uniforms).forEach((key) => {
+            const t = uniforms[key].type;
+            const method = t.match(/vec/) ? `${t[t.length - 1]}fv` : `1${t[0]}`;
+            gl[`uniform${method}`](uniforms[key].location, uniforms[key].value);
+        });
+
         gl.bindVertexArray(vertexArray);
         const indexOffset = 0 * index[0].length;
         gl.drawElements(gl.TRIANGLES, indexData.length,
@@ -133,7 +174,7 @@ window.addEventListener("load", ev => {
     const startRendering = (program) => {
         let count = 0;
         const animate = (timestamp) => {
-            render(program, count++);
+            render(program, count++, timestamp);
             requestAnimationFrame(animate);
         };
         animate();

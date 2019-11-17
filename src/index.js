@@ -61,7 +61,6 @@ window.addEventListener("load", ev => {
         //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     };
     
-    
     // shader loader
     const loadShader = (src, type) => {
         const shader = gl.createShader(type);
@@ -72,6 +71,7 @@ window.addEventListener("load", ev => {
         }
         return shader;
     };
+
     const loadProgram = () => Promise.all([
         /*fetch("vertex.glsl").then(res => res.text()).then(
             src => loadShader(src, gl.VERTEX_SHADER)),
@@ -129,13 +129,14 @@ window.addEventListener("load", ev => {
         gl.bindVertexArray(null);
         gl.useProgram(null);
     };
+
     const startRendering = (program) => {
-        (function loop(count) {
-            requestAnimationFrame(() => {
-                render(program, count);
-                setTimeout(loop, 30, (count + 1) & 0x7fffffff);
-            });
-        })(0);
+        let count = 0;
+        const animate = (timestamp) => {
+            render(program, count++);
+            requestAnimationFrame(animate);
+        };
+        animate();
     };
 
     // (not used because of it runs forever)

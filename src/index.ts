@@ -1,5 +1,9 @@
 class ShaderPlayer {
+    isPlaying: boolean;
+
     constructor() {
+        this.isPlaying = true;
+
         // webgl setup
         const canvas = document.createElement("canvas");
         canvas.width = 512, canvas.height = 512;
@@ -92,10 +96,6 @@ class ShaderPlayer {
         };
 
         const loadProgram = () => Promise.all([
-            /*fetch("vertex.glsl").then(res => res.text()).then(
-                src => loadShader(src, gl.VERTEX_SHADER)),
-            fetch("fragment.glsl").then(res => res.text()).then(
-                src => loadShader(src, gl.FRAGMENT_SHADER))*/
             loadShader(require("./vertex.glsl").default, gl.VERTEX_SHADER),
             loadShader(require("./fragment.glsl").default, gl.FRAGMENT_SHADER)
         ]).then(shaders => {
@@ -115,12 +115,12 @@ class ShaderPlayer {
             return program;
         };
 
-        const render = (program: WebGLProgram, timestamp: number, lastTimestamp: number) => {
+        const render = (program: WebGLProgram, time: number, timeDelta: number) => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.useProgram(program);
 
-            uniforms.iTime.value = timestamp * 0.001;
-            uniforms.iTimeDelta.value = (timestamp - lastTimestamp) * 0.001;
+            uniforms.iTime.value = time;
+            uniforms.iTimeDelta.value = timeDelta;
             uniforms.iFrame.value++;
 
             for (const [key, uniform] of Object.entries(uniforms)) {
@@ -147,9 +147,16 @@ class ShaderPlayer {
 
         const startRendering = (program: WebGLProgram) => {
             let lastTimestamp = 0;
+            let time = 0;
             const update = (timestamp: number) => {
-                render(program, timestamp, lastTimestamp);
                 requestAnimationFrame(update);
+                const timeDelta = (timestamp - lastTimestamp) * 0.001;
+
+                if (this.isPlaying) {
+                    render(program, time, timeDelta);
+                    time += timeDelta;
+                }
+
                 lastTimestamp = timestamp;
             };
             update(0);
@@ -169,4 +176,9 @@ class ShaderPlayer {
 
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer();
+
+    const checkbox = document.getElementById('isPlaying');
+    checkbox.addEventListener('change', (event) => {
+        player.isPlaying = (<HTMLInputElement>event.target).checked;
+    })
 }, false);

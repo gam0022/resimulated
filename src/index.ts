@@ -10,7 +10,6 @@ class ShaderPlayer {
         // webgl setup
         const canvas = document.createElement("canvas");
         canvas.width = 512, canvas.height = 512;
-        canvas.style.border = "solid";
         window.document.body.appendChild(canvas);
 
         // webgl2 enabled default from: firefox-51, chrome-56
@@ -198,5 +197,12 @@ window.addEventListener("load", ev => {
 
     player.onUpdate = (time) => {
         timeBar.valueAsNumber = time;
+    }
+
+    const tickmarks = document.getElementById('tickmarks');
+    for (let i = 0; i < 60; i++) {
+        const option = document.createElement("option");
+        option.value = "" + i;
+        tickmarks.appendChild(option);
     }
 }, false);

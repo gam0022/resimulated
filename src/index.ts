@@ -1,7 +1,12 @@
 class ShaderPlayer {
+    /** 再生中かどうかのフラグです */
     isPlaying: boolean;
+
+    /** 再生時間（秒）です */
     time: number;
-    onUpdate: (time: number) => void;
+
+    /** レンダリング時に実行されるコールバック関数です */
+    onRender: (time: number) => void;
 
     constructor() {
         this.isPlaying = true;
@@ -155,12 +160,13 @@ class ShaderPlayer {
                 const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
                 if (this.isPlaying || lastRenderTime !== this.time) {
+                    if (this.onRender !== null) {
+                        this.onRender(this.time);
+                    }
+
                     render(program, this.time, timeDelta);
                     this.time += timeDelta;
                     lastRenderTime = this.time;
-                    if (this.onUpdate !== null) {
-                        this.onUpdate(this.time);
-                    }
                 }
 
                 lastTimestamp = timestamp;
@@ -201,7 +207,7 @@ window.addEventListener("load", ev => {
         player.isPlaying = false;
     })
 
-    player.onUpdate = (time) => {
+    player.onRender = (time) => {
         timeBar.valueAsNumber = time;
     }
 

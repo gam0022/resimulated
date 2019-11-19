@@ -183,15 +183,21 @@ class ShaderPlayer {
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer();
 
-    const isPlayingCheckbox = <HTMLInputElement>document.getElementById('isPlaying');
+    /*const isPlayingCheckbox = <HTMLInputElement>document.getElementById('isPlaying');
     isPlayingCheckbox.addEventListener('change', (event) => {
         player.isPlaying = (<HTMLInputElement>event.target).checked;
+    })*/
+
+    const playPauseButton = <HTMLInputElement>document.getElementById('playPause');
+    playPauseButton.addEventListener('click', (event) => {
+        player.isPlaying = !player.isPlaying;
+        playPauseButton.value = player.isPlaying ? "⏸" : "▶";
     })
 
     const timeBar = <HTMLInputElement>document.getElementById('time');
     timeBar.addEventListener('input', (event) => {
-        player.time = (<HTMLInputElement>event.target).valueAsNumber;
-        isPlayingCheckbox.checked = false;
+        player.time = timeBar.valueAsNumber;
+        playPauseButton.value = "▶";
         player.isPlaying = false;
     })
 

@@ -9,6 +9,7 @@
             background-color: black;
             margin: 0;
             padding: 0;
+            color: white;
         }
 
         a {
@@ -34,14 +35,57 @@
             text-align: center;
             z-index: 100;
         }
+
+        .time-slider {
+            clear: both;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 5px 0px;
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+        }
+
+        .time-slider input {
+            display: block;
+            box-sizing: border-box;
+            height: 36px;
+            line-height: 36px;
+            margin: 5px;
+            padding: 0px;
+        }
+
+        .time-slider [type="range"] {
+            flex-grow: 100;
+            margin: 0px 10px;
+        }
+
+        .time-slider [type="number"] {
+            text-align: center;
+            width: 60px;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        .time-slider [type="button"] {
+            text-align: center;
+            width: 60px;
+            border-radius: 4px;
+            font-size: 30px;
+        }
     </style>
 </head>
 
 <body>
-    <!--for dev-->
-    <div id="info">
-        <input id="isPlaying" type="checkbox" checked="checked">
-        <input id="time" type="range" min="0" max="60" step="any" list="tickmarks" style="width: 90%;">
+    <div class="time-slider">
+        <!--input id="isPlaying" type="checkbox" checked="checked"-->
+        <input id="stop" type="button" value="⏹">
+        <input id="playPause" type="button" value="⏸">
+        <input id="timeNumber" type="number" min="0" value="0">
+        <input id="time" type="range" min="0" max="60" step="any" list="tickmarks">
+        <input id="timeLength" type="number" min="0" value="60">
         <datalist id="tickmarks"></datalist>
     </div>
 </body>

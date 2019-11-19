@@ -1,8 +1,11 @@
 class ShaderPlayer {
     isPlaying: boolean;
+    time: number;
+    onUpdate: (time: number) => void;
 
     constructor() {
         this.isPlaying = true;
+        this.time = 0;
 
         // webgl setup
         const canvas = document.createElement("canvas");
@@ -147,14 +150,18 @@ class ShaderPlayer {
 
         const startRendering = (program: WebGLProgram) => {
             let lastTimestamp = 0;
-            let time = 0;
+            let lastRenderTime = 0;
             const update = (timestamp: number) => {
                 requestAnimationFrame(update);
                 const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
-                if (this.isPlaying) {
-                    render(program, time, timeDelta);
-                    time += timeDelta;
+                if (this.isPlaying || lastRenderTime !== this.time) {
+                    render(program, this.time, timeDelta);
+                    this.time += timeDelta;
+                    lastRenderTime = this.time;
+                    if (this.onUpdate !== null) {
+                        this.onUpdate(this.time);
+                    }
                 }
 
                 lastTimestamp = timestamp;
@@ -177,8 +184,19 @@ class ShaderPlayer {
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer();
 
-    const checkbox = document.getElementById('isPlaying');
-    checkbox.addEventListener('change', (event) => {
+    const isPlayingCheckbox = <HTMLInputElement>document.getElementById('isPlaying');
+    isPlayingCheckbox.addEventListener('change', (event) => {
         player.isPlaying = (<HTMLInputElement>event.target).checked;
     })
+
+    const timeBar = <HTMLInputElement>document.getElementById('time');
+    timeBar.addEventListener('input', (event) => {
+        player.time = (<HTMLInputElement>event.target).valueAsNumber;
+        isPlayingCheckbox.checked = false;
+        player.isPlaying = false;
+    })
+
+    player.onUpdate = (time) => {
+        timeBar.valueAsNumber = time;
+    }
 }, false);

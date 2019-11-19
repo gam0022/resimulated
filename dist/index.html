@@ -1,11 +1,48 @@
 <!doctype html>
 <html>
+
 <head>
-<meta charset="utf-8" />
-<script src="bundle.js"></script>
+    <meta charset="utf-8" />
+    <script src="bundle.js"></script>
+    <style type="text/css">
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            color: skyblue
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        #info {
+            color: white;
+            font-size: 13px;
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+        }
+    </style>
 </head>
+
 <body>
     <!--for dev-->
-    <div>isPlaying: <input type="checkbox" id="isPlaying" checked="checked">isPlaying</div>
+    <div id="info">
+        <input id="isPlaying" type="checkbox" checked="checked">
+        <input id="time" type="range" min="0" max="60" step="any" style="width: 90%;">
+    </div>
 </body>
+
 </html>

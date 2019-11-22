@@ -1,5 +1,8 @@
-attribute vec3 position;
+#version 300 es
 
-void main(void){
-	gl_Position = vec4(position, 1.0);
+invariant gl_Position;
+in vec2 vert2d;
+
+void main(void) {
+  gl_Position = vec4(vert2d, 0, 1);
 }

@@ -1,7 +1,8 @@
+#version 300 es
 #ifdef GL_ES
 precision highp float;
 precision highp int;
-//precision mediump sampler3D;
+precision mediump sampler3D;
 #endif
 #define HW_PERFORMANCE 1
 uniform vec3      iResolution;
@@ -38,4 +39,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     fragColor = vec4(col,1.0);
 }
 
-void main( void ){vec4 color = vec4(0.0,0.0,0.0,1.0);mainImage( color, gl_FragCoord.xy );color.w = 1.0;gl_FragColor = color;}
+out vec4 outColor;
+void main( void ){vec4 color = vec4(0.0,0.0,0.0,1.0);mainImage( color, gl_FragCoord.xy );color.w = 1.0;outColor = color;}

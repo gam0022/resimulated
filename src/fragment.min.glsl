@@ -1,1 +1,3 @@
-uniform vec3 iResolution;uniform float iTime;void main(){vec4 a;vec4 b;b.w=1.0;b.xyz=(0.5+(0.5*cos(((iTime+(gl_FragCoord.xy/iResolution.xy).xyx)+vec3(0.0,2.0,4.0)))));a.xyz=b.xyz;a.w=1.0;gl_FragColor=a;}
+
+#version 300 es
+precision mediump sampler3D;precision highp int;precision highp float;uniform vec3 iResolution;uniform float iTime;out highp vec4 outColor;void main(){highp vec4 a;highp vec4 b;b.w=1.0;b.xyz=(0.5+(0.5*cos(((iTime+(gl_FragCoord.xy/iResolution.xy).xyx)+vec3(0.0,2.0,4.0)))));a.xyz=b.xyz;a.w=1.0;outColor=a;}

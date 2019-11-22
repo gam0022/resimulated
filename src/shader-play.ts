@@ -104,7 +104,7 @@ export class ShaderPlayer {
 
         const loadProgram = () => Promise.all([
             loadShader(require("./vertex.glsl").default, gl.VERTEX_SHADER),
-            loadShader(require("./fragment.glsl").default, gl.FRAGMENT_SHADER)
+            loadShader(require("./fragment.min.glsl").default, gl.FRAGMENT_SHADER)
         ]).then(shaders => {
             const program = gl.createProgram();
             shaders.forEach(shader => gl.attachShader(program, shader));

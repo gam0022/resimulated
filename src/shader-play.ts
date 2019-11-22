@@ -73,7 +73,6 @@ export class ShaderPlayer {
             gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
 
-            return;
             // set attribute types
             const vert2dId = gl.getAttribLocation(program, "vert2d");
             const elem = gl.FLOAT, count = vert2d[0].length, normalize = false;

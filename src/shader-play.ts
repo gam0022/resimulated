@@ -1,3 +1,17 @@
+enum PassType {
+    MainImage,
+    Buffer,
+    Audio,
+}
+
+class Pass {
+    type: PassType;
+    program: WebGLProgram;
+    locations: { [index: string]: WebGLUniformLocation }
+    frameBuffer: WebGLFramebuffer;
+    texture: WebGLTexture;
+}
+
 export class ShaderPlayer {
     /** 再生中かどうかのフラグです */
     isPlaying: boolean;
@@ -8,7 +22,7 @@ export class ShaderPlayer {
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number) => void;
 
-    constructor() {
+    constructor(vertexShader: string, mainImageShader: string, bufferShaders: string[]) {
         this.isPlaying = true;
         this.time = 0;
 
@@ -41,26 +55,30 @@ export class ShaderPlayer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-        const uniforms: { [index: string]: any } = {
+        const uniforms: { [index: string]: { type: string, value: any } } = {
             iResolution: {
-                type: 'vec3',
+                type: "v3",
                 value: [512, 512, 0],
             },
             iTime: {
-                type: 'float',
+                type: "f",
                 value: 0,
             },
-            iTimeDelta: {
-                type: 'float',
+            iChannel0: {
+                type: "t",
                 value: 0,
             },
-            iFrame: {
-                type: 'int',
-                value: 0,
+            iChannel1: {
+                type: "t",
+                value: 1,
             },
-            iMouse: {
-                type: 'vec4',
-                value: [0, 0, 0, 0],
+            iChannel2: {
+                type: "t",
+                value: 2,
+            },
+            iChannel3: {
+                type: "t",
+                value: 3,
             },
         };
 
@@ -85,12 +103,6 @@ export class ShaderPlayer {
             //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         };
 
-        const setupUniforms = (program: WebGLProgram) => {
-            Object.keys(uniforms).forEach((key, i) => {
-                uniforms[key].location = gl.getUniformLocation(program, key);
-            });
-        };
-
         // shader loader
         const loadShader = (src: string, type: number) => {
             const shader = gl.createShader(type);
@@ -102,10 +114,11 @@ export class ShaderPlayer {
             return shader;
         };
 
-        const loadProgram = () => Promise.all([
-            loadShader(require("./vertex.glsl").default, gl.VERTEX_SHADER),
-            loadShader(require("./fragment.glsl").default, gl.FRAGMENT_SHADER)
-        ]).then(shaders => {
+        const loadProgram = (fragmentShader: string) => {
+            const shaders = [
+                loadShader(vertexShader, gl.VERTEX_SHADER),
+                loadShader(fragmentShader, gl.FRAGMENT_SHADER)
+            ];
             const program = gl.createProgram();
             shaders.forEach(shader => gl.attachShader(program, shader));
             gl.linkProgram(program);
@@ -113,32 +126,85 @@ export class ShaderPlayer {
                 console.log(gl.getProgramInfoLog(program));
             };
             return program;
-        });
-
-        // initialize data variables for the shader program
-        const initVariables = (program: WebGLProgram) => {
-            setupVAO(program);
-            setupUniforms(program);
-            return program;
         };
 
-        const render = (program: WebGLProgram, time: number, timeDelta: number) => {
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            gl.useProgram(program);
+        const createFrameBuffer = (width: number, height: number) => {
+            // フレームバッファの生成
+            var frameBuffer = gl.createFramebuffer();
 
-            uniforms.iTime.value = time;
-            uniforms.iTimeDelta.value = timeDelta;
-            uniforms.iFrame.value++;
+            // フレームバッファをWebGLにバインド
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+
+            // フレームバッファ用テクスチャの生成
+            var fTexture = gl.createTexture();
+
+            // フレームバッファ用のテクスチャをバインド
+            gl.bindTexture(gl.TEXTURE_2D, fTexture);
+
+            // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+            // テクスチャパラメータ
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            // フレームバッファにテクスチャを関連付ける
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fTexture, 0);
+
+            // 各種オブジェクトのバインドを解除
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+            // オブジェクトを返して終了
+            return { f: frameBuffer, t: fTexture };
+        }
+
+        const createLocations = (program: WebGLProgram) => {
+            const locations: { [index: string]: WebGLUniformLocation } = {};
+            Object.keys(uniforms).forEach(key => {
+                locations[key] = gl.getUniformLocation(program, key);
+            });
+            return locations;
+        };
+
+        const initPass = (program: WebGLProgram, type: PassType) => {
+            setupVAO(program);
+            const pass = new Pass();
+            pass.program = program;
+            pass.locations = createLocations(program);
+
+            if (type === PassType.Buffer) {
+                const ft = createFrameBuffer(canvas.width, canvas.height);
+                pass.frameBuffer = ft.f;
+                pass.texture = ft.t;
+            }
+
+            return pass;
+        };
+
+        const render = (pass: Pass, buffersPasses: Pass[]) => {
+            gl.useProgram(pass.program);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(uniforms)) {
-                const methods: { [index: string]: any } = {
-                    float: gl.uniform1f,
-                    vec2: gl.uniform2fv,
-                    vec3: gl.uniform3fv,
-                    vec4: gl.uniform4fv,
-                    int: gl.uniform1i,
+                if (uniform.type === "t" && uniform.value < buffersPasses.length) {
+                    gl.activeTexture(gl.TEXTURE0 + uniform.value);
+                    gl.bindTexture(gl.TEXTURE_2D, buffersPasses[uniform.value].texture);
                 }
-                methods[uniform.type].call(gl, uniform.location, uniform.value);
+
+                const methods: { [index: string]: any } = {
+                    f: gl.uniform1f,
+                    // v2: gl.uniform2fv,
+                    v3: gl.uniform3fv,
+                    // v4: gl.uniform4fv,
+                    t: gl.uniform1i,
+                }
+                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
             }
 
             // draw the buffer with VAO
@@ -152,36 +218,30 @@ export class ShaderPlayer {
             gl.useProgram(null);
         };
 
-        const startRendering = (program: WebGLProgram) => {
-            let lastTimestamp = 0;
-            let lastRenderTime = 0;
-            const update = (timestamp: number) => {
-                requestAnimationFrame(update);
-                const timeDelta = (timestamp - lastTimestamp) * 0.001;
+        const mainPass = initPass(loadProgram(mainImageShader), PassType.MainImage);
+        const buffersPasses = bufferShaders.map((shader) => initPass(loadProgram(shader), PassType.Buffer));
 
-                if (this.isPlaying || lastRenderTime !== this.time) {
-                    if (this.onRender != null) {
-                        this.onRender(this.time);
-                    }
+        let lastTimestamp = 0;
+        let lastRenderTime = 0;
+        const update = (timestamp: number) => {
+            requestAnimationFrame(update);
+            const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
-                    render(program, this.time, timeDelta);
-                    this.time += timeDelta;
-                    lastRenderTime = this.time;
+            if (this.isPlaying || lastRenderTime !== this.time) {
+                if (this.onRender != null) {
+                    this.onRender(this.time);
                 }
 
-                lastTimestamp = timestamp;
-            };
-            update(0);
-        };
+                uniforms.iTime.value = this.time;
+                buffersPasses.forEach((program) => render(program, buffersPasses));
+                render(mainPass, buffersPasses);
 
-        // (not used because of it runs forever)
-        const cleanupResources = (program: WebGLProgram) => {
-            gl.deleteBuffer(vertBuf);
-            gl.deleteBuffer(indexBuf);
-            gl.deleteVertexArray(vertexArray);
-            gl.deleteProgram(program);
-        };
+                this.time += timeDelta;
+                lastRenderTime = this.time;
+            }
 
-        loadProgram().then(initVariables).then(startRendering);
+            lastTimestamp = timestamp;
+        };
+        update(0);
     }
 }

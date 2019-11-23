@@ -1,7 +1,13 @@
 import { ShaderPlayer } from "./shader-play"
 
 window.addEventListener("load", ev => {
-    const player = new ShaderPlayer();
+    const player = new ShaderPlayer(
+        require("./vertex.glsl").default,
+        require("./fragment.glsl").default,
+        [
+            require("./buffer0.glsl").default,
+        ]
+    );
 
     const stopButton = <HTMLInputElement>document.getElementById('stop-button');
     stopButton.addEventListener("click", (event) => {

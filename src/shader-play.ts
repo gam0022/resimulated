@@ -8,7 +8,7 @@ export class ShaderPlayer {
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number) => void;
 
-    constructor() {
+    constructor(mainImageShader: string, vertexShader: string) {
         this.isPlaying = true;
         this.time = 0;
 
@@ -103,8 +103,8 @@ export class ShaderPlayer {
         };
 
         const loadProgram = () => Promise.all([
-            loadShader(require("./vertex.glsl").default, gl.VERTEX_SHADER),
-            loadShader(require("./fragment.glsl").default, gl.FRAGMENT_SHADER)
+            loadShader(mainImageShader, gl.VERTEX_SHADER),
+            loadShader(vertexShader, gl.FRAGMENT_SHADER)
         ]).then(shaders => {
             const program = gl.createProgram();
             shaders.forEach(shader => gl.attachShader(program, shader));

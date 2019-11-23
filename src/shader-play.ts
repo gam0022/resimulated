@@ -158,15 +158,15 @@ export class ShaderPlayer {
             return pass;
         };
 
-        const render = (pass: Pass, buffersPasses: Pass[]) => {
+        const render = (pass: Pass) => {
             gl.useProgram(pass.program);
             gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(this.uniforms)) {
-                if (uniform.type === "t" && uniform.value < buffersPasses.length) {
+                if (uniform.type === "t" && uniform.value < this.buffersPasses.length) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, buffersPasses[uniform.value].texture);
+                    gl.bindTexture(gl.TEXTURE_2D, this.buffersPasses[uniform.value].texture);
                 }
 
                 const methods: { [index: string]: any } = {
@@ -205,8 +205,8 @@ export class ShaderPlayer {
                 }
 
                 this.uniforms.iTime.value = this.time;
-                this.buffersPasses.forEach((program) => render(program, this.buffersPasses));
-                render(mainPass, this.buffersPasses);
+                this.buffersPasses.forEach((program) => render(program));
+                render(mainPass);
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;

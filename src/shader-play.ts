@@ -103,14 +103,6 @@ export class ShaderPlayer {
             //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         };
 
-        const createLocations = (program: WebGLProgram) => {
-            const locations: { [index: string]: WebGLUniformLocation } = {};
-            Object.keys(uniforms).forEach(key => {
-                locations[key] = gl.getUniformLocation(program, key);
-            });
-            return locations;
-        };
-
         // shader loader
         const loadShader = (src: string, type: number) => {
             const shader = gl.createShader(type);
@@ -169,6 +161,14 @@ export class ShaderPlayer {
             // オブジェクトを返して終了
             return { f: frameBuffer, t: fTexture };
         }
+
+        const createLocations = (program: WebGLProgram) => {
+            const locations: { [index: string]: WebGLUniformLocation } = {};
+            Object.keys(uniforms).forEach(key => {
+                locations[key] = gl.getUniformLocation(program, key);
+            });
+            return locations;
+        };
 
         const initPass = (program: WebGLProgram, type: PassType) => {
             setupVAO(program);

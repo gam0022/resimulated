@@ -1,3 +1,17 @@
+enum PassType {
+    MainImage,
+    Buffer,
+    Audio,
+}
+
+class Pass {
+    type: PassType;
+    program: WebGLProgram;
+    locations: { [index: string]: WebGLUniformLocation }
+    frameBuffer: WebGLFramebuffer;
+    texture: WebGLTexture;
+}
+
 export class ShaderPlayer {
     /** 再生中かどうかのフラグです */
     isPlaying: boolean;
@@ -41,14 +55,30 @@ export class ShaderPlayer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-        const uniforms: { [index: string]: any } = {
+        const uniforms: { [index: string]: { type: string, value: any } } = {
             iResolution: {
-                type: 'vec3',
+                type: "v3",
                 value: [512, 512, 0],
             },
             iTime: {
-                type: 'float',
+                type: "f",
                 value: 0,
+            },
+            iChannel0: {
+                type: "t",
+                value: 0,
+            },
+            iChannel1: {
+                type: "t",
+                value: 1,
+            },
+            iChannel2: {
+                type: "t",
+                value: 2,
+            },
+            iChannel3: {
+                type: "t",
+                value: 3,
             },
         };
 
@@ -73,10 +103,12 @@ export class ShaderPlayer {
             //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         };
 
-        const setupUniforms = (program: WebGLProgram) => {
-            Object.keys(uniforms).forEach((key, i) => {
-                uniforms[key].location = gl.getUniformLocation(program, key);
+        const createLocations = (program: WebGLProgram) => {
+            const locations: { [index: string]: WebGLUniformLocation } = {};
+            Object.keys(uniforms).forEach(key => {
+                locations[key] = gl.getUniformLocation(program, key);
             });
+            return locations;
         };
 
         // shader loader
@@ -137,30 +169,42 @@ export class ShaderPlayer {
             // オブジェクトを返して終了
             return { f: frameBuffer, t: fTexture };
         }
-        const frameBuffer = createFrameBuffer(canvas.width, canvas.height);
 
-        // initialize data variables for the shader program
-        const initVariables = (program: WebGLProgram) => {
+        const initPass = (program: WebGLProgram, type: PassType) => {
             setupVAO(program);
-            setupUniforms(program);
-            return program;
+            const pass = new Pass();
+            pass.program = program;
+            pass.locations = createLocations(program);
+
+            if (type === PassType.Buffer) {
+                const ft = createFrameBuffer(canvas.width, canvas.height);
+                pass.frameBuffer = ft.f;
+                pass.texture = ft.t;
+            }
+
+            return pass;
         };
 
-        const render = (program: WebGLProgram) => {
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            gl.useProgram(program);
+        const render = (pass: Pass, buffersPasses: Pass[]) => {
+            gl.useProgram(pass.program);
 
-            uniforms.iTime.value = this.time;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(uniforms)) {
-                const methods: { [index: string]: any } = {
-                    float: gl.uniform1f,
-                    //vec2: gl.uniform2fv,
-                    vec3: gl.uniform3fv,
-                    //vec4: gl.uniform4fv,
-                    //int: gl.uniform1i,
+                if (uniform.type === "t" && uniform.value < buffersPasses.length) {
+                    gl.activeTexture(gl.TEXTURE0 + uniform.value);
+                    gl.bindTexture(gl.TEXTURE_2D, buffersPasses[uniform.value].texture);
                 }
-                methods[uniform.type].call(gl, uniform.location, uniform.value);
+
+                const methods: { [index: string]: any } = {
+                    f: gl.uniform1f,
+                    // v2: gl.uniform2fv,
+                    v3: gl.uniform3fv,
+                    // v4: gl.uniform4fv,
+                    t: gl.uniform1i,
+                }
+                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
             }
 
             // draw the buffer with VAO
@@ -174,8 +218,9 @@ export class ShaderPlayer {
             gl.useProgram(null);
         };
 
-        const mainProgram = initVariables(loadProgram(mainImageShader));
-        //const buffersPrograms = bufferShaders.map((shader) => initVariables(loadProgram(shader)));
+        const mainPass = initPass(loadProgram(mainImageShader), PassType.MainImage);
+        const buffersPasses = bufferShaders.map((shader) => initPass(loadProgram(shader), PassType.Buffer));
+
         let lastTimestamp = 0;
         let lastRenderTime = 0;
         const update = (timestamp: number) => {
@@ -187,8 +232,9 @@ export class ShaderPlayer {
                     this.onRender(this.time);
                 }
 
-                //buffersPrograms.forEach((program) => render(program));
-                render(mainProgram);
+                uniforms.iTime.value = this.time;
+                buffersPasses.forEach((program) => render(program, buffersPasses));
+                render(mainPass, buffersPasses);
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;

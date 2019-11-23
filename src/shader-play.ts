@@ -8,7 +8,7 @@ export class ShaderPlayer {
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number) => void;
 
-    constructor(mainImageShader: string, vertexShader: string, buffers: string[]) {
+    constructor(vertexShader: string, mainImageShader: string, bufferShaders: string[]) {
         this.isPlaying = true;
         this.time = 0;
 
@@ -50,18 +50,6 @@ export class ShaderPlayer {
                 type: 'float',
                 value: 0,
             },
-            iTimeDelta: {
-                type: 'float',
-                value: 0,
-            },
-            iFrame: {
-                type: 'int',
-                value: 0,
-            },
-            iMouse: {
-                type: 'vec4',
-                value: [0, 0, 0, 0],
-            },
         };
 
         // opengl3 VAO
@@ -102,10 +90,11 @@ export class ShaderPlayer {
             return shader;
         };
 
-        const loadProgram = () => Promise.all([
-            loadShader(mainImageShader, gl.VERTEX_SHADER),
-            loadShader(vertexShader, gl.FRAGMENT_SHADER)
-        ]).then(shaders => {
+        const loadProgram = (fragmentShader: string) => {
+            const shaders = [
+                loadShader(vertexShader, gl.VERTEX_SHADER),
+                loadShader(fragmentShader, gl.FRAGMENT_SHADER)
+            ];
             const program = gl.createProgram();
             shaders.forEach(shader => gl.attachShader(program, shader));
             gl.linkProgram(program);
@@ -113,7 +102,7 @@ export class ShaderPlayer {
                 console.log(gl.getProgramInfoLog(program));
             };
             return program;
-        });
+        };
 
         const createFrameBuffer = (width: number, height: number) => {
             // フレームバッファの生成
@@ -157,21 +146,19 @@ export class ShaderPlayer {
             return program;
         };
 
-        const render = (program: WebGLProgram, time: number, timeDelta: number) => {
+        const render = (program: WebGLProgram) => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.useProgram(program);
 
-            uniforms.iTime.value = time;
-            uniforms.iTimeDelta.value = timeDelta;
-            uniforms.iFrame.value++;
+            uniforms.iTime.value = this.time;
 
             for (const [key, uniform] of Object.entries(uniforms)) {
                 const methods: { [index: string]: any } = {
                     float: gl.uniform1f,
-                    vec2: gl.uniform2fv,
+                    //vec2: gl.uniform2fv,
                     vec3: gl.uniform3fv,
-                    vec4: gl.uniform4fv,
-                    int: gl.uniform1i,
+                    //vec4: gl.uniform4fv,
+                    //int: gl.uniform1i,
                 }
                 methods[uniform.type].call(gl, uniform.location, uniform.value);
             }
@@ -187,36 +174,28 @@ export class ShaderPlayer {
             gl.useProgram(null);
         };
 
-        const startRendering = (program: WebGLProgram) => {
-            let lastTimestamp = 0;
-            let lastRenderTime = 0;
-            const update = (timestamp: number) => {
-                requestAnimationFrame(update);
-                const timeDelta = (timestamp - lastTimestamp) * 0.001;
+        const mainProgram = initVariables(loadProgram(mainImageShader));
+        //const buffersPrograms = bufferShaders.map((shader) => initVariables(loadProgram(shader)));
+        let lastTimestamp = 0;
+        let lastRenderTime = 0;
+        const update = (timestamp: number) => {
+            requestAnimationFrame(update);
+            const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
-                if (this.isPlaying || lastRenderTime !== this.time) {
-                    if (this.onRender != null) {
-                        this.onRender(this.time);
-                    }
-
-                    render(program, this.time, timeDelta);
-                    this.time += timeDelta;
-                    lastRenderTime = this.time;
+            if (this.isPlaying || lastRenderTime !== this.time) {
+                if (this.onRender != null) {
+                    this.onRender(this.time);
                 }
 
-                lastTimestamp = timestamp;
-            };
-            update(0);
-        };
+                //buffersPrograms.forEach((program) => render(program));
+                render(mainProgram);
 
-        // (not used because of it runs forever)
-        const cleanupResources = (program: WebGLProgram) => {
-            gl.deleteBuffer(vertBuf);
-            gl.deleteBuffer(indexBuf);
-            gl.deleteVertexArray(vertexArray);
-            gl.deleteProgram(program);
-        };
+                this.time += timeDelta;
+                lastRenderTime = this.time;
+            }
 
-        loadProgram().then(initVariables).then(startRendering);
+            lastTimestamp = timestamp;
+        };
+        update(0);
     }
 }

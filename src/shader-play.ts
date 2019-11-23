@@ -38,30 +38,6 @@ export class ShaderPlayer {
         canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
 
-        // webgl2 enabled default from: firefox-51, chrome-56
-        const gl = this.gl = canvas.getContext("webgl2");
-        if (!gl) {
-            console.log("WebGL 2 is not supported...");
-            return;
-        }
-
-        gl.enable(gl.CULL_FACE);
-
-        // drawing data (as viewport square)
-        const vert2d = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
-        const vert2dData = new Float32Array([].concat(...vert2d));
-        const vertBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
-        gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        const index = [[0, 1, 2], [3, 2, 1]];
-        const indexData = new Uint16Array([].concat(...index));
-        const indexBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
         this.uniforms = {
             iResolution: {
                 type: "v3",
@@ -88,6 +64,30 @@ export class ShaderPlayer {
                 value: 3,
             },
         };
+
+        // webgl2 enabled default from: firefox-51, chrome-56
+        const gl = this.gl = canvas.getContext("webgl2");
+        if (!gl) {
+            console.log("WebGL 2 is not supported...");
+            return;
+        }
+
+        gl.enable(gl.CULL_FACE);
+
+        // drawing data (as viewport square)
+        const vert2d = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+        const vert2dData = new Float32Array([].concat(...vert2d));
+        const vertBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        const index = [[0, 1, 2], [3, 2, 1]];
+        const indexData = new Uint16Array([].concat(...index));
+        const indexBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         // opengl3 VAO
         const vertexArray = gl.createVertexArray();

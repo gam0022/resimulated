@@ -8,7 +8,7 @@ export class ShaderPlayer {
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number) => void;
 
-    constructor(mainImageShader: string, vertexShader: string) {
+    constructor(mainImageShader: string, vertexShader: string, buffers: string[]) {
         this.isPlaying = true;
         this.time = 0;
 
@@ -114,6 +114,41 @@ export class ShaderPlayer {
             };
             return program;
         });
+
+        const createFrameBuffer = (width: number, height: number) => {
+            // フレームバッファの生成
+            var frameBuffer = gl.createFramebuffer();
+
+            // フレームバッファをWebGLにバインド
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+
+            // フレームバッファ用テクスチャの生成
+            var fTexture = gl.createTexture();
+
+            // フレームバッファ用のテクスチャをバインド
+            gl.bindTexture(gl.TEXTURE_2D, fTexture);
+
+            // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+            // テクスチャパラメータ
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            // フレームバッファにテクスチャを関連付ける
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fTexture, 0);
+
+            // 各種オブジェクトのバインドを解除
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+            // オブジェクトを返して終了
+            return { f: frameBuffer, t: fTexture };
+        }
+        const frameBuffer = createFrameBuffer(canvas.width, canvas.height);
 
         // initialize data variables for the shader program
         const initVariables = (program: WebGLProgram) => {

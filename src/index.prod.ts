@@ -3,7 +3,8 @@ import { ShaderPlayer } from "./shader-play"
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer(
         require("./vertex.glsl").default,
-        require("./fragment.glsl").default
+        require("./fragment.glsl").default,
+        []
     );
 
     const style = document.createElement("style");

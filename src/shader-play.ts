@@ -150,9 +150,7 @@ export class ShaderPlayer {
             pass.locations = createLocations(program);
 
             if (type === PassType.Buffer) {
-                const ft = this.createFrameBuffer(canvas.width, canvas.height);
-                pass.frameBuffer = ft.f;
-                pass.texture = ft.t;
+                this.setupFrameBuffer(pass, canvas.width, canvas.height);
             }
 
             return pass;
@@ -217,19 +215,19 @@ export class ShaderPlayer {
         update(0);
     }
 
-    createFrameBuffer(width: number, height: number) {
+    setupFrameBuffer(pass: Pass, width: number, height: number) {
         // フレームバッファの生成
         const gl = this.gl;
-        var frameBuffer = gl.createFramebuffer();
+        pass.frameBuffer = gl.createFramebuffer();
 
         // フレームバッファをWebGLにバインド
-        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
 
         // フレームバッファ用テクスチャの生成
-        var fTexture = gl.createTexture();
+        pass.texture = gl.createTexture();
 
         // フレームバッファ用のテクスチャをバインド
-        gl.bindTexture(gl.TEXTURE_2D, fTexture);
+        gl.bindTexture(gl.TEXTURE_2D, pass.texture);
 
         // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
@@ -241,15 +239,12 @@ export class ShaderPlayer {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
         // フレームバッファにテクスチャを関連付ける
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fTexture, 0);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
 
         // 各種オブジェクトのバインドを解除
         gl.bindTexture(gl.TEXTURE_2D, null);
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        // オブジェクトを返して終了
-        return { f: frameBuffer, t: fTexture };
     }
 
     setSize(width: number, height: number) {
@@ -262,10 +257,7 @@ export class ShaderPlayer {
         this.buffersPasses.forEach(pass => {
             this.gl.deleteFramebuffer(pass.frameBuffer);
             this.gl.deleteTexture(pass.texture);
-
-            const ft = this.createFrameBuffer(width, height);
-            pass.frameBuffer = ft.f;
-            pass.texture = ft.t;
+            this.setupFrameBuffer(pass, width, height);
         });
 
         this.uniforms.iResolution.value = [width, height, 0];

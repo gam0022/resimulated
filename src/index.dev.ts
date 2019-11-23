@@ -9,6 +9,10 @@ window.addEventListener("load", ev => {
         ]
     );
 
+    window.addEventListener("resize", ev => {
+        player.setSize(window.innerWidth, window.innerHeight);
+    });
+
     const stopButton = <HTMLInputElement>document.getElementById('stop-button');
     stopButton.addEventListener("click", (event) => {
         player.isPlaying = false;

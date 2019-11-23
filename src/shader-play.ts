@@ -22,43 +22,26 @@ export class ShaderPlayer {
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number) => void;
 
+    gl: WebGL2RenderingContext;
+
+    buffersPasses: Pass[];
+
+    uniforms: { [index: string]: { type: string, value: any } };
+
     constructor(vertexShader: string, mainImageShader: string, bufferShaders: string[]) {
         this.isPlaying = true;
         this.time = 0;
 
         // webgl setup
         const canvas = document.createElement("canvas");
-        canvas.width = 512, canvas.height = 512;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
 
-        // webgl2 enabled default from: firefox-51, chrome-56
-        const gl = canvas.getContext("webgl2");
-        if (!gl) {
-            console.log("WebGL 2 is not supported...");
-            return;
-        }
-
-        gl.enable(gl.CULL_FACE);
-
-        // drawing data (as viewport square)
-        const vert2d = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
-        const vert2dData = new Float32Array([].concat(...vert2d));
-        const vertBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
-        gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        const index = [[0, 1, 2], [3, 2, 1]];
-        const indexData = new Uint16Array([].concat(...index));
-        const indexBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-        const uniforms: { [index: string]: { type: string, value: any } } = {
+        this.uniforms = {
             iResolution: {
                 type: "v3",
-                value: [512, 512, 0],
+                value: [canvas.width, canvas.height, 0],
             },
             iTime: {
                 type: "f",
@@ -81,6 +64,30 @@ export class ShaderPlayer {
                 value: 3,
             },
         };
+
+        // webgl2 enabled default from: firefox-51, chrome-56
+        const gl = this.gl = canvas.getContext("webgl2");
+        if (!gl) {
+            console.log("WebGL 2 is not supported...");
+            return;
+        }
+
+        gl.enable(gl.CULL_FACE);
+
+        // drawing data (as viewport square)
+        const vert2d = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+        const vert2dData = new Float32Array([].concat(...vert2d));
+        const vertBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        const index = [[0, 1, 2], [3, 2, 1]];
+        const indexData = new Uint16Array([].concat(...index));
+        const indexBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         // opengl3 VAO
         const vertexArray = gl.createVertexArray();
@@ -128,43 +135,9 @@ export class ShaderPlayer {
             return program;
         };
 
-        const createFrameBuffer = (width: number, height: number) => {
-            // フレームバッファの生成
-            var frameBuffer = gl.createFramebuffer();
-
-            // フレームバッファをWebGLにバインド
-            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
-
-            // フレームバッファ用テクスチャの生成
-            var fTexture = gl.createTexture();
-
-            // フレームバッファ用のテクスチャをバインド
-            gl.bindTexture(gl.TEXTURE_2D, fTexture);
-
-            // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-            // テクスチャパラメータ
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-            // フレームバッファにテクスチャを関連付ける
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fTexture, 0);
-
-            // 各種オブジェクトのバインドを解除
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-            // オブジェクトを返して終了
-            return { f: frameBuffer, t: fTexture };
-        }
-
         const createLocations = (program: WebGLProgram) => {
             const locations: { [index: string]: WebGLUniformLocation } = {};
-            Object.keys(uniforms).forEach(key => {
+            Object.keys(this.uniforms).forEach(key => {
                 locations[key] = gl.getUniformLocation(program, key);
             });
             return locations;
@@ -177,24 +150,21 @@ export class ShaderPlayer {
             pass.locations = createLocations(program);
 
             if (type === PassType.Buffer) {
-                const ft = createFrameBuffer(canvas.width, canvas.height);
-                pass.frameBuffer = ft.f;
-                pass.texture = ft.t;
+                this.setupFrameBuffer(pass, canvas.width, canvas.height);
             }
 
             return pass;
         };
 
-        const render = (pass: Pass, buffersPasses: Pass[]) => {
+        const render = (pass: Pass) => {
             gl.useProgram(pass.program);
-
             gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            for (const [key, uniform] of Object.entries(uniforms)) {
-                if (uniform.type === "t" && uniform.value < buffersPasses.length) {
+            for (const [key, uniform] of Object.entries(this.uniforms)) {
+                if (uniform.type === "t" && uniform.value < this.buffersPasses.length) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, buffersPasses[uniform.value].texture);
+                    gl.bindTexture(gl.TEXTURE_2D, this.buffersPasses[uniform.value].texture);
                 }
 
                 const methods: { [index: string]: any } = {
@@ -219,7 +189,7 @@ export class ShaderPlayer {
         };
 
         const mainPass = initPass(loadProgram(mainImageShader), PassType.MainImage);
-        const buffersPasses = bufferShaders.map((shader) => initPass(loadProgram(shader), PassType.Buffer));
+        this.buffersPasses = bufferShaders.map((shader) => initPass(loadProgram(shader), PassType.Buffer));
 
         let lastTimestamp = 0;
         let lastRenderTime = 0;
@@ -232,9 +202,9 @@ export class ShaderPlayer {
                     this.onRender(this.time);
                 }
 
-                uniforms.iTime.value = this.time;
-                buffersPasses.forEach((program) => render(program, buffersPasses));
-                render(mainPass, buffersPasses);
+                this.uniforms.iTime.value = this.time;
+                this.buffersPasses.forEach((program) => render(program));
+                render(mainPass);
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;
@@ -243,5 +213,53 @@ export class ShaderPlayer {
             lastTimestamp = timestamp;
         };
         update(0);
+    }
+
+    setupFrameBuffer(pass: Pass, width: number, height: number) {
+        // フレームバッファの生成
+        const gl = this.gl;
+        pass.frameBuffer = gl.createFramebuffer();
+
+        // フレームバッファをWebGLにバインド
+        gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+
+        // フレームバッファ用テクスチャの生成
+        pass.texture = gl.createTexture();
+
+        // フレームバッファ用のテクスチャをバインド
+        gl.bindTexture(gl.TEXTURE_2D, pass.texture);
+
+        // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        // テクスチャパラメータ
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        // フレームバッファにテクスチャを関連付ける
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
+
+        // 各種オブジェクトのバインドを解除
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    setSize(width: number, height: number) {
+        const canvas = this.gl.canvas;
+        canvas.width = width;
+        canvas.height = height;
+
+        this.gl.viewport(0, 0, width, height);
+
+        this.buffersPasses.forEach(pass => {
+            this.gl.deleteFramebuffer(pass.frameBuffer);
+            this.gl.deleteTexture(pass.texture);
+            this.setupFrameBuffer(pass, width, height);
+        });
+
+        this.uniforms.iResolution.value = [width, height, 0];
     }
 }

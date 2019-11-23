@@ -19,6 +19,10 @@ export class ShaderPlayer {
     /** 再生時間（秒）です */
     time: number;
 
+    isFullscreen: boolean;
+
+    width: number;
+
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number) => void;
 
@@ -28,7 +32,8 @@ export class ShaderPlayer {
 
         // webgl setup
         const canvas = document.createElement("canvas");
-        canvas.width = 512, canvas.height = 512;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
 
         // webgl2 enabled default from: firefox-51, chrome-56
@@ -58,7 +63,7 @@ export class ShaderPlayer {
         const uniforms: { [index: string]: { type: string, value: any } } = {
             iResolution: {
                 type: "v3",
-                value: [512, 512, 0],
+                value: [canvas.width, canvas.height, 0],
             },
             iTime: {
                 type: "f",
@@ -187,7 +192,6 @@ export class ShaderPlayer {
 
         const render = (pass: Pass, buffersPasses: Pass[]) => {
             gl.useProgram(pass.program);
-
             gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 

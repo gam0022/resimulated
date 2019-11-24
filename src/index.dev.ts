@@ -13,30 +13,33 @@ window.addEventListener("load", ev => {
         player.setSize(window.innerWidth, window.innerHeight);
     });
 
+    const pauseChar = "\uf04c";
+    const playChar = "\uf04b";
+
     const stopButton = <HTMLInputElement>document.getElementById('stop-button');
     stopButton.addEventListener("click", (event) => {
         player.isPlaying = false;
         player.time = 0;
-        playPauseButton.value = "▶";
+        playPauseButton.value = playChar;
     })
 
     const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
     playPauseButton.addEventListener("click", (event) => {
         player.isPlaying = !player.isPlaying;
-        playPauseButton.value = player.isPlaying ? "⏸" : "▶";
+        playPauseButton.value = player.isPlaying ? pauseChar : playChar;
     })
 
     const timeInput = <HTMLInputElement>document.getElementById("time-input");
     timeInput.addEventListener("input", (event) => {
         player.time = timeInput.valueAsNumber;
-        playPauseButton.value = "▶";
+        playPauseButton.value = playChar;
         player.isPlaying = false;
     })
 
     const timeBar = <HTMLInputElement>document.getElementById("time-bar");
     timeBar.addEventListener("input", (event) => {
         player.time = timeBar.valueAsNumber;
-        playPauseButton.value = "▶";
+        playPauseButton.value = playChar;
         player.isPlaying = false;
     })
 

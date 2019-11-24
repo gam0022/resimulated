@@ -28,10 +28,9 @@
         }
 
         #info {
-            color: white;
             font-size: 13px;
             position: absolute;
-            bottom: 10px;
+            top: 10px;
             width: 100%;
             text-align: center;
             z-index: 100;
@@ -81,6 +80,10 @@
 </head>
 
 <body>
+    <div id="info">
+        <span id="fps-span">0 FPS</span>
+    </div>
+
     <div class="time-slider">
         <select id="resolution-scale">
             <option value="0.25">0.25</option>

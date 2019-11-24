@@ -16,6 +16,7 @@ window.addEventListener("load", ev => {
 
 
     // HTMLElements
+    const fpsSpan = document.getElementById("fps-span");
     const resolutionScaleSelect = <HTMLSelectElement>document.getElementById("resolution-scale");
     const stopButton = <HTMLInputElement>document.getElementById("stop-button");
     const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
@@ -91,9 +92,11 @@ window.addEventListener("load", ev => {
 
 
     // Player
-    player.onRender = (time) => {
+    player.onRender = (time, timeDelta) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
+        const fps = 1.0 / timeDelta;
+        fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
     }
 
 

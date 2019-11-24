@@ -20,7 +20,7 @@ export class ShaderPlayer {
     time: number;
 
     /** レンダリング時に実行されるコールバック関数です */
-    onRender: (time: number) => void;
+    onRender: (time: number, timeDelta: number) => void;
 
     gl: WebGL2RenderingContext;
 
@@ -199,7 +199,7 @@ export class ShaderPlayer {
 
             if (this.isPlaying || lastRenderTime !== this.time) {
                 if (this.onRender != null) {
-                    this.onRender(this.time);
+                    this.onRender(this.time, timeDelta);
                 }
 
                 this.uniforms.iTime.value = this.time;

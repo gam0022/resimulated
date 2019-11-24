@@ -25,11 +25,39 @@ window.addEventListener("load", ev => {
     const tickmarks = <HTMLDataListElement>document.getElementById("tickmarks");
 
 
+    // Common Callbacks
+    const onResolutionCange = () => {
+        const resolutionScale = parseFloat(resolutionScaleSelect.value);
+        player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+    }
+
+    const onTimeLengthUpdate = () => {
+        timeBar.max = timeLengthInput.value;
+
+        // tickmarksの子要素を全て削除します
+        for (let i = tickmarks.childNodes.length - 1; i >= 0; i--) {
+            tickmarks.removeChild(tickmarks.childNodes[i]);
+        }
+
+        // 1秒刻みにラベルを置きます
+        for (let i = 0; i < timeLengthInput.valueAsNumber; i++) {
+            const option = document.createElement("option");
+            option.value = i.toString();
+            option.label = i.toString();
+            tickmarks.appendChild(option);
+        }
+    }
+
+    onResolutionCange();
+    onTimeLengthUpdate();
+
+
     // SessionStorage
     const saveToSessionStorage = () => {
         sessionStorage.setItem("time", player.time.toString());
         sessionStorage.setItem("isPlaying", player.isPlaying ? "true" : "false");
         sessionStorage.setItem("resolutionScale", resolutionScaleSelect.value);
+        sessionStorage.setItem("timeLength", timeLengthInput.value);
     }
 
     const loadFromSessionStorage = () => {
@@ -48,7 +76,14 @@ window.addEventListener("load", ev => {
         if (resolutionScaleStr) {
             resolutionScaleSelect.value = resolutionScaleStr;
         }
+
+        const timeLengthStr = sessionStorage.getItem("timeLength");
+        if (timeLengthStr) {
+            timeLengthInput.value = timeLengthStr;
+            onTimeLengthUpdate();
+        }
     }
+
     loadFromSessionStorage();
 
 
@@ -60,12 +95,7 @@ window.addEventListener("load", ev => {
     }
 
 
-    // UI
-    const onResolutionCange = () => {
-        const resolutionScale = parseFloat(resolutionScaleSelect.value);
-        player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
-    }
-    onResolutionCange();
+    // UI Events
     window.addEventListener("resize", onResolutionCange);
 
     resolutionScaleSelect.addEventListener("input", ev => {
@@ -101,24 +131,7 @@ window.addEventListener("load", ev => {
     })
 
     timeLengthInput.addEventListener("input", (event) => {
-        timeBar.max = timeLengthInput.value;
         onTimeLengthUpdate();
         saveToSessionStorage();
     })
-
-    const onTimeLengthUpdate = () => {
-        // tickmarksの子要素を全て削除します
-        for (let i = tickmarks.childNodes.length - 1; i >= 0; i--) {
-            tickmarks.removeChild(tickmarks.childNodes[i]);
-        }
-
-        // 1秒刻みにラベルを置きます
-        for (let i = 0; i < timeLengthInput.valueAsNumber; i++) {
-            const option = document.createElement("option");
-            option.value = i.toString();
-            option.label = i.toString();
-            tickmarks.appendChild(option);
-        }
-    }
-    onTimeLengthUpdate();
 }, false);

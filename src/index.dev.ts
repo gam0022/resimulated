@@ -9,14 +9,24 @@ window.addEventListener("load", ev => {
         ]
     );
 
-    window.addEventListener("resize", ev => {
-        player.setSize(window.innerWidth, window.innerHeight);
-    });
+    let resolutionScale = 0.5;
+    const onResolutionCange = () => {
+        player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+    }
+
+    onResolutionCange();
+    window.addEventListener("resize", onResolutionCange);
+
+    const resolutionScaleSelect = <HTMLSelectElement>document.getElementById("resolution-scale");
+    resolutionScaleSelect.addEventListener("input", ev => {
+        resolutionScale = parseFloat(resolutionScaleSelect.value);
+        onResolutionCange();
+    })
 
     const pauseChar = "\uf04c";
     const playChar = "\uf04b";
 
-    const stopButton = <HTMLInputElement>document.getElementById('stop-button');
+    const stopButton = <HTMLInputElement>document.getElementById("stop-button");
     stopButton.addEventListener("click", (event) => {
         player.isPlaying = false;
         player.time = 0;

@@ -39,6 +39,12 @@ window.addEventListener("load", ev => {
         playPauseButton.value = player.isPlaying ? pauseChar : playChar;
     })
 
+    const time_str = sessionStorage.getItem("time")
+    if (time_str !== null) {
+        const time = parseFloat(time_str);
+        player.time = time;
+    }
+
     const timeInput = <HTMLInputElement>document.getElementById("time-input");
     timeInput.addEventListener("input", (event) => {
         player.time = timeInput.valueAsNumber;
@@ -64,6 +70,7 @@ window.addEventListener("load", ev => {
     player.onRender = (time) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
+        sessionStorage.setItem("time", time.toString());
     }
 
     const onTimeLengthUpdate = () => {

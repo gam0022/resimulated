@@ -25,15 +25,11 @@ window.addEventListener("load", ev => {
     const tickmarks = <HTMLDataListElement>document.getElementById("tickmarks");
 
 
-    // status
-    let resolutionScale = 0.5;
-
-
     // SessionStorage
     const saveToSessionStorage = () => {
         sessionStorage.setItem("time", player.time.toString());
         sessionStorage.setItem("isPlaying", player.isPlaying ? "true" : "false");
-        sessionStorage.setItem("resolutionScale", resolutionScale.toString());
+        sessionStorage.setItem("resolutionScale", resolutionScaleSelect.value);
     }
 
     const loadFromSessionStorage = () => {
@@ -50,22 +46,29 @@ window.addEventListener("load", ev => {
 
         const resolutionScaleStr = sessionStorage.getItem("resolutionScale");
         if (resolutionScaleStr) {
-            resolutionScale = parseFloat(resolutionScaleStr);
             resolutionScaleSelect.value = resolutionScaleStr;
         }
     }
     loadFromSessionStorage();
 
 
+    // Player
+    player.onRender = (time) => {
+        timeBar.valueAsNumber = time;
+        timeInput.valueAsNumber = time;
+        saveToSessionStorage();
+    }
+
+
     // UI
     const onResolutionCange = () => {
+        const resolutionScale = parseFloat(resolutionScaleSelect.value);
         player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
     }
     onResolutionCange();
     window.addEventListener("resize", onResolutionCange);
 
     resolutionScaleSelect.addEventListener("input", ev => {
-        resolutionScale = parseFloat(resolutionScaleSelect.value);
         onResolutionCange();
         saveToSessionStorage();
     })
@@ -102,12 +105,6 @@ window.addEventListener("load", ev => {
         onTimeLengthUpdate();
         saveToSessionStorage();
     })
-
-    player.onRender = (time) => {
-        timeBar.valueAsNumber = time;
-        timeInput.valueAsNumber = time;
-        saveToSessionStorage();
-    }
 
     const onTimeLengthUpdate = () => {
         // tickmarksの子要素を全て削除します

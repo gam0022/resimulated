@@ -9,68 +9,104 @@ window.addEventListener("load", ev => {
         ]
     );
 
-    let resolutionScale = 0.5;
-    const onResolutionCange = () => {
-        player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
-    }
 
-    onResolutionCange();
-    window.addEventListener("resize", onResolutionCange);
-
-    const resolutionScaleSelect = <HTMLSelectElement>document.getElementById("resolution-scale");
-    resolutionScaleSelect.addEventListener("input", ev => {
-        resolutionScale = parseFloat(resolutionScaleSelect.value);
-        onResolutionCange();
-    })
-
+    // consts
     const pauseChar = "\uf04c";
     const playChar = "\uf04b";
 
+
+    // HTMLElements
+    const resolutionScaleSelect = <HTMLSelectElement>document.getElementById("resolution-scale");
     const stopButton = <HTMLInputElement>document.getElementById("stop-button");
+    const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
+    const timeInput = <HTMLInputElement>document.getElementById("time-input");
+    const timeBar = <HTMLInputElement>document.getElementById("time-bar");
+    const timeLengthInput = <HTMLInputElement>document.getElementById("time-length-input");
+    const tickmarks = <HTMLDataListElement>document.getElementById("tickmarks");
+
+
+    // status
+    let resolutionScale = 0.5;
+
+
+    // SessionStorage
+    const saveToSessionStorage = () => {
+        sessionStorage.setItem("time", player.time.toString());
+        sessionStorage.setItem("isPlaying", player.isPlaying ? "true" : "false");
+        sessionStorage.setItem("resolutionScale", resolutionScale.toString());
+    }
+
+    const loadFromSessionStorage = () => {
+        const timeStr = sessionStorage.getItem("time")
+        if (timeStr) {
+            player.time = parseFloat(timeStr);
+        }
+
+        const isPlayingStr = sessionStorage.getItem("isPlaying");
+        if (isPlayingStr) {
+            player.isPlaying = isPlayingStr === "true";
+            playPauseButton.value = player.isPlaying ? pauseChar : playChar;
+        }
+
+        const resolutionScaleStr = sessionStorage.getItem("resolutionScale");
+        if (resolutionScaleStr) {
+            resolutionScale = parseFloat(resolutionScaleStr);
+            resolutionScaleSelect.value = resolutionScaleStr;
+        }
+    }
+    loadFromSessionStorage();
+
+
+    // UI
+    const onResolutionCange = () => {
+        player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+    }
+    onResolutionCange();
+    window.addEventListener("resize", onResolutionCange);
+
+    resolutionScaleSelect.addEventListener("input", ev => {
+        resolutionScale = parseFloat(resolutionScaleSelect.value);
+        onResolutionCange();
+        saveToSessionStorage();
+    })
+
     stopButton.addEventListener("click", (event) => {
         player.isPlaying = false;
         player.time = 0;
         playPauseButton.value = playChar;
+        saveToSessionStorage();
     })
 
-    const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
     playPauseButton.addEventListener("click", (event) => {
         player.isPlaying = !player.isPlaying;
         playPauseButton.value = player.isPlaying ? pauseChar : playChar;
+        saveToSessionStorage();
     })
 
-    const time_str = sessionStorage.getItem("time")
-    if (time_str !== null) {
-        const time = parseFloat(time_str);
-        player.time = time;
-    }
-
-    const timeInput = <HTMLInputElement>document.getElementById("time-input");
     timeInput.addEventListener("input", (event) => {
         player.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
+        saveToSessionStorage();
     })
 
-    const timeBar = <HTMLInputElement>document.getElementById("time-bar");
     timeBar.addEventListener("input", (event) => {
         player.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
+        saveToSessionStorage();
     })
 
-    const timeLengthInput = <HTMLInputElement>document.getElementById("time-length-input");
     timeLengthInput.addEventListener("input", (event) => {
         timeBar.max = timeLengthInput.value;
         onTimeLengthUpdate();
+        saveToSessionStorage();
     })
-
-    const tickmarks = document.getElementById("tickmarks");
 
     player.onRender = (time) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
-        sessionStorage.setItem("time", time.toString());
+        saveToSessionStorage();
     }
 
     const onTimeLengthUpdate = () => {

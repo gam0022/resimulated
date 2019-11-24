@@ -85,13 +85,15 @@ window.addEventListener("load", ev => {
     }
 
     loadFromSessionStorage();
+    window.addEventListener("beforeunload", ev => {
+        saveToSessionStorage();
+    })
 
 
     // Player
     player.onRender = (time) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
-        saveToSessionStorage();
     }
 
 
@@ -100,38 +102,32 @@ window.addEventListener("load", ev => {
 
     resolutionScaleSelect.addEventListener("input", ev => {
         onResolutionCange();
-        saveToSessionStorage();
     })
 
     stopButton.addEventListener("click", (event) => {
         player.isPlaying = false;
         player.time = 0;
         playPauseButton.value = playChar;
-        saveToSessionStorage();
     })
 
     playPauseButton.addEventListener("click", (event) => {
         player.isPlaying = !player.isPlaying;
         playPauseButton.value = player.isPlaying ? pauseChar : playChar;
-        saveToSessionStorage();
     })
 
     timeInput.addEventListener("input", (event) => {
         player.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
-        saveToSessionStorage();
     })
 
     timeBar.addEventListener("input", (event) => {
         player.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
-        saveToSessionStorage();
     })
 
     timeLengthInput.addEventListener("input", (event) => {
         onTimeLengthUpdate();
-        saveToSessionStorage();
     })
 }, false);

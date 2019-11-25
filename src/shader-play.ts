@@ -1,3 +1,6 @@
+// for Webpack DefinePlugin
+declare var PRODUCTION: boolean;
+
 enum PassType {
     MainImage,
     Buffer,
@@ -198,8 +201,10 @@ export class ShaderPlayer {
             const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
             if (this.isPlaying || lastRenderTime !== this.time) {
-                if (this.onRender != null) {
-                    this.onRender(this.time, timeDelta);
+                if (!PRODUCTION) {
+                    if (this.onRender != null) {
+                        this.onRender(this.time, timeDelta);
+                    }
                 }
 
                 this.uniforms.iTime.value = this.time;
@@ -248,18 +253,20 @@ export class ShaderPlayer {
     }
 
     setSize(width: number, height: number) {
-        const canvas = this.gl.canvas;
-        canvas.width = width;
-        canvas.height = height;
+        if (!PRODUCTION) {
+            const canvas = this.gl.canvas;
+            canvas.width = width;
+            canvas.height = height;
 
-        this.gl.viewport(0, 0, width, height);
+            this.gl.viewport(0, 0, width, height);
 
-        this.buffersPasses.forEach(pass => {
-            this.gl.deleteFramebuffer(pass.frameBuffer);
-            this.gl.deleteTexture(pass.texture);
-            this.setupFrameBuffer(pass, width, height);
-        });
+            this.buffersPasses.forEach(pass => {
+                this.gl.deleteFramebuffer(pass.frameBuffer);
+                this.gl.deleteTexture(pass.texture);
+                this.setupFrameBuffer(pass, width, height);
+            });
 
-        this.uniforms.iResolution.value = [width, height, 0];
+            this.uniforms.iResolution.value = [width, height, 0];
+        }
     }
 }

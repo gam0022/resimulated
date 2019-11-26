@@ -4,8 +4,8 @@ window.addEventListener("load", ev => {
     const player = new ShaderPlayer(
         require("./vertex.glsl").default,
         [
-            require("./buffer0.glsl").default,
-            require("./fragment.glsl").default,
+            require("./kaleidoscope.glsl").default,
+            require("./invert.glsl").default,
         ]
     );
 

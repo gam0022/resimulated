@@ -6,7 +6,7 @@ window.addEventListener("load", ev => {
         [
             require("./kaleidoscope.glsl").default,
             require("./invert.glsl").default,
-            require("./invert.glsl").default,
+            require("./chromatic-aberration.glsl").default,
         ]
     );
 

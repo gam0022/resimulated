@@ -54,22 +54,6 @@ export class ShaderPlayer {
                 type: "t",
                 value: 0,
             },
-            iChannel0: {
-                type: "t",
-                value: 0,
-            },
-            iChannel1: {
-                type: "t",
-                value: 1,
-            },
-            iChannel2: {
-                type: "t",
-                value: 2,
-            },
-            iChannel3: {
-                type: "t",
-                value: 3,
-            },
         };
 
         // webgl2 enabled default from: firefox-51, chrome-56
@@ -166,7 +150,7 @@ export class ShaderPlayer {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(this.uniforms)) {
-                if (uniform.type === "t" && uniform.value < this.imagePasses.length) {
+                if (uniform.type === "t") {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
                     gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
                 }
@@ -191,6 +175,10 @@ export class ShaderPlayer {
             gl.bindVertexArray(null);
             gl.useProgram(null);
         };
+
+        imageShaders.forEach((_, i) => {
+            this.uniforms[`iPass${i}`] = { type: "t", value: i };
+        });
 
         this.imagePasses = imageShaders.map((shader, i, ary) => initPass(
             loadProgram(shader),

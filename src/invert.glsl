@@ -5,10 +5,7 @@ precision mediump sampler3D;
 uniform vec3 iResolution;
 uniform float iTime;
 
-uniform sampler2D iChannel0;
-uniform sampler2D iChannel1;
-uniform sampler2D iChannel2;
-uniform sampler2D iChannel3;
+uniform sampler2D iPass0;
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
@@ -16,7 +13,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 uv = fragCoord/iResolution.xy;
 
     // invert
-    vec3 col = vec3(1.0) - texture(iChannel0, uv).rgb;
+    vec3 col = vec3(1.0) - texture(iPass0, uv).rgb;
 
     // Output to screen
     fragColor = vec4(col, 1.0);

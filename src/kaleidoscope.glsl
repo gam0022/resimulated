@@ -5,11 +5,6 @@ precision mediump sampler3D;
 uniform vec3 iResolution;
 uniform float iTime;
 
-uniform sampler2D iChannel0;
-uniform sampler2D iChannel1;
-uniform sampler2D iChannel2;
-uniform sampler2D iChannel3;
-
 #define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.14159265359
 #define PI2 6.28318530718

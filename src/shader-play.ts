@@ -9,6 +9,7 @@ enum PassType {
 
 class Pass {
     type: PassType;
+    index: number;
     program: WebGLProgram;
     locations: { [index: string]: WebGLUniformLocation }
     frameBuffer: WebGLFramebuffer;
@@ -134,10 +135,11 @@ export class ShaderPlayer {
             return locations;
         };
 
-        const initPass = (program: WebGLProgram, type: PassType) => {
+        const initPass = (program: WebGLProgram, index: number, type: PassType) => {
             setupVAO(program);
             const pass = new Pass();
             pass.type = type;
+            pass.index = index;
             pass.program = program;
             pass.locations = createLocations(program);
             this.setupFrameBuffer(pass, canvas.width, canvas.height);
@@ -150,7 +152,9 @@ export class ShaderPlayer {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(this.uniforms)) {
-                if (uniform.type === "t") {
+                const isPrevPass = key === "iPrevPass";
+
+                if (uniform.type === "t" && !isPrevPass) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
                     gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
                 }
@@ -162,7 +166,9 @@ export class ShaderPlayer {
                     // v4: gl.uniform4fv,
                     t: gl.uniform1i,
                 }
-                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
+
+                const value = isPrevPass ? Math.max(pass.index - 1, 0) : uniform.value;
+                methods[uniform.type].call(gl, pass.locations[key], value);
             }
 
             // draw the buffer with VAO
@@ -182,6 +188,7 @@ export class ShaderPlayer {
 
         this.imagePasses = imageShaders.map((shader, i, ary) => initPass(
             loadProgram(shader),
+            i,
             i < ary.length - 1 ? PassType.Image : PassType.FinalImage
         ));
 

@@ -2,8 +2,8 @@
 declare var PRODUCTION: boolean;
 
 enum PassType {
-    MainImage,
-    Buffer,
+    Image,
+    FinalImage,
     Audio,
 }
 
@@ -27,11 +27,11 @@ export class ShaderPlayer {
 
     gl: WebGL2RenderingContext;
 
-    buffersPasses: Pass[];
+    imagePasses: Pass[];
 
     uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(vertexShader: string, mainImageShader: string, bufferShaders: string[]) {
+    constructor(vertexShader: string, imageShaders: string[]) {
         this.isPlaying = true;
         this.time = 0;
 
@@ -48,6 +48,10 @@ export class ShaderPlayer {
             },
             iTime: {
                 type: "f",
+                value: 0,
+            },
+            iPrevPass: {
+                type: "t",
                 value: 0,
             },
             iChannel0: {
@@ -149,13 +153,10 @@ export class ShaderPlayer {
         const initPass = (program: WebGLProgram, type: PassType) => {
             setupVAO(program);
             const pass = new Pass();
+            pass.type = type;
             pass.program = program;
             pass.locations = createLocations(program);
-
-            if (type === PassType.Buffer) {
-                this.setupFrameBuffer(pass, canvas.width, canvas.height);
-            }
-
+            this.setupFrameBuffer(pass, canvas.width, canvas.height);
             return pass;
         };
 
@@ -165,9 +166,9 @@ export class ShaderPlayer {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(this.uniforms)) {
-                if (uniform.type === "t" && uniform.value < this.buffersPasses.length) {
+                if (uniform.type === "t" && uniform.value < this.imagePasses.length) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, this.buffersPasses[uniform.value].texture);
+                    gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
                 }
 
                 const methods: { [index: string]: any } = {
@@ -191,8 +192,10 @@ export class ShaderPlayer {
             gl.useProgram(null);
         };
 
-        const mainPass = initPass(loadProgram(mainImageShader), PassType.MainImage);
-        this.buffersPasses = bufferShaders.map((shader) => initPass(loadProgram(shader), PassType.Buffer));
+        this.imagePasses = imageShaders.map((shader, i, ary) => initPass(
+            loadProgram(shader),
+            i < ary.length - 1 ? PassType.Image : PassType.FinalImage
+        ));
 
         let lastTimestamp = 0;
         let lastRenderTime = 0;
@@ -208,8 +211,7 @@ export class ShaderPlayer {
                 }
 
                 this.uniforms.iTime.value = this.time;
-                this.buffersPasses.forEach((program) => render(program));
-                render(mainPass);
+                this.imagePasses.forEach((program) => render(program));
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;
@@ -221,6 +223,10 @@ export class ShaderPlayer {
     }
 
     setupFrameBuffer(pass: Pass, width: number, height: number) {
+        if (pass.type === PassType.FinalImage) {
+            return;
+        }
+
         // フレームバッファの生成
         const gl = this.gl;
         pass.frameBuffer = gl.createFramebuffer();
@@ -260,7 +266,7 @@ export class ShaderPlayer {
 
             this.gl.viewport(0, 0, width, height);
 
-            this.buffersPasses.forEach(pass => {
+            this.imagePasses.forEach(pass => {
                 this.gl.deleteFramebuffer(pass.frameBuffer);
                 this.gl.deleteTexture(pass.texture);
                 this.setupFrameBuffer(pass, width, height);

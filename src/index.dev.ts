@@ -109,30 +109,30 @@ window.addEventListener("load", ev => {
         onResolutionCange();
     })
 
-    stopButton.addEventListener("click", (event) => {
+    stopButton.addEventListener("click", ev => {
         player.isPlaying = false;
         player.time = 0;
         playPauseButton.value = playChar;
     })
 
-    playPauseButton.addEventListener("click", (event) => {
+    playPauseButton.addEventListener("click", ev => {
         player.isPlaying = !player.isPlaying;
         playPauseButton.value = player.isPlaying ? pauseChar : playChar;
     })
 
-    timeInput.addEventListener("input", (event) => {
+    timeInput.addEventListener("input", ev => {
         player.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
     })
 
-    timeBar.addEventListener("input", (event) => {
+    timeBar.addEventListener("input", ev => {
         player.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
     })
 
-    timeLengthInput.addEventListener("input", (event) => {
+    timeLengthInput.addEventListener("input", ev => {
         onTimeLengthUpdate();
     })
 }, false);

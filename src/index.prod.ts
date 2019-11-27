@@ -3,9 +3,10 @@ import { ShaderPlayer } from "./shader-play"
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer(
         require("./vertex.glsl").default,
-        require("./fragment.glsl").default,
         [
-            require("./buffer0.glsl").default,
+            require("./kaleidoscope.glsl").default,
+            require("./invert.glsl").default,
+            require("./chromatic-aberration.glsl").default,
         ]
     );
 

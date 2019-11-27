@@ -2,12 +2,12 @@ import { ShaderPlayer } from "./shader-play"
 
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer(
-        require("./vertex.glsl").default,
+        require("./shaders/vertex.glsl").default,
         [
-            require("./kaleidoscope.glsl").default,
-            require("./invert.glsl").default,
-            require("./dot-matrix.glsl").default,
-            require("./chromatic-aberration.glsl").default,
+            require("./shaders/kaleidoscope.glsl").default,
+            require("./shaders/invert.glsl").default,
+            require("./shaders/dot-matrix.glsl").default,
+            require("./shaders/chromatic-aberration.glsl").default,
         ]
     );
 

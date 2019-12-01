@@ -16,6 +16,10 @@ class Pass {
     texture: WebGLTexture;
 }
 
+const SOUND_DURATION = 6; // Loop 3 sec
+const SOUND_WIDTH = 512;
+const SOUND_HEIGHT = 512;
+
 export class ShaderPlayer {
     /** 再生中かどうかのフラグです */
     isPlaying: boolean;
@@ -37,15 +41,11 @@ export class ShaderPlayer {
         this.time = 0;
 
         // setup WebAudio
-        const DURATION = 6; // Loop 3 sec
-        const WIDTH = 512;
-        const HEIGHT = 512;
-
-        const ctx = new window.AudioContext();
-        const node = ctx.createBufferSource();
-        node.connect(ctx.destination);
+        const audio = new window.AudioContext();
+        const node = audio.createBufferSource();
+        node.connect(audio.destination);
         node.loop = true;
-        const audioBuffer = ctx.createBuffer(2, ctx.sampleRate * DURATION, ctx.sampleRate);
+        const audioBuffer = audio.createBuffer(2, audio.sampleRate * SOUND_DURATION, audio.sampleRate);
 
         // setup WebGL
         const canvas = document.createElement("canvas");
@@ -58,7 +58,7 @@ export class ShaderPlayer {
             iTime: { type: "f", value: 0.0 },
             iPrevPass: { type: "t", value: 0 },
             iBlockOffset: { type: "f", value: 0.0 },
-            iSampleRate: { type: "f", value: ctx.sampleRate },
+            iSampleRate: { type: "f", value: audio.sampleRate },
         };
 
         // webgl2 enabled default from: firefox-51, chrome-56
@@ -197,19 +197,18 @@ export class ShaderPlayer {
         ));
 
         // Sound
-        const samples = WIDTH * HEIGHT;
-        const numBlocks = (ctx.sampleRate * DURATION) / samples;
+        const samples = SOUND_WIDTH * SOUND_HEIGHT;
+        const numBlocks = (audio.sampleRate * SOUND_DURATION) / samples;
         const soundProgram = loadProgram(soundShader);
         const soundPass = initPass(soundProgram, 0, PassType.Sound);
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
-            this.uniforms.iBlockOffset.value = i * samples / ctx.sampleRate;
-            // renderer.render(scene, camera, target, true);
+            this.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
             render(soundPass);
 
             // Read pixels
-            const pixels = new Uint8Array(WIDTH * HEIGHT * 4);
-            gl.readPixels(0, 0, WIDTH, HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+            const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
+            gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
             // Convert pixels to samples
             const outputDataL = audioBuffer.getChannelData(0);
@@ -220,10 +219,10 @@ export class ShaderPlayer {
             }
         }
 
-        // Play
         node.buffer = audioBuffer;
         node.start(0);
 
+        // Start Rendering
         let lastTimestamp = 0;
         let lastRenderTime = 0;
         const update = (timestamp: number) => {
@@ -250,12 +249,14 @@ export class ShaderPlayer {
     }
 
     setupFrameBuffer(pass: Pass, width: number, height: number) {
+        // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
             return;
         }
 
         if (pass.type === PassType.Sound) {
-            width = height = 512;
+            width = SOUND_WIDTH;
+            height = SOUND_HEIGHT;
         }
 
         // フレームバッファの生成

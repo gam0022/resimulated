@@ -8,7 +8,8 @@ window.addEventListener("load", ev => {
             require("./shaders/invert.glsl").default,
             require("./shaders/dot-matrix.glsl").default,
             require("./shaders/chromatic-aberration.glsl").default,
-        ]
+        ],
+        require("./shaders/sound.glsl").default
     );
 
 

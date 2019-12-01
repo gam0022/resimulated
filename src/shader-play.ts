@@ -4,7 +4,7 @@ declare var PRODUCTION: boolean;
 enum PassType {
     Image,
     FinalImage,
-    Audio,
+    Sound,
 }
 
 class Pass {
@@ -32,29 +32,33 @@ export class ShaderPlayer {
 
     uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(vertexShader: string, imageShaders: string[]) {
+    constructor(vertexShader: string, imageShaders: string[], soundShader: string) {
         this.isPlaying = true;
         this.time = 0;
 
-        // webgl setup
+        // setup WebAudio
+        const DURATION = 6; // Loop 3 sec
+        const WIDTH = 512;
+        const HEIGHT = 512;
+
+        const ctx = new window.AudioContext();
+        const node = ctx.createBufferSource();
+        node.connect(ctx.destination);
+        node.loop = true;
+        const audioBuffer = ctx.createBuffer(2, ctx.sampleRate * DURATION, ctx.sampleRate);
+
+        // setup WebGL
         const canvas = document.createElement("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
 
         this.uniforms = {
-            iResolution: {
-                type: "v3",
-                value: [canvas.width, canvas.height, 0],
-            },
-            iTime: {
-                type: "f",
-                value: 0,
-            },
-            iPrevPass: {
-                type: "t",
-                value: 0,
-            },
+            iResolution: { type: "v3", value: [canvas.width, canvas.height, 0] },
+            iTime: { type: "f", value: 0.0 },
+            iPrevPass: { type: "t", value: 0 },
+            iBlockOffset: { type: "f", value: 0.0 },
+            iSampleRate: { type: "f", value: ctx.sampleRate },
         };
 
         // webgl2 enabled default from: firefox-51, chrome-56
@@ -192,6 +196,34 @@ export class ShaderPlayer {
             i < ary.length - 1 ? PassType.Image : PassType.FinalImage
         ));
 
+        // Sound
+        const samples = WIDTH * HEIGHT;
+        const numBlocks = (ctx.sampleRate * DURATION) / samples;
+        const soundProgram = loadProgram(soundShader);
+        const soundPass = initPass(soundProgram, 0, PassType.Sound);
+        for (let i = 0; i < numBlocks; i++) {
+            // Update uniform & Render
+            this.uniforms.iBlockOffset.value = i * samples / ctx.sampleRate;
+            // renderer.render(scene, camera, target, true);
+            render(soundPass);
+
+            // Read pixels
+            const pixels = new Uint8Array(WIDTH * HEIGHT * 4);
+            gl.readPixels(0, 0, WIDTH, HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+            // Convert pixels to samples
+            const outputDataL = audioBuffer.getChannelData(0);
+            const outputDataR = audioBuffer.getChannelData(1);
+            for (let j = 0; j < samples; j++) {
+                outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
+                outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+            }
+        }
+
+        // Play
+        node.buffer = audioBuffer;
+        node.start(0);
+
         let lastTimestamp = 0;
         let lastRenderTime = 0;
         const update = (timestamp: number) => {
@@ -206,7 +238,7 @@ export class ShaderPlayer {
                 }
 
                 this.uniforms.iTime.value = this.time;
-                this.imagePasses.forEach((program) => render(program));
+                this.imagePasses.forEach((pass) => render(pass));
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;
@@ -220,6 +252,10 @@ export class ShaderPlayer {
     setupFrameBuffer(pass: Pass, width: number, height: number) {
         if (pass.type === PassType.FinalImage) {
             return;
+        }
+
+        if (pass.type === PassType.Sound) {
+            width = height = 512;
         }
 
         // フレームバッファの生成

@@ -102,6 +102,10 @@ window.addEventListener("load", ev => {
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
     }
 
+    if (player.isPlaying) {
+        player.playSound();
+    }
+
 
     // UI Events
     window.addEventListener("resize", onResolutionCange);
@@ -114,11 +118,18 @@ window.addEventListener("load", ev => {
         player.isPlaying = false;
         player.time = 0;
         playPauseButton.value = playChar;
+        player.stopSound();
     })
 
     playPauseButton.addEventListener("click", ev => {
         player.isPlaying = !player.isPlaying;
         playPauseButton.value = player.isPlaying ? pauseChar : playChar;
+
+        if (player.isPlaying) {
+            player.playSound()
+        } else {
+            player.stopSound();
+        }
     })
 
     timeInput.addEventListener("input", ev => {
@@ -131,8 +142,6 @@ window.addEventListener("load", ev => {
         player.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
-
-        player.setTime(timeInput.valueAsNumber);
     })
 
     timeLengthInput.addEventListener("input", ev => {

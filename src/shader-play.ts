@@ -194,9 +194,6 @@ export class ShaderPlayer {
         ));
 
         // Sound
-        const audioSource = this.audioSource = audio.createBufferSource();
-        audioSource.connect(audio.destination);
-        audioSource.loop = true;
         const audioBuffer = audio.createBuffer(2, audio.sampleRate * SOUND_DURATION, audio.sampleRate);
         const samples = SOUND_WIDTH * SOUND_HEIGHT;
         const numBlocks = (audio.sampleRate * SOUND_DURATION) / samples;
@@ -220,8 +217,10 @@ export class ShaderPlayer {
             }
         }
 
-        audioSource.buffer = audioBuffer;
-        audioSource.start(0);
+        this.audioSource = audio.createBufferSource();
+        this.audioSource.buffer = audioBuffer;
+        this.audioSource.loop = true;
+        this.audioSource.connect(audio.destination);
 
         // Start Rendering
         let lastTimestamp = 0;
@@ -309,15 +308,17 @@ export class ShaderPlayer {
         }
     }
 
-    setTime(time: number) {
+    stopSound() {
+        this.audioSource.stop();
+    }
+
+    playSound() {
         const newAudioSource = this.audioContext.createBufferSource();
         newAudioSource.buffer = this.audioSource.buffer;
         newAudioSource.loop = this.audioSource.loop;
         newAudioSource.connect(this.audioContext.destination);
-
-        this.audioSource.stop();
-
         this.audioSource = newAudioSource;
-        this.audioSource.start(this.audioContext.currentTime, time % SOUND_DURATION);
+
+        this.audioSource.start(this.audioContext.currentTime, this.time % SOUND_DURATION);
     }
 }

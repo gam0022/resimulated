@@ -16,7 +16,7 @@ class Pass {
     texture: WebGLTexture;
 }
 
-const SOUND_DURATION = 6; // Loop 3 sec
+const SOUND_DURATION = 6;
 const SOUND_WIDTH = 512;
 const SOUND_HEIGHT = 512;
 

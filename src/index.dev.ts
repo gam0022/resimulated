@@ -136,12 +136,19 @@ window.addEventListener("load", ev => {
         player.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
+
+        if (player.isPlaying) {
+            player.playSound()
+        } else {
+            player.stopSound();
+        }
     })
 
     timeBar.addEventListener("input", ev => {
         player.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         player.isPlaying = false;
+        player.stopSound();
     })
 
     timeLengthInput.addEventListener("input", ev => {

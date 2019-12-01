@@ -31,9 +31,10 @@ export class ShaderPlayer {
     onRender: (time: number, timeDelta: number) => void;
 
     gl: WebGL2RenderingContext;
+    audioContext: AudioContext;
+    audioSource: AudioBufferSourceNode;
 
     imagePasses: Pass[];
-
     uniforms: { [index: string]: { type: string, value: any } };
 
     constructor(vertexShader: string, imageShaders: string[], soundShader: string) {
@@ -41,11 +42,7 @@ export class ShaderPlayer {
         this.time = 0;
 
         // setup WebAudio
-        const audio = new window.AudioContext();
-        const node = audio.createBufferSource();
-        node.connect(audio.destination);
-        node.loop = true;
-        const audioBuffer = audio.createBuffer(2, audio.sampleRate * SOUND_DURATION, audio.sampleRate);
+        const audio = this.audioContext = new window.AudioContext();
 
         // setup WebGL
         const canvas = document.createElement("canvas");
@@ -197,6 +194,10 @@ export class ShaderPlayer {
         ));
 
         // Sound
+        const audioSource = this.audioSource = audio.createBufferSource();
+        audioSource.connect(audio.destination);
+        audioSource.loop = true;
+        const audioBuffer = audio.createBuffer(2, audio.sampleRate * SOUND_DURATION, audio.sampleRate);
         const samples = SOUND_WIDTH * SOUND_HEIGHT;
         const numBlocks = (audio.sampleRate * SOUND_DURATION) / samples;
         const soundProgram = loadProgram(soundShader);
@@ -219,8 +220,8 @@ export class ShaderPlayer {
             }
         }
 
-        node.buffer = audioBuffer;
-        node.start(0);
+        audioSource.buffer = audioBuffer;
+        audioSource.start(0);
 
         // Start Rendering
         let lastTimestamp = 0;
@@ -306,5 +307,17 @@ export class ShaderPlayer {
 
             this.uniforms.iResolution.value = [width, height, 0];
         }
+    }
+
+    setTime(time: number) {
+        const newAudioSource = this.audioContext.createBufferSource();
+        newAudioSource.buffer = this.audioSource.buffer;
+        newAudioSource.loop = this.audioSource.loop;
+        newAudioSource.connect(this.audioContext.destination);
+
+        this.audioSource.stop();
+
+        this.audioSource = newAudioSource;
+        this.audioSource.start(this.audioContext.currentTime, time % SOUND_DURATION);
     }
 }

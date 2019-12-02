@@ -4,7 +4,7 @@ declare var PRODUCTION: boolean;
 enum PassType {
     Image,
     FinalImage,
-    Audio,
+    Sound,
 }
 
 class Pass {
@@ -15,6 +15,10 @@ class Pass {
     frameBuffer: WebGLFramebuffer;
     texture: WebGLTexture;
 }
+
+const SOUND_DURATION = 6;
+const SOUND_WIDTH = 512;
+const SOUND_HEIGHT = 512;
 
 export class ShaderPlayer {
     /** 再生中かどうかのフラグです */
@@ -27,34 +31,31 @@ export class ShaderPlayer {
     onRender: (time: number, timeDelta: number) => void;
 
     gl: WebGL2RenderingContext;
+    audioContext: AudioContext;
+    audioSource: AudioBufferSourceNode;
 
     imagePasses: Pass[];
-
     uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(vertexShader: string, imageShaders: string[]) {
+    constructor(vertexShader: string, imageShaders: string[], soundShader: string) {
         this.isPlaying = true;
         this.time = 0;
 
-        // webgl setup
+        // setup WebAudio
+        const audio = this.audioContext = new window.AudioContext();
+
+        // setup WebGL
         const canvas = document.createElement("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
 
         this.uniforms = {
-            iResolution: {
-                type: "v3",
-                value: [canvas.width, canvas.height, 0],
-            },
-            iTime: {
-                type: "f",
-                value: 0,
-            },
-            iPrevPass: {
-                type: "t",
-                value: 0,
-            },
+            iResolution: { type: "v3", value: [canvas.width, canvas.height, 0] },
+            iTime: { type: "f", value: 0.0 },
+            iPrevPass: { type: "t", value: 0 },
+            iBlockOffset: { type: "f", value: 0.0 },
+            iSampleRate: { type: "f", value: audio.sampleRate },
         };
 
         // webgl2 enabled default from: firefox-51, chrome-56
@@ -192,6 +193,36 @@ export class ShaderPlayer {
             i < ary.length - 1 ? PassType.Image : PassType.FinalImage
         ));
 
+        // Sound
+        const audioBuffer = audio.createBuffer(2, audio.sampleRate * SOUND_DURATION, audio.sampleRate);
+        const samples = SOUND_WIDTH * SOUND_HEIGHT;
+        const numBlocks = (audio.sampleRate * SOUND_DURATION) / samples;
+        const soundProgram = loadProgram(soundShader);
+        const soundPass = initPass(soundProgram, 0, PassType.Sound);
+        for (let i = 0; i < numBlocks; i++) {
+            // Update uniform & Render
+            this.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+            render(soundPass);
+
+            // Read pixels
+            const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
+            gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+            // Convert pixels to samples
+            const outputDataL = audioBuffer.getChannelData(0);
+            const outputDataR = audioBuffer.getChannelData(1);
+            for (let j = 0; j < samples; j++) {
+                outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
+                outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+            }
+        }
+
+        this.audioSource = audio.createBufferSource();
+        this.audioSource.buffer = audioBuffer;
+        this.audioSource.loop = true;
+        this.audioSource.connect(audio.destination);
+
+        // Start Rendering
         let lastTimestamp = 0;
         let lastRenderTime = 0;
         const update = (timestamp: number) => {
@@ -206,7 +237,7 @@ export class ShaderPlayer {
                 }
 
                 this.uniforms.iTime.value = this.time;
-                this.imagePasses.forEach((program) => render(program));
+                this.imagePasses.forEach((pass) => render(pass));
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;
@@ -218,8 +249,14 @@ export class ShaderPlayer {
     }
 
     setupFrameBuffer(pass: Pass, width: number, height: number) {
+        // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
             return;
+        }
+
+        if (pass.type === PassType.Sound) {
+            width = SOUND_WIDTH;
+            height = SOUND_HEIGHT;
         }
 
         // フレームバッファの生成
@@ -269,5 +306,19 @@ export class ShaderPlayer {
 
             this.uniforms.iResolution.value = [width, height, 0];
         }
+    }
+
+    stopSound() {
+        this.audioSource.stop();
+    }
+
+    playSound() {
+        const newAudioSource = this.audioContext.createBufferSource();
+        newAudioSource.buffer = this.audioSource.buffer;
+        newAudioSource.loop = this.audioSource.loop;
+        newAudioSource.connect(this.audioContext.destination);
+        this.audioSource = newAudioSource;
+
+        this.audioSource.start(this.audioContext.currentTime, this.time % SOUND_DURATION);
     }
 }

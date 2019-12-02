@@ -11,6 +11,7 @@ window.addEventListener("load", ev => {
         ],
         require("./shaders/sound.glsl").default
     );
+    player.playSound();
 
     const style = document.createElement("style");
     style.innerText = require("../dist/style.prod.min.css").default;

@@ -2,6 +2,7 @@ import { ShaderPlayer } from "./shader-play"
 
 window.addEventListener("load", ev => {
     const player = new ShaderPlayer(
+        60,
         require("./shaders/vertex.glsl").default,
         [
             require("./shaders/kaleidoscope.glsl").default,

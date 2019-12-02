@@ -16,11 +16,13 @@ class Pass {
     texture: WebGLTexture;
 }
 
-const SOUND_DURATION = 6;
 const SOUND_WIDTH = 512;
 const SOUND_HEIGHT = 512;
 
 export class ShaderPlayer {
+    /** 再生時間の長さです */
+    timeLength: number;
+
     /** 再生中かどうかのフラグです */
     isPlaying: boolean;
 
@@ -37,7 +39,8 @@ export class ShaderPlayer {
     imagePasses: Pass[];
     uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(vertexShader: string, imageShaders: string[], soundShader: string) {
+    constructor(timeLength: number, vertexShader: string, imageShaders: string[], soundShader: string) {
+        this.timeLength = timeLength;
         this.isPlaying = true;
         this.time = 0;
 
@@ -194,9 +197,9 @@ export class ShaderPlayer {
         ));
 
         // Sound
-        const audioBuffer = audio.createBuffer(2, audio.sampleRate * SOUND_DURATION, audio.sampleRate);
+        const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
         const samples = SOUND_WIDTH * SOUND_HEIGHT;
-        const numBlocks = (audio.sampleRate * SOUND_DURATION) / samples;
+        const numBlocks = (audio.sampleRate * timeLength) / samples;
         const soundProgram = loadProgram(soundShader);
         const soundPass = initPass(soundProgram, 0, PassType.Sound);
         for (let i = 0; i < numBlocks; i++) {
@@ -319,6 +322,6 @@ export class ShaderPlayer {
         newAudioSource.connect(this.audioContext.destination);
         this.audioSource = newAudioSource;
 
-        this.audioSource.start(this.audioContext.currentTime, this.time % SOUND_DURATION);
+        this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }
 }

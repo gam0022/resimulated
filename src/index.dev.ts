@@ -1,7 +1,7 @@
-import { ShaderPlayer } from "./shader-play"
+import { Chromatic } from "./chromatic"
 
 window.addEventListener("load", ev => {
-    const player = new ShaderPlayer(
+    const chromatic = new Chromatic(
         60,
         require("./shaders/vertex.glsl").default,
         [
@@ -33,7 +33,7 @@ window.addEventListener("load", ev => {
     // Common Callbacks
     const onResolutionCange = () => {
         const resolutionScale = parseFloat(resolutionScaleSelect.value);
-        player.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+        chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
     }
 
     const onTimeLengthUpdate = () => {
@@ -59,8 +59,8 @@ window.addEventListener("load", ev => {
 
     // SessionStorage
     const saveToSessionStorage = () => {
-        sessionStorage.setItem("time", player.time.toString());
-        sessionStorage.setItem("isPlaying", player.isPlaying ? "true" : "false");
+        sessionStorage.setItem("time", chromatic.time.toString());
+        sessionStorage.setItem("isPlaying", chromatic.isPlaying ? "true" : "false");
         sessionStorage.setItem("resolutionScale", resolutionScaleSelect.value);
         sessionStorage.setItem("timeLength", timeLengthInput.value);
     }
@@ -68,13 +68,13 @@ window.addEventListener("load", ev => {
     const loadFromSessionStorage = () => {
         const timeStr = sessionStorage.getItem("time")
         if (timeStr) {
-            player.time = parseFloat(timeStr);
+            chromatic.time = parseFloat(timeStr);
         }
 
         const isPlayingStr = sessionStorage.getItem("isPlaying");
         if (isPlayingStr) {
-            player.isPlaying = isPlayingStr === "true";
-            playPauseButton.value = player.isPlaying ? pauseChar : playChar;
+            chromatic.isPlaying = isPlayingStr === "true";
+            playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
         }
 
         const resolutionScaleStr = sessionStorage.getItem("resolutionScale");
@@ -96,15 +96,15 @@ window.addEventListener("load", ev => {
 
 
     // Player
-    player.onRender = (time, timeDelta) => {
+    chromatic.onRender = (time, timeDelta) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
     }
 
-    if (player.isPlaying) {
-        player.playSound();
+    if (chromatic.isPlaying) {
+        chromatic.playSound();
     }
 
 
@@ -116,40 +116,40 @@ window.addEventListener("load", ev => {
     })
 
     stopButton.addEventListener("click", ev => {
-        player.isPlaying = false;
-        player.time = 0;
+        chromatic.isPlaying = false;
+        chromatic.time = 0;
         playPauseButton.value = playChar;
-        player.stopSound();
+        chromatic.stopSound();
     })
 
     playPauseButton.addEventListener("click", ev => {
-        player.isPlaying = !player.isPlaying;
-        playPauseButton.value = player.isPlaying ? pauseChar : playChar;
+        chromatic.isPlaying = !chromatic.isPlaying;
+        playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
 
-        if (player.isPlaying) {
-            player.playSound()
+        if (chromatic.isPlaying) {
+            chromatic.playSound()
         } else {
-            player.stopSound();
+            chromatic.stopSound();
         }
     })
 
     timeInput.addEventListener("input", ev => {
-        player.time = timeInput.valueAsNumber;
+        chromatic.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
-        player.isPlaying = false;
+        chromatic.isPlaying = false;
 
-        if (player.isPlaying) {
-            player.playSound()
+        if (chromatic.isPlaying) {
+            chromatic.playSound()
         } else {
-            player.stopSound();
+            chromatic.stopSound();
         }
     })
 
     timeBar.addEventListener("input", ev => {
-        player.time = timeBar.valueAsNumber;
+        chromatic.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
-        player.isPlaying = false;
-        player.stopSound();
+        chromatic.isPlaying = false;
+        chromatic.stopSound();
     })
 
     timeLengthInput.addEventListener("input", ev => {

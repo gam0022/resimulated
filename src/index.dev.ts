@@ -2,7 +2,7 @@ import { Chromatic } from "./chromatic"
 
 window.addEventListener("load", ev => {
     const chromatic = new Chromatic(
-        60,
+        60,// デモの長さ（秒）
         require("./shaders/vertex.glsl").default,
         [
             require("./shaders/kaleidoscope.glsl").default,
@@ -36,6 +36,8 @@ window.addEventListener("load", ev => {
         chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
     }
 
+    onResolutionCange();
+
     const onTimeLengthUpdate = () => {
         timeBar.max = timeLengthInput.value;
 
@@ -52,9 +54,6 @@ window.addEventListener("load", ev => {
             tickmarks.appendChild(option);
         }
     }
-
-    onResolutionCange();
-    onTimeLengthUpdate();
 
 
     // SessionStorage
@@ -85,8 +84,11 @@ window.addEventListener("load", ev => {
         const timeLengthStr = sessionStorage.getItem("timeLength");
         if (timeLengthStr) {
             timeLengthInput.value = timeLengthStr;
-            onTimeLengthUpdate();
+        } else {
+            timeLengthInput.valueAsNumber = chromatic.timeLength;
         }
+
+        onTimeLengthUpdate();
     }
 
     loadFromSessionStorage();

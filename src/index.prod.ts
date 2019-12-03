@@ -1,7 +1,7 @@
-import { ShaderPlayer } from "./shader-play"
+import { Chromatic } from "./chromatic"
 
 window.addEventListener("load", ev => {
-    const player = new ShaderPlayer(
+    const chromatic = new Chromatic(
         60,
         require("./shaders/vertex.glsl").default,
         [
@@ -12,7 +12,7 @@ window.addEventListener("load", ev => {
         ],
         require("./shaders/sound.glsl").default
     );
-    player.playSound();
+    chromatic.playSound();
 
     const style = document.createElement("style");
     style.innerText = require("../dist/style.prod.min.css").default;

@@ -3,6 +3,12 @@ precision mediump float;
 uniform float iSampleRate;
 uniform float iBlockOffset;
 
+//--------------------
+// ここから下を書き換える
+//--------------------
+
+#define PI 3.141592
+
 float tri(in float freq, in float time)
 {
     return -abs(1. - mod(freq * time * 2., 2.));
@@ -11,11 +17,15 @@ float tri(in float freq, in float time)
 vec2 mainSound(float time)
 {
     float freq = 440.;
-    freq *= pow(1.06 * 1.06, floor(mod(time, 6.)));
+    freq *= pow(1.06 * 1.06, floor(mod(time, 6. * 4.)));
     return vec2(
-        tri(freq, time) * sin(time * 3.141592),
-        tri(freq * 1.5, time) * sin(time * 3.141592));
+        tri(freq, time) * sin(time * PI),
+        tri(freq, time) * sin(time * PI));
 }
+
+//--------------------
+// ここまでを書き換える
+//--------------------
 
 out vec4 outColor;
 void main()

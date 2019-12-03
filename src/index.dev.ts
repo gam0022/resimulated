@@ -2,7 +2,7 @@ import { Chromatic } from "./chromatic"
 
 window.addEventListener("load", ev => {
     const chromatic = new Chromatic(
-        60,// デモの長さ（秒）
+        48,// デモの長さ（秒）
         require("./shaders/vertex.glsl").default,
         [
             require("./shaders/kaleidoscope.glsl").default,
@@ -10,7 +10,7 @@ window.addEventListener("load", ev => {
             require("./shaders/dot-matrix.glsl").default,
             require("./shaders/chromatic-aberration.glsl").default,
         ],
-        require("./shaders/sound.glsl").default
+        require("./shaders/sound-example.glsl").default
     );
 
 

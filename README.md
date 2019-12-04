@@ -20,9 +20,18 @@ cd webpack-tdf2020
 # プロジェクトのセットアップをします。
 npm install
 
-# デバッグをするとき
+# 開発をするときのコマンド（Webサーバを起動）
 npm run start
 
-# ビルドをするとき（最後に提出する時用なので sadakkey さんはあまり使わないはず）
+# ビルドをするときのコマンド（提出するときにしか使わないので、sadakkey さんはあまり使わないはず）
 npm run build
 ```
+
+## 編集するとき
+
+### サウンド
+
+`src/shaders/sound-*.glsl` を編集してください。
+
+ファイル名は以下から指定できます。
+https://github.com/gam0022/webpack-tdf2020/blob/master/src/index.dev.ts#L13

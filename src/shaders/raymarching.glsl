@@ -310,11 +310,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         }
     }
 
-    #ifdef GLSLSANDBOX
-        gl_FragColor = vec4(color, 1.0);
-    #else
-        fragColor = vec4(color,1.0);
-    #endif
+    fragColor = vec4(color,1.0);
 }
 
 out vec4 outColor;

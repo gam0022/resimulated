@@ -9,7 +9,7 @@ uniform float iTime;
 #ifdef DEBUG_AO
 #define BOUNCE_LIMIT (1)
 #else
-#define BOUNCE_LIMIT (10)
+#define BOUNCE_LIMIT (2)
 #endif
 
 
@@ -78,25 +78,6 @@ struct Intersection {
 
 #define calcNormal(p, dFunc) normalize(vec2(EPS_N, -EPS_N).xyy * dFunc(p + vec2(EPS_N, -EPS_N).xyy) + vec2(EPS_N, -EPS_N).yyx * dFunc(p + vec2(EPS_N, -EPS_N).yyx ) + vec2(EPS_N, -EPS_N).yxy * dFunc(p + vec2(EPS_N, -EPS_N).yxy) + vec2(EPS_N, -EPS_N).xxx * dFunc(p + vec2(EPS_N, -EPS_N).xxx))
 
-float sdGround(in vec3 p) {
-    return p.y + GROUND_BASE;
-}
-
-void intersectGround(inout Intersection intersection, inout Ray ray) {
-    float t = -(ray.origin.y + GROUND_BASE) / ray.direction.y;
-    if (t > 0.0) {
-        intersection.distance = t;
-        intersection.hit = true;
-        intersection.position = ray.origin + t * ray.direction;
-        intersection.normal = vec3(0.0, 1.0, 0.0);
-        intersection.ambient = vec3(0.5) * mod(floor(intersection.position.x) + floor(intersection.position.z), 2.0);
-        intersection.diffuse = vec3(0.3);
-        intersection.specular = vec3(0.5);
-        intersection.transparent = false;
-        intersection.reflectance = vec3(0.1);
-    }
-}
-
 // Distance Functions
 float sdBox( vec3 p, vec3 b ) {
     vec3 d = abs(p) - b;
@@ -107,52 +88,48 @@ float dSphere(vec3 p, float r) {
     return length(p) - r;
 }
 
-float dSphereCenter(vec3 p) {
-    return dSphere(p - vec3(0.0, 1.0, -0.5), 1.0);
+mat2 rotate(float a) {
+	float c = cos(a), s = sin(a);
+	return mat2(c, s, -s, c);
 }
 
-float dSphereLeft(vec3 p) {
-    return dSphere(p - vec3(2.5, 1.0, 0.0), 1.0);
-}
+float dMenger(vec3 z0, vec3 offset, float scale) {
+    vec4 z = vec4(z0, 1.0);
+    for (int n = 0; n < 5; n++) {
+        z = abs(z);
 
-float dBar(vec2 p, float width) {
-    vec2 d = abs(p) - width;
-    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) + 0.01 * width;
-}
+        if (z.x < z.y) z.xy = z.yx;
+        if (z.x < z.z) z.xz = z.zx;
+        if (z.y < z.z) z.yz = z.zy;
 
-float dCrossBar(vec3 p, float x) {
-    float bar_x = dBar(p.yz, x);
-    float bar_y = dBar(p.zx, x);
-    float bar_z = dBar(p.xy, x);
-    return min(bar_z, min(bar_x, bar_y));
-}
+        z *= scale;
+        z.xyz -= offset * (scale - 1.0);
 
-float dMengerSponge(vec3 p) {
-    float d = sdBox(p, vec3(1.0));
-    float one_third = 1.0 / 3.0;
-    for (float i = 0.0; i < 3.0; i++) {
-        float k = pow(one_third, i);
-        float kh = k * 0.5;
-        d = max(d, -dCrossBar(mod(p + kh, k * 2.0) - kh, k * one_third));
+        if (z.z < -0.5 * offset.z * (scale - 1.0)) {
+            z.z += offset.z * (scale - 1.0);
+        }
     }
-    return d;
+    return length(max(abs(z.xyz) - vec3(1.0), 0.0)) / z.w;
 }
 
-float dMengerSpongeRight(vec3 p) {
-    return dMengerSponge(p - vec3(-2.5, 1.0, 0.0));
+vec2 foldRotate(vec2 p, float s) {
+    float a = PI / s - atan(p.x, p.y);
+    float n = TAU / s;
+    a = floor(a / n) * n;
+    p = rotate(a) * p;
+    return p;
 }
 
-float dObjects(vec3 p) {
-    float d = dSphereCenter(p);
-    d = min(d, dSphereLeft(p));
-    d = min(d, dMengerSpongeRight(p));
-    return d;
+vec3 opRep(vec3 p, vec3 c) {
+	return mod(p, c) - 0.5 * c;
 }
 
 float dScene(vec3 p) {
-    float d = dObjects(p);
-    d = min(d, sdGround(p));
-    return d;
+	p -= vec3(2.0);
+	p = opRep(p, vec3(4.0, 4.0, 2.0));
+	p.xy = foldRotate(p.xy, 8.0);
+	float d = dMenger(p, vec3(0.8, 1.1 + 0.3 * sin(iTime), 0.5), 2.3);
+	return d;
 }
 
 // color functions
@@ -168,7 +145,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
 
     for (float i = 0.0; i < 100.0; i++) {
-        d = abs(dObjects(p));
+        d = abs(dScene(p));
         distance += d;
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
@@ -180,32 +157,18 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.hit = true;
         intersection.position = p;
         intersection.normal = calcNormal(p, dScene);
-        if (abs(dSphereLeft(p)) < EPS) {
-            intersection.ambient = vec3(0.0);
-            intersection.diffuse = vec3(0.0);
+        //if (abs(dScene(p)) < EPS) {
+            intersection.ambient = vec3(0.2);
+            intersection.diffuse = vec3(0.5);
             intersection.specular = vec3(0.5);
             intersection.transparent = false;
             intersection.reflectance = vec3(0.9);
-        } else if (abs(dSphereCenter(p)) < EPS) {
-            intersection.ambient = vec3(0.3, 0.3, 0.6) * 1.2 * 0.;
-            intersection.diffuse = vec3(0.3, 0.3, 0.6) * 0.5 * 0.;
-            intersection.specular = vec3(0.5);
-            intersection.transparent = true;
-            intersection.reflectance = vec3(0.8, 0.8, 1.0);
-            intersection.refractiveIndex = 2.2;
-        } else if (abs(dMengerSpongeRight(p)) < EPS) {
-            intersection.ambient = vec3(0.1, 0.2, 0.1) * 2.0;
-            intersection.diffuse = vec3(0.1, 0.2, 0.1) * 0.2;
-            intersection.specular = vec3(0.0);
-            intersection.transparent = false;
-            intersection.reflectance = vec3(0.0);
-        }
+        //}
     }
 }
 
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
-    intersectGround(intersection, ray);
     intersectObjects(intersection, ray);
 }
 
@@ -268,17 +231,11 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
-    // vec2 mouseUV = iMouse.xy / iResolution.xy;
-    float cameraR = 8.0;
-
-    vec2 mouseUV = vec2(0.45, 0.8);
 
     // camera and ray
     Camera camera;
-    camera.eye.x = cameraR * sin(mouseUV.y * PIH) * cos(mouseUV.x * PI + PI);
-    camera.eye.z = cameraR * sin(mouseUV.y * PIH) * sin(mouseUV.x * PI + PI);
-    camera.eye.y = cameraR * cos(mouseUV.y * PIH);
-    camera.target = vec3(-0.3, 1.0, 0.0);
+    camera.eye = vec3(0.0, 0.0, iTime);
+    camera.target = camera.eye + vec3(0.0, 0.0, 1.0);
     camera.up = vec3(0.0, 1.0, 0.0);// y-up
     camera.zoom = 3.0;
     Ray ray = cameraShootRay(camera, uv);

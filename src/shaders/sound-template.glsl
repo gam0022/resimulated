@@ -137,11 +137,10 @@ vec2 mainSound( float time ) {
     // arp
 
     float arpTime = beatToTime( mod( beat, 0.25 ) );
-    float arpSeed = floor( beat / 0.25 );
-    vec4 arpDice = fract( noise( arpSeed ) * 100.0 );
-
-    float arpNote = chord( floor( 4.0 * arpDice.x ) );
-    arpNote += 12.0 * floor( 3.0 * arpDice.y );
+    float[8] arpNotes = float[](
+        69.0, 70.0, 71.0, 72.0, 69.0, 70.0, 69.0, 72.0
+    );
+    float arpNote = arpNotes[int(mod(beat, 8.0))];
 
     ret += sidechain * 0.5 * vec2( arp( arpNote, arpTime ) );
 

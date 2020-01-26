@@ -5,10 +5,11 @@ window.addEventListener("load", ev => {
         48,// デモの長さ（秒）
         require("./shaders/vertex.glsl").default,
         [
-            require("./shaders/kaleidoscope.glsl").default,
-            require("./shaders/invert.glsl").default,
-            require("./shaders/dot-matrix.glsl").default,
-            require("./shaders/chromatic-aberration.glsl").default,
+            require("./shaders/raymarching.glsl").default,
+            //require("./shaders/kaleidoscope.glsl").default,
+            //require("./shaders/invert.glsl").default,
+            //require("./shaders/dot-matrix.glsl").default,
+            //require("./shaders/chromatic-aberration.glsl").default,
         ],
         require("./shaders/sound-template.glsl").default
     );

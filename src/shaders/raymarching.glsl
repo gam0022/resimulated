@@ -15,7 +15,7 @@ uniform float iTime;
 
 // consts
 const float INF = 1e+10;
-const float EPS = 1e-3;
+const float EPS = 0.2;
 const float EPS_N = 1e-4;
 const float OFFSET = EPS * 10.0;
 
@@ -66,6 +66,7 @@ struct Intersection {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+    vec3 emission;
 
     bool transparent;
     vec3 reflectance;
@@ -124,7 +125,7 @@ vec3 opRep(vec3 p, vec3 c) {
 	return mod(p, c) - 0.5 * c;
 }
 
-float dScene(vec3 p) {
+float map(vec3 p) {
 	p -= vec3(2.0);
 	p = opRep(p, vec3(4.0, 4.0, 2.0));
 	p.xy = foldRotate(p.xy, 8.0);
@@ -139,13 +140,40 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, saturate(p - K.xxx), c.y);
 }
 
+// https://www.shadertoy.com/view/lttGDn
+float calcEdge(vec3 p) {
+    float edge = 0.0;
+    vec2 e = vec2(.001, 0);
+
+    // Take some distance function measurements from either side of the hit point on all three axes.
+	float d1 = map(p + e.xyy), d2 = map(p - e.xyy);
+	float d3 = map(p + e.yxy), d4 = map(p - e.yxy);
+	float d5 = map(p + e.yyx), d6 = map(p - e.yyx);
+	float d = map(p)*2.;	// The hit point itself - Doubled to cut down on calculations. See below.
+
+    // Edges - Take a geometry measurement from either side of the hit point. Average them, then see how
+    // much the value differs from the hit point itself. Do this for X, Y and Z directions. Here, the sum
+    // is used for the overall difference, but there are other ways. Note that it's mainly sharp surface
+    // curves that register a discernible difference.
+    edge = abs(d1 + d2 - d) + abs(d3 + d4 - d) + abs(d5 + d6 - d);
+    //edge = max(max(abs(d1 + d2 - d), abs(d3 + d4 - d)), abs(d5 + d6 - d)); // Etc.
+
+    // Once you have an edge value, it needs to normalized, and smoothed if possible. How you
+    // do that is up to you. This is what I came up with for now, but I might tweak it later.
+    edge = smoothstep(0., 1., sqrt(edge/e.x*2.));
+
+    // Return the normal.
+    // Standard, normalized gradient mearsurement.
+    return edge;
+}
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
     vec3 p = ray.origin;
 
     for (float i = 0.0; i < 100.0; i++) {
-        d = abs(dScene(p));
+        d = abs(map(p));
         distance += d;
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
@@ -156,14 +184,19 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;
-        intersection.normal = calcNormal(p, dScene);
-        //if (abs(dScene(p)) < EPS) {
-            intersection.ambient = vec3(0.2);
-            intersection.diffuse = vec3(0.5);
-            intersection.specular = vec3(0.5);
+        intersection.normal = calcNormal(p, map);
+        //if (abs(map(p)) < EPS) {
+        {
+            intersection.ambient = vec3(0.0);
+            intersection.diffuse = vec3(0.0);
+            intersection.specular = vec3(0.0);
+
+            float edge = calcEdge(p);
+            intersection.emission = vec3(edge);
+
             intersection.transparent = false;
-            intersection.reflectance = vec3(0.9);
-        //}
+            intersection.reflectance = vec3(0.4);
+        }
     }
 }
 
@@ -176,7 +209,7 @@ float calcAo(in vec3 p, in vec3 n){
     float k = 1.0, occ = 0.0;
     for(int i = 0; i < 5; i++){
         float len = 0.15 + float(i) * 0.15;
-        float distance = dScene(n * len + p);
+        float distance = map(n * len + p);
         occ += (len - distance) * k;
         k *= 0.5;
     }
@@ -191,7 +224,7 @@ float calcShadow(in vec3 p, in vec3 rd) {
     float shadowSharpness = 10.0;
 
     for (int i = 0; i < 30; i++) {
-        d = dScene(p + rd * distance);
+        d = map(p + rd * distance);
         if (d < EPS) return shadowIntensity;
         bright = min(bright, shadowSharpness * d / distance);
         distance += d;
@@ -218,7 +251,8 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
         intersection.color =
             intersection.ambient * ao +
             intersection.diffuse * diffuse * shadow +
-            intersection.specular * specular * shadow;
+            intersection.specular * specular * shadow +
+            intersection.emission;
         #endif
 
         // fog

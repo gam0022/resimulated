@@ -195,7 +195,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(edge);
 
             intersection.transparent = false;
-            intersection.reflectance = vec3(0.4);
+            intersection.reflectance = vec3(0.0);
         }
     }
 }
@@ -269,9 +269,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // camera and ray
     Camera camera;
     camera.eye = vec3(0.0, 0.0, iTime);
-    camera.target = camera.eye + vec3(0.0, 0.0, 1.0);
+    camera.target = camera.eye + vec3(0.05 * sin((iTime)), 0.0, 1.0);
     camera.up = vec3(0.0, 1.0, 0.0);// y-up
-    camera.zoom = 3.0;
+    camera.zoom = 9.0;
     Ray ray = cameraShootRay(camera, uv);
 
     vec3 color = vec3(0.0);

@@ -12,22 +12,6 @@ float brightness(vec3 c) {
     return max(max(c.r, c.g), c.b);
 }
 
-vec4 encodeHDR(vec3 rgb) {
-    return vec4(rgb, 1.0);
-
-    rgb *= 1.0 / 8.0;
-    float m = max(max(rgb.r, rgb.g), max(rgb.b, 1e-6));
-    m = ceil(m * 255.0) / 255.0;
-    return vec4(rgb / m, m);
-}
-
-vec3 decodeHDR(vec4 rgba)
-{
-    return rgba.rgb;
-
-    return rgba.rgb * rgba.a * 8.0;
-}
-
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Runtime/Components/BloomComponent.cs#L78-L109
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     float softKnee = 0.0;
@@ -44,7 +28,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     rq = curve.z * rq * rq;
 
     m *= max(rq, br - lthresh) / max(br, 1e-5);
-    fragColor = encodeHDR(m);
+    fragColor = vec4(m, color.a);
 }
 
 out vec4 outColor;

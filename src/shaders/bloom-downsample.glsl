@@ -9,7 +9,7 @@ uniform float iTime;
 uniform sampler2D iPrevPass;
 
 vec4 encodeHDR(vec3 rgb) {
-    //return vec4(rgb, 1.0);
+    return vec4(rgb, 1.0);
 
     rgb *= 1.0 / 8.0;
     float m = max(max(rgb.r, rgb.g), max(rgb.b, 1e-6));
@@ -19,7 +19,7 @@ vec4 encodeHDR(vec3 rgb) {
 
 vec3 decodeHDR(vec4 rgba)
 {
-    // return rgba.rgb;
+    return rgba.rgb;
 
     return rgba.rgb * rgba.a * 8.0;
 }

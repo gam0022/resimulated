@@ -75,6 +75,12 @@ export class Chromatic {
             return;
         }
 
+        const ext2 = gl.getExtension("OES_texture_float_linear");
+        if (!ext2) {
+            alert("need OES_texture_float_linear");
+            return;
+        }
+
         gl.enable(gl.CULL_FACE);
 
         // drawing data (as viewport square)
@@ -272,17 +278,14 @@ export class Chromatic {
         const gl = this.gl;
         let type = gl.FLOAT;
         let format = gl.RGBA32F;
-        let filter = gl.NEAREST;
+        let filter = gl.LINEAR;
 
         if (pass.type === PassType.Sound) {
             width = SOUND_WIDTH;
             height = SOUND_HEIGHT;
-        }
-
-        if (pass.type === PassType.Sound || pass.index > 0) {
             type = gl.UNSIGNED_BYTE;
             format = gl.RGBA;
-            filter = gl.LINEAR;
+            filter = gl.NEAREST;
         }
 
         // フレームバッファの生成

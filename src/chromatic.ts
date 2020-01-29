@@ -69,6 +69,12 @@ export class Chromatic {
             return;
         }
 
+        const ext = gl.getExtension("EXT_color_buffer_float");
+        if (!ext) {
+            alert("need EXT_color_buffer_float");
+            return;
+        }
+
         gl.enable(gl.CULL_FACE);
 
         // drawing data (as viewport square)
@@ -262,13 +268,20 @@ export class Chromatic {
             return;
         }
 
+        const gl = this.gl;
+        let type = gl.FLOAT;
+        let format = gl.RGBA32F;
+        let filter = gl.NEAREST;
+
         if (pass.type === PassType.Sound) {
             width = SOUND_WIDTH;
             height = SOUND_HEIGHT;
+            type = gl.UNSIGNED_BYTE;
+            format = gl.RGBA;
+            filter = gl.LINEAR;
         }
 
         // フレームバッファの生成
-        const gl = this.gl;
         pass.frameBuffer = gl.createFramebuffer();
 
         // フレームバッファをWebGLにバインド
@@ -281,11 +294,13 @@ export class Chromatic {
         gl.bindTexture(gl.TEXTURE_2D, pass.texture);
 
         // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
 
         // テクスチャパラメータ
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 

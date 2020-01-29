@@ -173,7 +173,10 @@ export class Chromatic {
                     t: gl.uniform1i,
                 }
 
-                const value = isPrevPass ? Math.max(pass.index - 1, 0) : uniform.value;
+                const value =
+                    isPrevPass ? Math.max(pass.index - 1, 0) :
+                        key === "iResolution" ? [uniform.value[0] * pass.scale, uniform.value[1] * pass.scale, uniform.value[2]] :
+                            uniform.value;
                 methods[uniform.type].call(gl, pass.locations[key], value);
             }
 

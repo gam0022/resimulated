@@ -6,12 +6,21 @@ window.addEventListener("load", ev => {
         require("./shaders/vertex.glsl").default,
         [
             require("./shaders/raymarching.glsl").default,
-            require("./shaders/bloom-single-pass.glsl").default,
+            require("./shaders/bloom-prefilter.glsl").default,
 
             //require("./shaders/kaleidoscope.glsl").default,
             //require("./shaders/invert.glsl").default,
             //require("./shaders/dot-matrix.glsl").default,
             //require("./shaders/chromatic-aberration.glsl").default,
+        ],
+        [
+            1,
+            1,
+            0.5,
+            0.25,
+            0.5,
+            1,
+            1,
         ],
         require("./shaders/sound-template.glsl").default
     );

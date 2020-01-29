@@ -10,6 +10,7 @@ window.addEventListener("load", ev => {
             require("./shaders/dot-matrix.glsl").default,
             require("./shaders/chromatic-aberration.glsl").default,
         ],
+        [],
         require("./shaders/sound-template.glsl").default
     );
     chromatic.playSound();

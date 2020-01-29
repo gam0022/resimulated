@@ -39,7 +39,7 @@ export class Chromatic {
     imagePasses: Pass[];
     uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(timeLength: number, vertexShader: string, imageShaders: string[], soundShader: string) {
+    constructor(timeLength: number, vertexShader: string, imageShaders: string[], imageScales: number[], soundShader: string) {
         this.timeLength = timeLength;
         this.isPlaying = true;
         this.time = 0;

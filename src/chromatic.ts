@@ -265,6 +265,7 @@ export class Chromatic {
     setupFrameBuffer(pass: Pass, width: number, height: number) {
         // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
+            pass.scale = 1;
             return;
         }
 
@@ -276,6 +277,9 @@ export class Chromatic {
         if (pass.type === PassType.Sound) {
             width = SOUND_WIDTH;
             height = SOUND_HEIGHT;
+        }
+
+        if (pass.type === PassType.Sound || pass.index >= 1) {
             type = gl.UNSIGNED_BYTE;
             format = gl.RGBA;
             filter = gl.LINEAR;
@@ -295,10 +299,9 @@ export class Chromatic {
 
         // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
         gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
+        console.log("format: " + (format === gl.RGBA32F));
 
         // テクスチャパラメータ
-        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

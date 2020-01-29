@@ -279,7 +279,7 @@ export class Chromatic {
             height = SOUND_HEIGHT;
         }
 
-        if (pass.type === PassType.Sound || pass.index >= 1) {
+        if (pass.type === PassType.Sound || pass.index > 0) {
             type = gl.UNSIGNED_BYTE;
             format = gl.RGBA;
             filter = gl.LINEAR;

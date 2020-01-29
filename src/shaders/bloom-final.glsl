@@ -8,8 +8,10 @@ uniform float iTime;
 uniform sampler2D iPass0;
 uniform sampler2D iPrevPass;
 
+#define saturate(x) clamp(x, 0.0, 1.0)
+
 vec4 encodeHDR(vec3 rgb) {
-    return vec4(rgb, 1.0);
+    //return vec4(rgb, 1.0);
 
     rgb *= 1.0 / 8.0;
     float m = max(max(rgb.r, rgb.g), max(rgb.b, 1e-6));
@@ -19,7 +21,7 @@ vec4 encodeHDR(vec3 rgb) {
 
 vec3 decodeHDR(vec4 rgba)
 {
-    return rgba.rgb;
+    // return rgba.rgb;
 
     return rgba.rgb * rgba.a * 8.0;
 }
@@ -39,10 +41,10 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 	vec2 uv = fragCoord.xy / iResolution.xy;
-    vec2 texelSize = 1.0 / iResolution.xy * 0.5;
+    vec2 texelSize = 1.0 / iResolution.xy * 0.25;
     vec3 col = texture(iPass0, uv).rgb;
-    fragColor = vec4(col + 4.0 * tap4(iPrevPass, uv, texelSize), 1.0);
+    fragColor = vec4(col + 10.0 * saturate(sin(10.0 * iTime)) * tap4(iPrevPass, uv, texelSize), 1.0);
 }
 
 out vec4 outColor;
-void main( void ){vec4 color = vec4(0.0,0.0,0.0,1.0);mainImage( color, gl_FragCoord.xy );color.w = 1.0;outColor = color;}
+void main( void ){vec4 color = vec4(0.0,0.0,0.0,1.0);mainImage( color, gl_FragCoord.xy );outColor = color;}

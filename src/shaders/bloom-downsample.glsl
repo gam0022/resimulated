@@ -8,36 +8,23 @@ uniform float iTime;
 // uniform sampler2D iPass0;
 uniform sampler2D iPrevPass;
 
-vec4 BlurColor (in vec2 Coord, in sampler2D Tex, in float MipBias)
+vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)
 {
-	vec2 TexelSize = MipBias/iResolution.xy;
+    vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);
 
-    vec4  Color = texture(Tex, Coord, MipBias);
-    Color += texture(Tex, Coord + vec2(TexelSize.x,0.0), MipBias);
-    Color += texture(Tex, Coord + vec2(-TexelSize.x,0.0), MipBias);
-    Color += texture(Tex, Coord + vec2(0.0,TexelSize.y), MipBias);
-    Color += texture(Tex, Coord + vec2(0.0,-TexelSize.y), MipBias);
-    Color += texture(Tex, Coord + vec2(TexelSize.x,TexelSize.y), MipBias);
-    Color += texture(Tex, Coord + vec2(-TexelSize.x,TexelSize.y), MipBias);
-    Color += texture(Tex, Coord + vec2(TexelSize.x,-TexelSize.y), MipBias);
-    Color += texture(Tex, Coord + vec2(-TexelSize.x,-TexelSize.y), MipBias);
+    vec3 s;
+    s = texture(tex, uv + d.xy).rgb;
+    s += texture(tex, uv + d.zy).rgb;
+    s += texture(tex, uv + d.xw).rgb;
+    s += texture(tex, uv + d.zw).rgb;
 
-    return Color/9.0;
+    return s * (1.0 / 4.0);
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
-    float Threshold = 0.1;
-	float Intensity = 1.0;
-	float BlurSize = 2.0;
-
-	vec2 uv = fragCoord.xy/iResolution.xy;
-
-    vec4 Color = texture(iPrevPass, uv);
-
-    vec4 Highlight = clamp(BlurColor(uv, iPrevPass, BlurSize)-Threshold,0.0,1.0)*1.0/(1.0-Threshold);
-
-    fragColor = 1.0-(1.0-Color)*(1.0-Highlight*Intensity); //Screen Blend Mode
+void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+	vec2 uv = fragCoord.xy / iResolution.xy;
+    vec2 texelSize = 1.0 / (iResolution.xy * 0.5);
+    fragColor = vec4(tap4(iPrevPass, uv, texelSize), 1.0);
 }
 
 out vec4 outColor;

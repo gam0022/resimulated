@@ -14,6 +14,7 @@ class Pass {
     locations: { [index: string]: WebGLUniformLocation }
     frameBuffer: WebGLFramebuffer;
     texture: WebGLTexture;
+    scale: number;
 }
 
 const SOUND_WIDTH = 512;
@@ -146,6 +147,7 @@ export class Chromatic {
             pass.index = index;
             pass.program = program;
             pass.locations = createLocations(program);
+            pass.scale = imageScales[index];
             this.setupFrameBuffer(pass, canvas.width, canvas.height);
             return pass;
         };
@@ -304,7 +306,7 @@ export class Chromatic {
             this.imagePasses.forEach(pass => {
                 this.gl.deleteFramebuffer(pass.frameBuffer);
                 this.gl.deleteTexture(pass.texture);
-                this.setupFrameBuffer(pass, width, height);
+                this.setupFrameBuffer(pass, width * pass.scale, height * pass.scale);
             });
 
             this.uniforms.iResolution.value = [width, height, 0];

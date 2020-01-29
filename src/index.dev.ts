@@ -7,6 +7,10 @@ window.addEventListener("load", ev => {
         [
             require("./shaders/raymarching.glsl").default,
             require("./shaders/bloom-prefilter.glsl").default,
+            require("./shaders/bloom-downsample.glsl").default,
+            //require("./shaders/bloom-downsample.glsl").default,
+            //require("./shaders/bloom-downsample.glsl").default,
+            require("./shaders/blit.glsl").default,
 
             //require("./shaders/kaleidoscope.glsl").default,
             //require("./shaders/invert.glsl").default,

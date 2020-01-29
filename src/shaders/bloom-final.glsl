@@ -9,6 +9,8 @@ uniform sampler2D iPass0;
 uniform sampler2D iPrevPass;
 
 vec4 encodeHDR(vec3 rgb) {
+    return vec4(rgb, 1.0);
+
     rgb *= 1.0 / 8.0;
     float m = max(max(rgb.r, rgb.g), max(rgb.b, 1e-6));
     m = ceil(m * 255.0) / 255.0;
@@ -17,6 +19,8 @@ vec4 encodeHDR(vec3 rgb) {
 
 vec3 decodeHDR(vec4 rgba)
 {
+    return rgba.rgb;
+
     return rgba.rgb * rgba.a * 8.0;
 }
 
@@ -37,7 +41,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 	vec2 uv = fragCoord.xy / iResolution.xy;
     vec2 texelSize = 1.0 / iResolution.xy * 0.5;
     vec3 col = texture(iPass0, uv).rgb;
-    fragColor = vec4(col + 0.1 * tap4(iPrevPass, uv, texelSize), 1.0);
+    fragColor = vec4(col + 4.0 * tap4(iPrevPass, uv, texelSize), 1.0);
 }
 
 out vec4 outColor;

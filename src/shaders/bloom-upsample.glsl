@@ -23,7 +23,7 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 	vec2 uv = fragCoord.xy / iResolution.xy;
-    vec2 texelSize = 1.0 / iResolution.xy * 0.5;
+    vec2 texelSize = 1.0 / iResolution.xy * 2.0;
     vec3 col = texture(iPass0, uv).rgb;
     fragColor = vec4(col + tap4(iPrevPass, uv, texelSize), 1.0);
 }

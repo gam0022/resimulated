@@ -160,7 +160,7 @@ export class Chromatic {
             pass.program = program;
             pass.locations = createLocations(program);
             pass.scale = imageScales[index];
-            this.setupFrameBuffer(pass, canvas.width, canvas.height);
+            this.setupFrameBuffer(pass, canvas.width * pass.scale, canvas.height * pass.scale);
             return pass;
         };
 

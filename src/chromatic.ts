@@ -302,7 +302,6 @@ export class Chromatic {
 
         // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
         gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
-        console.log("format: " + (format === gl.RGBA32F));
 
         // テクスチャパラメータ
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);

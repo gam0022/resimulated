@@ -198,7 +198,7 @@ export class Chromatic {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(pass.uniforms)) {
-                if (uniform.type === "t" && key !== "iPrevPass") {
+                if (uniform.type === "t" && key.indexOf("iPass") === 0) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
                     gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
                 }

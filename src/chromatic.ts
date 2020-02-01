@@ -5,6 +5,7 @@ enum PassType {
     Image,
     FinalImage,
     Bloom,
+    BloomUpsample,
     Sound,
 }
 
@@ -170,6 +171,7 @@ export class Chromatic {
                 iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
                 iTime: { type: "f", value: 0.0 },
                 iPrevPass: { type: "t", value: Math.max(pass.index - 1, 0) },
+                iBeforeBloom: { type: "t", value: Math.max(bloomPassBeginIndex - 1, 0) },
                 iBlockOffset: { type: "f", value: 0.0 },
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
@@ -177,6 +179,12 @@ export class Chromatic {
             this.imagePasses.forEach((_, i) => {
                 pass.uniforms[`iPass${i}`] = { type: "t", value: i };
             });
+
+            if (type === PassType.BloomUpsample) {
+                const bloomDonwsampleEndIndex = bloomPassBeginIndex + bloomDonwsampleIterations;
+                const upCount = index - bloomDonwsampleEndIndex;
+                pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
+            }
 
             pass.locations = createLocations(pass);
 
@@ -246,7 +254,7 @@ export class Chromatic {
                     this.imagePasses.push(initPass(
                         loadProgram(bloomUpsampleShader),
                         passIndex,
-                        PassType.Bloom,
+                        PassType.BloomUpsample,
                         scale,
                     ));
                     passIndex++;
@@ -255,7 +263,7 @@ export class Chromatic {
                 this.imagePasses.push(initPass(
                     loadProgram(bloomFinalShader),
                     passIndex,
-                    PassType.Bloom,
+                    PassType.BloomUpsample,
                     scale,
                 ));
                 passIndex++;

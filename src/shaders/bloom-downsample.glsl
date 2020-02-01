@@ -5,7 +5,6 @@ precision mediump sampler3D;
 uniform vec3 iResolution;
 uniform float iTime;
 
-// uniform sampler2D iPass0;
 uniform sampler2D iPrevPass;
 
 vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)

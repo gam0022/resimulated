@@ -150,13 +150,13 @@ export class Chromatic {
             const pass = new Pass();
             pass.type = type;
             pass.index = index;
-            pass.scale = imageScales[index];
+            pass.scale = pass.type === PassType.FinalImage ? 1 : imageScales[index];
             pass.program = program;
 
             pass.uniforms = {
                 iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
                 iTime: { type: "f", value: 0.0 },
-                iPrevPass: { type: "t", value: 0 },
+                iPrevPass: { type: "t", value: Math.max(pass.index - 1, 0) },
                 iBlockOffset: { type: "f", value: 0.0 },
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
@@ -177,9 +177,7 @@ export class Chromatic {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(pass.uniforms)) {
-                const isPrevPass = key === "iPrevPass";
-
-                if (uniform.type === "t" && !isPrevPass) {
+                if (uniform.type === "t" && key !== "iPrevPass") {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
                     gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
                 }
@@ -192,8 +190,7 @@ export class Chromatic {
                     t: gl.uniform1i,
                 }
 
-                const value = isPrevPass ? Math.max(pass.index - 1, 0) : uniform.value;
-                methods[uniform.type].call(gl, pass.locations[key], value);
+                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
             }
 
             // draw the buffer with VAO
@@ -273,7 +270,6 @@ export class Chromatic {
     setupFrameBuffer(pass: Pass) {
         // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
-            pass.scale = 1;
             return;
         }
 

@@ -150,20 +150,24 @@ export class Chromatic {
             const pass = new Pass();
             pass.type = type;
             pass.index = index;
+            pass.scale = imageScales[index];
             pass.program = program;
+
             pass.uniforms = {
-                iResolution: { type: "v3", value: [canvas.width, canvas.height, 0] },
+                iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
                 iTime: { type: "f", value: 0.0 },
                 iPrevPass: { type: "t", value: 0 },
                 iBlockOffset: { type: "f", value: 0.0 },
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
+
             imageShaders.forEach((_, i) => {
                 pass.uniforms[`iPass${i}`] = { type: "t", value: i };
             });
+
             pass.locations = createLocations(pass);
-            pass.scale = imageScales[index];
-            this.setupFrameBuffer(pass, canvas.width * pass.scale, canvas.height * pass.scale);
+
+            this.setupFrameBuffer(pass);
             return pass;
         };
 
@@ -188,10 +192,7 @@ export class Chromatic {
                     t: gl.uniform1i,
                 }
 
-                const value =
-                    isPrevPass ? Math.max(pass.index - 1, 0) :
-                        key === "iResolution" ? [uniform.value[0] * pass.scale, uniform.value[1] * pass.scale, uniform.value[2]] :
-                            uniform.value;
+                const value = isPrevPass ? Math.max(pass.index - 1, 0) : uniform.value;
                 methods[uniform.type].call(gl, pass.locations[key], value);
             }
 
@@ -269,7 +270,7 @@ export class Chromatic {
         update(0);
     }
 
-    setupFrameBuffer(pass: Pass, width: number, height: number) {
+    setupFrameBuffer(pass: Pass) {
         // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
             pass.scale = 1;
@@ -277,6 +278,9 @@ export class Chromatic {
         }
 
         const gl = this.gl;
+
+        let width = pass.uniforms.iResolution.value[0];
+        let height = pass.uniforms.iResolution.value[1];
         let type = gl.FLOAT;
         let format = gl.RGBA32F;
         let filter = gl.LINEAR;
@@ -330,8 +334,8 @@ export class Chromatic {
             this.imagePasses.forEach(pass => {
                 this.gl.deleteFramebuffer(pass.frameBuffer);
                 this.gl.deleteTexture(pass.texture);
-                pass.uniforms.iResolution.value = [width, height, 0];
-                this.setupFrameBuffer(pass, width * pass.scale, height * pass.scale);
+                pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
+                this.setupFrameBuffer(pass);
             });
         }
     }

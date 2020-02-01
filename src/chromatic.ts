@@ -264,7 +264,7 @@ export class Chromatic {
                     loadProgram(bloomFinalShader),
                     passIndex,
                     PassType.BloomUpsample,
-                    scale,
+                    1,
                 ));
                 passIndex++;
             }

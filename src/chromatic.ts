@@ -4,6 +4,7 @@ declare var PRODUCTION: boolean;
 enum PassType {
     Image,
     FinalImage,
+    Bloom,
     Sound,
 }
 
@@ -11,7 +12,8 @@ class Pass {
     type: PassType;
     index: number;
     program: WebGLProgram;
-    locations: { [index: string]: WebGLUniformLocation }
+    uniforms: { [index: string]: { type: string, value: any } };
+    locations: { [index: string]: WebGLUniformLocation };
     frameBuffer: WebGLFramebuffer;
     texture: WebGLTexture;
     scale: number;
@@ -38,7 +40,6 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     imagePasses: Pass[];
-    uniforms: { [index: string]: { type: string, value: any } };
 
     constructor(timeLength: number, vertexShader: string, imageShaders: string[], imageScales: number[], soundShader: string) {
         this.timeLength = timeLength;
@@ -53,14 +54,6 @@ export class Chromatic {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
-
-        this.uniforms = {
-            iResolution: { type: "v3", value: [canvas.width, canvas.height, 0] },
-            iTime: { type: "f", value: 0.0 },
-            iPrevPass: { type: "t", value: 0 },
-            iBlockOffset: { type: "f", value: 0.0 },
-            iSampleRate: { type: "f", value: audio.sampleRate },
-        };
 
         // webgl2 enabled default from: firefox-51, chrome-56
         const gl = this.gl = canvas.getContext("webgl2");
@@ -144,10 +137,10 @@ export class Chromatic {
             return program;
         };
 
-        const createLocations = (program: WebGLProgram) => {
+        const createLocations = (pass: Pass) => {
             const locations: { [index: string]: WebGLUniformLocation } = {};
-            Object.keys(this.uniforms).forEach(key => {
-                locations[key] = gl.getUniformLocation(program, key);
+            Object.keys(pass.uniforms).forEach(key => {
+                locations[key] = gl.getUniformLocation(pass.program, key);
             });
             return locations;
         };
@@ -158,7 +151,17 @@ export class Chromatic {
             pass.type = type;
             pass.index = index;
             pass.program = program;
-            pass.locations = createLocations(program);
+            pass.uniforms = {
+                iResolution: { type: "v3", value: [canvas.width, canvas.height, 0] },
+                iTime: { type: "f", value: 0.0 },
+                iPrevPass: { type: "t", value: 0 },
+                iBlockOffset: { type: "f", value: 0.0 },
+                iSampleRate: { type: "f", value: audio.sampleRate },
+            };
+            imageShaders.forEach((_, i) => {
+                pass.uniforms[`iPass${i}`] = { type: "t", value: i };
+            });
+            pass.locations = createLocations(pass);
             pass.scale = imageScales[index];
             this.setupFrameBuffer(pass, canvas.width * pass.scale, canvas.height * pass.scale);
             return pass;
@@ -169,7 +172,7 @@ export class Chromatic {
             gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            for (const [key, uniform] of Object.entries(this.uniforms)) {
+            for (const [key, uniform] of Object.entries(pass.uniforms)) {
                 const isPrevPass = key === "iPrevPass";
 
                 if (uniform.type === "t" && !isPrevPass) {
@@ -203,10 +206,6 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
-        imageShaders.forEach((_, i) => {
-            this.uniforms[`iPass${i}`] = { type: "t", value: i };
-        });
-
         this.imagePasses = imageShaders.map((shader, i, ary) => initPass(
             loadProgram(shader),
             i,
@@ -221,7 +220,7 @@ export class Chromatic {
         const soundPass = initPass(soundProgram, 0, PassType.Sound);
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
-            this.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+            soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
             render(soundPass);
 
             // Read pixels
@@ -256,8 +255,10 @@ export class Chromatic {
                     }
                 }
 
-                this.uniforms.iTime.value = this.time;
-                this.imagePasses.forEach((pass) => render(pass));
+                this.imagePasses.forEach((pass) => {
+                    pass.uniforms.iTime.value = this.time;
+                    render(pass);
+                });
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;
@@ -329,10 +330,9 @@ export class Chromatic {
             this.imagePasses.forEach(pass => {
                 this.gl.deleteFramebuffer(pass.frameBuffer);
                 this.gl.deleteTexture(pass.texture);
+                pass.uniforms.iResolution.value = [width, height, 0];
                 this.setupFrameBuffer(pass, width * pass.scale, height * pass.scale);
             });
-
-            this.uniforms.iResolution.value = [width, height, 0];
         }
     }
 

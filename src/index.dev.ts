@@ -5,8 +5,8 @@ window.addEventListener("load", ev => {
         48,// デモの長さ（秒）
         require("./shaders/vertex.glsl").default,
         [
-            //require("./shaders/kaleidoscope.glsl").default,
-            require("./shaders/raymarching.glsl").default,
+            require("./shaders/kaleidoscope.glsl").default,
+            //require("./shaders/raymarching.glsl").default,
             require("./shaders/blit.glsl").default,
 
             //require("./shaders/kaleidoscope.glsl").default,

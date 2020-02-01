@@ -7,13 +7,6 @@ window.addEventListener("load", ev => {
         [
             require("./shaders/kaleidoscope.glsl").default,
             //require("./shaders/raymarching.glsl").default,
-            require("./shaders/bloom-prefilter.glsl").default,
-            require("./shaders/bloom-downsample.glsl").default,
-            require("./shaders/bloom-downsample.glsl").default,
-            require("./shaders/bloom-downsample.glsl").default,
-            require("./shaders/bloom-upsample.glsl").default,
-            require("./shaders/bloom-upsample.glsl").default,
-            require("./shaders/bloom-final.glsl").default,
             require("./shaders/blit.glsl").default,
 
             //require("./shaders/kaleidoscope.glsl").default,
@@ -21,17 +14,14 @@ window.addEventListener("load", ev => {
             //require("./shaders/dot-matrix.glsl").default,
             //require("./shaders/chromatic-aberration.glsl").default,
         ],
-        [
-            1,
-            1,
-            1 / 2,
-            1 / 4,
-            1 / 8,
-            1 / 4,
-            1 / 2,
-            1,
-            1,
-        ],
+
+        1,
+        3,
+        require("./shaders/bloom-prefilter.glsl").default,
+        require("./shaders/bloom-downsample.glsl").default,
+        require("./shaders/bloom-upsample.glsl").default,
+        require("./shaders/bloom-final.glsl").default,
+
         require("./shaders/sound-template.glsl").default
     );
     chromatic.playSound();

@@ -41,7 +41,20 @@ export class Chromatic {
 
     imagePasses: Pass[];
 
-    constructor(timeLength: number, vertexShader: string, imageShaders: string[], imageScales: number[], soundShader: string) {
+    constructor(
+        timeLength: number,
+        vertexShader: string,
+        imageShaders: string[],
+
+        bloomPassBeginIndex: number,
+        bloomDonwsampleIterations: number,
+        bloomPrefilterShader: string,
+        bloomDownsampleShader: string,
+        bloomUpsampleShader: string,
+        bloomFinalShader: string,
+
+        soundShader: string
+    ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
         this.time = 0;
@@ -145,12 +158,12 @@ export class Chromatic {
             return locations;
         };
 
-        const initPass = (program: WebGLProgram, index: number, type: PassType) => {
+        const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
             setupVAO(program);
             const pass = new Pass();
             pass.type = type;
             pass.index = index;
-            pass.scale = pass.type === PassType.FinalImage ? 1 : imageScales[index];
+            pass.scale = scale;
             pass.program = program;
 
             pass.uniforms = {
@@ -161,7 +174,7 @@ export class Chromatic {
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
 
-            imageShaders.forEach((_, i) => {
+            this.imagePasses.forEach((_, i) => {
                 pass.uniforms[`iPass${i}`] = { type: "t", value: i };
             });
 
@@ -204,18 +217,66 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
-        this.imagePasses = imageShaders.map((shader, i, ary) => initPass(
-            loadProgram(shader),
-            i,
-            i < ary.length - 1 ? PassType.Image : PassType.FinalImage
-        ));
+        this.imagePasses = [];
+        let passIndex = 0;
+        imageShaders.forEach((shader, i, ary) => {
+            if (i === bloomPassBeginIndex) {
+                this.imagePasses.push(initPass(
+                    loadProgram(bloomPrefilterShader),
+                    passIndex,
+                    PassType.Bloom,
+                    1
+                ));
+                passIndex++;
+
+                let scale = 1;
+                for (let j = 0; j < bloomDonwsampleIterations; j++) {
+                    scale *= 0.5;
+                    this.imagePasses.push(initPass(
+                        loadProgram(bloomDownsampleShader),
+                        passIndex,
+                        PassType.Bloom,
+                        scale,
+                    ));
+                    passIndex++;
+                }
+
+                for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
+                    scale *= 2;
+                    this.imagePasses.push(initPass(
+                        loadProgram(bloomUpsampleShader),
+                        passIndex,
+                        PassType.Bloom,
+                        scale,
+                    ));
+                    passIndex++;
+                }
+
+                this.imagePasses.push(initPass(
+                    loadProgram(bloomFinalShader),
+                    passIndex,
+                    PassType.Bloom,
+                    scale,
+                ));
+                passIndex++;
+            }
+
+            this.imagePasses.push(initPass(
+                loadProgram(shader),
+                passIndex,
+                i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
+                1
+            ));
+
+            passIndex++;
+        })
 
         // Sound
         const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
         const samples = SOUND_WIDTH * SOUND_HEIGHT;
         const numBlocks = (audio.sampleRate * timeLength) / samples;
         const soundProgram = loadProgram(soundShader);
-        const soundPass = initPass(soundProgram, 0, PassType.Sound);
+        const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
             soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;

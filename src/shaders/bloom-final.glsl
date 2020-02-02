@@ -5,8 +5,9 @@ precision mediump sampler3D;
 uniform vec3 iResolution;
 uniform float iTime;
 
-uniform sampler2D iPass0;
 uniform sampler2D iPrevPass;
+uniform sampler2D iBeforeBloom;
+uniform sampler2D iPairBloomDown;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
 
@@ -26,8 +27,9 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 	vec2 uv = fragCoord.xy / iResolution.xy;
     vec2 texelSize = 1.0 / iResolution.xy * 0.25;
-    vec3 col = texture(iPass0, uv).rgb;
-    fragColor = vec4(col + 10.0 * saturate(sin(10.0 * iTime)) * tap4(iPrevPass, uv, texelSize), 1.0);
+    vec3 col = texture(iBeforeBloom, uv).rgb;
+    vec3 pair = texture(iPairBloomDown, uv).rgb;
+    fragColor = vec4(col + pair + 5.0 * tap4(iPrevPass, uv, texelSize), 1.0);
 }
 
 out vec4 outColor;

@@ -4,6 +4,8 @@ declare var PRODUCTION: boolean;
 enum PassType {
     Image,
     FinalImage,
+    Bloom,
+    BloomUpsample,
     Sound,
 }
 
@@ -11,7 +13,8 @@ class Pass {
     type: PassType;
     index: number;
     program: WebGLProgram;
-    locations: { [index: string]: WebGLUniformLocation }
+    uniforms: { [index: string]: { type: string, value: any } };
+    locations: { [index: string]: WebGLUniformLocation };
     frameBuffer: WebGLFramebuffer;
     texture: WebGLTexture;
     scale: number;
@@ -38,9 +41,21 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     imagePasses: Pass[];
-    uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(timeLength: number, vertexShader: string, imageShaders: string[], imageScales: number[], soundShader: string) {
+    constructor(
+        timeLength: number,
+        vertexShader: string,
+        imageShaders: string[],
+
+        bloomPassBeginIndex: number,
+        bloomDonwsampleIterations: number,
+        bloomPrefilterShader: string,
+        bloomDownsampleShader: string,
+        bloomUpsampleShader: string,
+        bloomFinalShader: string,
+
+        soundShader: string
+    ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
         this.time = 0;
@@ -53,14 +68,6 @@ export class Chromatic {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
-
-        this.uniforms = {
-            iResolution: { type: "v3", value: [canvas.width, canvas.height, 0] },
-            iTime: { type: "f", value: 0.0 },
-            iPrevPass: { type: "t", value: 0 },
-            iBlockOffset: { type: "f", value: 0.0 },
-            iSampleRate: { type: "f", value: audio.sampleRate },
-        };
 
         // webgl2 enabled default from: firefox-51, chrome-56
         const gl = this.gl = canvas.getContext("webgl2");
@@ -144,23 +151,44 @@ export class Chromatic {
             return program;
         };
 
-        const createLocations = (program: WebGLProgram) => {
+        const createLocations = (pass: Pass) => {
             const locations: { [index: string]: WebGLUniformLocation } = {};
-            Object.keys(this.uniforms).forEach(key => {
-                locations[key] = gl.getUniformLocation(program, key);
+            Object.keys(pass.uniforms).forEach(key => {
+                locations[key] = gl.getUniformLocation(pass.program, key);
             });
             return locations;
         };
 
-        const initPass = (program: WebGLProgram, index: number, type: PassType) => {
+        const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
             setupVAO(program);
             const pass = new Pass();
             pass.type = type;
             pass.index = index;
+            pass.scale = scale;
             pass.program = program;
-            pass.locations = createLocations(program);
-            pass.scale = imageScales[index];
-            this.setupFrameBuffer(pass, canvas.width * pass.scale, canvas.height * pass.scale);
+
+            pass.uniforms = {
+                iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
+                iTime: { type: "f", value: 0.0 },
+                iPrevPass: { type: "t", value: Math.max(pass.index - 1, 0) },
+                iBeforeBloom: { type: "t", value: Math.max(bloomPassBeginIndex - 1, 0) },
+                iBlockOffset: { type: "f", value: 0.0 },
+                iSampleRate: { type: "f", value: audio.sampleRate },
+            };
+
+            this.imagePasses.forEach((_, i) => {
+                pass.uniforms[`iPass${i}`] = { type: "t", value: i };
+            });
+
+            if (type === PassType.BloomUpsample) {
+                const bloomDonwsampleEndIndex = bloomPassBeginIndex + bloomDonwsampleIterations;
+                const upCount = index - bloomDonwsampleEndIndex;
+                pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
+            }
+
+            pass.locations = createLocations(pass);
+
+            this.setupFrameBuffer(pass);
             return pass;
         };
 
@@ -169,10 +197,8 @@ export class Chromatic {
             gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            for (const [key, uniform] of Object.entries(this.uniforms)) {
-                const isPrevPass = key === "iPrevPass";
-
-                if (uniform.type === "t" && !isPrevPass) {
+            for (const [key, uniform] of Object.entries(pass.uniforms)) {
+                if (uniform.type === "t" && key.indexOf("iPass") === 0) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
                     gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
                 }
@@ -185,11 +211,7 @@ export class Chromatic {
                     t: gl.uniform1i,
                 }
 
-                const value =
-                    isPrevPass ? Math.max(pass.index - 1, 0) :
-                        key === "iResolution" ? [uniform.value[0] * pass.scale, uniform.value[1] * pass.scale, uniform.value[2]] :
-                            uniform.value;
-                methods[uniform.type].call(gl, pass.locations[key], value);
+                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
             }
 
             // draw the buffer with VAO
@@ -203,25 +225,69 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
-        imageShaders.forEach((_, i) => {
-            this.uniforms[`iPass${i}`] = { type: "t", value: i };
-        });
+        this.imagePasses = [];
+        let passIndex = 0;
+        imageShaders.forEach((shader, i, ary) => {
+            if (i === bloomPassBeginIndex) {
+                this.imagePasses.push(initPass(
+                    loadProgram(bloomPrefilterShader),
+                    passIndex,
+                    PassType.Bloom,
+                    1
+                ));
+                passIndex++;
 
-        this.imagePasses = imageShaders.map((shader, i, ary) => initPass(
-            loadProgram(shader),
-            i,
-            i < ary.length - 1 ? PassType.Image : PassType.FinalImage
-        ));
+                let scale = 1;
+                for (let j = 0; j < bloomDonwsampleIterations; j++) {
+                    scale *= 0.5;
+                    this.imagePasses.push(initPass(
+                        loadProgram(bloomDownsampleShader),
+                        passIndex,
+                        PassType.Bloom,
+                        scale,
+                    ));
+                    passIndex++;
+                }
+
+                for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
+                    scale *= 2;
+                    this.imagePasses.push(initPass(
+                        loadProgram(bloomUpsampleShader),
+                        passIndex,
+                        PassType.BloomUpsample,
+                        scale,
+                    ));
+                    passIndex++;
+                }
+
+                this.imagePasses.push(initPass(
+                    loadProgram(bloomFinalShader),
+                    passIndex,
+                    PassType.BloomUpsample,
+                    1,
+                ));
+                passIndex++;
+            }
+
+            this.imagePasses.push(initPass(
+                loadProgram(shader),
+                passIndex,
+                i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
+                1
+            ));
+
+            passIndex++;
+        })
 
         // Sound
         const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
         const samples = SOUND_WIDTH * SOUND_HEIGHT;
         const numBlocks = (audio.sampleRate * timeLength) / samples;
         const soundProgram = loadProgram(soundShader);
-        const soundPass = initPass(soundProgram, 0, PassType.Sound);
+        const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
-            this.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+            soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
             render(soundPass);
 
             // Read pixels
@@ -256,8 +322,10 @@ export class Chromatic {
                     }
                 }
 
-                this.uniforms.iTime.value = this.time;
-                this.imagePasses.forEach((pass) => render(pass));
+                this.imagePasses.forEach((pass) => {
+                    pass.uniforms.iTime.value = this.time;
+                    render(pass);
+                });
 
                 this.time += timeDelta;
                 lastRenderTime = this.time;
@@ -268,14 +336,16 @@ export class Chromatic {
         update(0);
     }
 
-    setupFrameBuffer(pass: Pass, width: number, height: number) {
+    setupFrameBuffer(pass: Pass) {
         // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
-            pass.scale = 1;
             return;
         }
 
         const gl = this.gl;
+
+        let width = pass.uniforms.iResolution.value[0];
+        let height = pass.uniforms.iResolution.value[1];
         let type = gl.FLOAT;
         let format = gl.RGBA32F;
         let filter = gl.LINEAR;
@@ -329,10 +399,9 @@ export class Chromatic {
             this.imagePasses.forEach(pass => {
                 this.gl.deleteFramebuffer(pass.frameBuffer);
                 this.gl.deleteTexture(pass.texture);
-                this.setupFrameBuffer(pass, width * pass.scale, height * pass.scale);
+                pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
+                this.setupFrameBuffer(pass);
             });
-
-            this.uniforms.iResolution.value = [width, height, 0];
         }
     }
 

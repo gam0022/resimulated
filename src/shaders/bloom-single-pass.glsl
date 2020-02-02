@@ -5,7 +5,6 @@ precision mediump sampler3D;
 uniform vec3 iResolution;
 uniform float iTime;
 
-// uniform sampler2D iPass0;
 uniform sampler2D iPrevPass;
 
 vec4 BlurColor (in vec2 Coord, in sampler2D Tex, in float MipBias)

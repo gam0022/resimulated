@@ -14,6 +14,7 @@ class Pass {
     locations: { [index: string]: WebGLUniformLocation }
     frameBuffer: WebGLFramebuffer;
     texture: WebGLTexture;
+    scale: number;
 }
 
 const SOUND_WIDTH = 512;
@@ -39,7 +40,7 @@ export class Chromatic {
     imagePasses: Pass[];
     uniforms: { [index: string]: { type: string, value: any } };
 
-    constructor(timeLength: number, vertexShader: string, imageShaders: string[], soundShader: string) {
+    constructor(timeLength: number, vertexShader: string, imageShaders: string[], imageScales: number[], soundShader: string) {
         this.timeLength = timeLength;
         this.isPlaying = true;
         this.time = 0;
@@ -65,6 +66,18 @@ export class Chromatic {
         const gl = this.gl = canvas.getContext("webgl2");
         if (!gl) {
             console.log("WebGL 2 is not supported...");
+            return;
+        }
+
+        const ext = gl.getExtension("EXT_color_buffer_float");
+        if (!ext) {
+            alert("need EXT_color_buffer_float");
+            return;
+        }
+
+        const ext2 = gl.getExtension("OES_texture_float_linear");
+        if (!ext2) {
+            alert("need OES_texture_float_linear");
             return;
         }
 
@@ -146,7 +159,8 @@ export class Chromatic {
             pass.index = index;
             pass.program = program;
             pass.locations = createLocations(program);
-            this.setupFrameBuffer(pass, canvas.width, canvas.height);
+            pass.scale = imageScales[index];
+            this.setupFrameBuffer(pass, canvas.width * pass.scale, canvas.height * pass.scale);
             return pass;
         };
 
@@ -171,7 +185,10 @@ export class Chromatic {
                     t: gl.uniform1i,
                 }
 
-                const value = isPrevPass ? Math.max(pass.index - 1, 0) : uniform.value;
+                const value =
+                    isPrevPass ? Math.max(pass.index - 1, 0) :
+                        key === "iResolution" ? [uniform.value[0] * pass.scale, uniform.value[1] * pass.scale, uniform.value[2]] :
+                            uniform.value;
                 methods[uniform.type].call(gl, pass.locations[key], value);
             }
 
@@ -254,16 +271,24 @@ export class Chromatic {
     setupFrameBuffer(pass: Pass, width: number, height: number) {
         // FIXME: setupFrameBuffer の呼び出し側でやるべき
         if (pass.type === PassType.FinalImage) {
+            pass.scale = 1;
             return;
         }
+
+        const gl = this.gl;
+        let type = gl.FLOAT;
+        let format = gl.RGBA32F;
+        let filter = gl.LINEAR;
 
         if (pass.type === PassType.Sound) {
             width = SOUND_WIDTH;
             height = SOUND_HEIGHT;
+            type = gl.UNSIGNED_BYTE;
+            format = gl.RGBA;
+            filter = gl.NEAREST;
         }
 
         // フレームバッファの生成
-        const gl = this.gl;
         pass.frameBuffer = gl.createFramebuffer();
 
         // フレームバッファをWebGLにバインド
@@ -276,11 +301,11 @@ export class Chromatic {
         gl.bindTexture(gl.TEXTURE_2D, pass.texture);
 
         // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
 
         // テクスチャパラメータ
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
@@ -304,7 +329,7 @@ export class Chromatic {
             this.imagePasses.forEach(pass => {
                 this.gl.deleteFramebuffer(pass.frameBuffer);
                 this.gl.deleteTexture(pass.texture);
-                this.setupFrameBuffer(pass, width, height);
+                this.setupFrameBuffer(pass, width * pass.scale, height * pass.scale);
             });
 
             this.uniforms.iResolution.value = [width, height, 0];

@@ -231,7 +231,7 @@ export class Chromatic {
         imageShaders.forEach((shader, i, ary) => {
             if (i === bloomPassBeginIndex) {
                 this.imagePasses.push(initPass(
-                    loadProgram(imageCommonHeaderShader + "\n" + bloomPrefilterShader),
+                    loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                     passIndex,
                     PassType.Bloom,
                     1
@@ -242,7 +242,7 @@ export class Chromatic {
                 for (let j = 0; j < bloomDonwsampleIterations; j++) {
                     scale *= 0.5;
                     this.imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + "\n" + bloomDownsampleShader),
+                        loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
                         passIndex,
                         PassType.Bloom,
                         scale,
@@ -253,7 +253,7 @@ export class Chromatic {
                 for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
                     scale *= 2;
                     this.imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + "\n" + bloomUpsampleShader),
+                        loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
                         passIndex,
                         PassType.BloomUpsample,
                         scale,
@@ -262,7 +262,7 @@ export class Chromatic {
                 }
 
                 this.imagePasses.push(initPass(
-                    loadProgram(imageCommonHeaderShader + "\n" + bloomFinalShader),
+                    loadProgram(imageCommonHeaderShader + bloomFinalShader),
                     passIndex,
                     PassType.BloomUpsample,
                     1,
@@ -271,7 +271,7 @@ export class Chromatic {
             }
 
             this.imagePasses.push(initPass(
-                loadProgram(imageCommonHeaderShader + "\n" + shader),
+                loadProgram(imageCommonHeaderShader + shader),
                 passIndex,
                 i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
                 1

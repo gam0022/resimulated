@@ -3,7 +3,7 @@ float sdCircle(vec2 p, float r) {
 }
 
 // Dot Matrix
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     vec2 uv = (fragCoord / iResolution.xy) * 2.0 - 1.0;
 

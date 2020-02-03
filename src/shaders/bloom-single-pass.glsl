@@ -15,8 +15,7 @@ vec4 BlurColor (in vec2 Coord, in sampler2D Tex, in float MipBias)
     return Color/9.0;
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float Threshold = 0.1;
 	float Intensity = 1.0;
 	float BlurSize = 2.0;

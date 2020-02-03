@@ -3,7 +3,7 @@ float brightness(vec3 c) {
 }
 
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Runtime/Components/BloomComponent.cs#L78-L109
-void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float softKnee = 0.5;
     float lthresh = 0.8;
 

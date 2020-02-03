@@ -14,7 +14,7 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)
     return s * (1.0 / 4.0);
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	vec2 uv = fragCoord.xy / iResolution.xy;
     vec2 texelSize = 1.0 / iResolution.xy * 0.25;
     vec3 col = texture(iPairBloomDown, uv).rgb;

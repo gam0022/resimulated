@@ -1,11 +1,3 @@
-#version 300 es
-precision highp float;
-precision highp int;
-precision mediump sampler3D;
-uniform vec3 iResolution;
-uniform float iTime;
-
-uniform sampler2D iPrevPass;
 uniform sampler2D iBeforeBloom;
 uniform sampler2D iPairBloomDown;
 
@@ -28,6 +20,3 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     vec3 col = texture(iPairBloomDown, uv).rgb;
     fragColor = vec4(col + tap4(iPrevPass, uv, texelSize), 1.0);
 }
-
-out vec4 outColor;
-void main( void ){vec4 color = vec4(0.0,0.0,0.0,1.0);mainImage( color, gl_FragCoord.xy );outColor = color;}

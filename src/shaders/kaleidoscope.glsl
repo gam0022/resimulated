@@ -1,11 +1,3 @@
-#version 300 es
-precision highp float;
-precision highp int;
-precision mediump sampler3D;
-uniform vec3 iResolution;
-uniform float iTime;
-
-#define saturate(x) clamp(x, 0.0, 1.0)
 #define PI 3.14159265359
 #define PI2 6.28318530718
 #define EPS 0.0001
@@ -55,6 +47,3 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     col = pow(col * 2.0, vec3(2.0));
     fragColor = vec4(col,1.0);
 }
-
-out vec4 outColor;
-void main( void ){vec4 color = vec4(0.0,0.0,0.0,1.0);mainImage( color, gl_FragCoord.xy );outColor = color;}

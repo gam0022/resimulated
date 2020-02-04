@@ -136,7 +136,9 @@ export class Chromatic {
             gl.compileShader(shader);
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
                 const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/, (match: string, p1: string, p2: string) => {
-                    return `${p1}:${parseInt(p2) - imageCommonHeaderShaderLineCount + 1}`;
+                    const line = parseInt(p2);
+                    const fixedLine = line <= imageCommonHeaderShaderLineCount ? line : line - imageCommonHeaderShaderLineCount + 1;
+                    return `${p1}:${fixedLine}`;
                 });
                 console.log(src, log);
             }

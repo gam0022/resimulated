@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-const dat = require("dat.gui");
+import * as dat from 'dat.gui';
 
 window.addEventListener("load", ev => {
     const text = {

@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/dat-gui": "^0.6.3",
+    "@types/dat.gui": "^0.7.5",
     "clean-css-cli": "^4.3.0",
     "css-loader": "^3.2.0",
     "html-webpack-plugin": "^3.2.0",
@@ -26,6 +27,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@types/webpack": "^4.41.5",
     "dat.gui": "^0.7.6"
   }
 }

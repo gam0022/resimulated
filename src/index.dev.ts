@@ -1,6 +1,17 @@
 import { Chromatic } from "./chromatic"
+const dat = require("dat.gui");
 
 window.addEventListener("load", ev => {
+    const text = {
+        message: "dat/gui",
+        speed: 0.8,
+        displayOutline: false,
+    };
+    const gui = new dat.GUI();
+    gui.add(text, 'message');
+    gui.add(text, 'speed', -5, 5);
+    gui.add(text, 'displayOutline');
+
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
         require("./shaders/vertex.glsl").default,

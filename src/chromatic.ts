@@ -127,13 +127,23 @@ export class Chromatic {
             //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         };
 
+        const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
+
         // shader loader
         const loadShader = (src: string, type: number) => {
             const shader = gl.createShader(type);
             gl.shaderSource(shader, src);
             gl.compileShader(shader);
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                console.log(src, gl.getShaderInfoLog(shader));
+                const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
+                    const line = parseInt(p2);
+                    if (line <= imageCommonHeaderShaderLineCount) {
+                        return `${p1}:${line} (common header)`;
+                    } else {
+                        return `${p1}:${line - imageCommonHeaderShaderLineCount}`;
+                    }
+                });
+                console.log(src, log);
             }
             return shader;
         };

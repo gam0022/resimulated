@@ -3,6 +3,7 @@ import * as dat from 'dat.gui';
 
 window.addEventListener("load", ev => {
     const globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [];
+    const globalDebugUniformValues: { [key: string]: number; } = {};
 
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
@@ -28,13 +29,13 @@ window.addEventListener("load", ev => {
 
         require("./shaders/sound-template.glsl").default,
         globalDebugUniforms,
+        globalDebugUniformValues,
     );
 
     const gui = new dat.GUI();
-    let globalDebugUnifomrsKV: { [key: string]: number; } = {};
     globalDebugUniforms.forEach(unifrom => {
-        globalDebugUnifomrsKV[unifrom.key] = unifrom.value;
-        gui.add(globalDebugUnifomrsKV, unifrom.key, unifrom.min, unifrom.max);
+        globalDebugUniformValues[unifrom.key] = unifrom.value;
+        gui.add(globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max);
     })
 
 

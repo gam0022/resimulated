@@ -57,6 +57,7 @@ export class Chromatic {
 
         soundShader: string,
         globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [],
+        globalDebugUniformValues: { [key: string]: number; } = {},
     ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
@@ -149,7 +150,7 @@ export class Chromatic {
             return shader;
         };
 
-        const loadProgram = (fragmentShader: string) => {
+        const getDebugUniforms = (fragmentShader: string) => {
             if (!PRODUCTION) {
                 // for Debug dat.GUI
                 let reg = /uniform float (g.+);(\/\/ (\d) (\d))?/g;
@@ -163,7 +164,9 @@ export class Chromatic {
                     });
                 }
             }
+        };
 
+        const loadProgram = (fragmentShader: string) => {
             const shaders = [
                 loadShader(vertexShader, gl.VERTEX_SHADER),
                 loadShader(fragmentShader, gl.FRAGMENT_SHADER)
@@ -212,6 +215,12 @@ export class Chromatic {
                 pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
             }
 
+            if (!PRODUCTION) {
+                globalDebugUniforms.forEach(unifrom => {
+                    pass.uniforms[unifrom.key] = { type: "f", value: unifrom.value };
+                })
+            }
+
             pass.locations = createLocations(pass);
 
             this.setupFrameBuffer(pass);
@@ -250,6 +259,18 @@ export class Chromatic {
             gl.bindVertexArray(null);
             gl.useProgram(null);
         };
+
+        if (!PRODUCTION) {
+            getDebugUniforms(imageCommonHeaderShader);
+            getDebugUniforms(bloomPrefilterShader);
+            getDebugUniforms(bloomDownsampleShader);
+            getDebugUniforms(bloomUpsampleShader);
+            getDebugUniforms(bloomFinalShader);
+
+            imageShaders.forEach(shader => {
+                getDebugUniforms(shader);
+            });
+        }
 
         this.imagePasses = [];
         let passIndex = 0;
@@ -350,6 +371,11 @@ export class Chromatic {
 
                 this.imagePasses.forEach((pass) => {
                     pass.uniforms.iTime.value = this.time;
+                    if (!PRODUCTION) {
+                        for (const [key, value] of Object.entries(globalDebugUniformValues)) {
+                            pass.uniforms[key].value = value;
+                        }
+                    }
                     render(pass);
                 });
 

@@ -134,7 +134,7 @@ uniform float gMandelboxScale;// 1 5
 uniform float gMandelboxRepeat;
 
 float map(vec3 p) {;
-	float d = dMandelFast(p, 2.7, 10);
+	float d = dMandelFast(p, gMandelboxScale, 10);
 	return d;
 }
 

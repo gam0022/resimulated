@@ -131,10 +131,10 @@ vec3 opRep(vec3 p, vec3 c) {
 }
 
 uniform float gMandelboxScale;// 2.7 1 5
-uniform float gMandelboxRepeat;
+uniform float gMandelboxRepeat;// 10 1 100
 
 float map(vec3 p) {;
-	float d = dMandelFast(p, gMandelboxScale, 10);
+	float d = dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
 	return d;
 }
 

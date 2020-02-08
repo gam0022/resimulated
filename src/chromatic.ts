@@ -478,6 +478,4 @@ export class Chromatic {
 
         this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }
-
-
 }

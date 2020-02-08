@@ -35,7 +35,9 @@ window.addEventListener("load", ev => {
     const gui = new dat.GUI();
     globalDebugUniforms.forEach(unifrom => {
         globalDebugUniformValues[unifrom.key] = unifrom.value;
-        gui.add(globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max);
+        gui.add(globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+            chromatic.needsUpdate = true;
+        });
     })
 
 

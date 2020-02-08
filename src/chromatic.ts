@@ -30,6 +30,9 @@ export class Chromatic {
     /** 再生中かどうかのフラグです */
     isPlaying: boolean;
 
+    /** 強制描画 */
+    needsUpdate: boolean;
+
     /** 再生時間（秒）です */
     time: number;
 
@@ -61,6 +64,7 @@ export class Chromatic {
     ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
+        this.needsUpdate = false;
         this.time = 0;
 
         // setup WebAudio
@@ -362,7 +366,7 @@ export class Chromatic {
             requestAnimationFrame(update);
             const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
-            if (this.isPlaying || lastRenderTime !== this.time) {
+            if (this.isPlaying || lastRenderTime !== this.time || this.needsUpdate) {
                 if (!PRODUCTION) {
                     if (this.onRender != null) {
                         this.onRender(this.time, timeDelta);
@@ -379,10 +383,14 @@ export class Chromatic {
                     render(pass);
                 });
 
-                this.time += timeDelta;
+                if (!this.needsUpdate) {
+                    this.time += timeDelta;
+                }
+
                 lastRenderTime = this.time;
             }
 
+            this.needsUpdate = false;
             lastTimestamp = timestamp;
         };
         update(0);

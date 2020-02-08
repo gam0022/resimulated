@@ -63,8 +63,6 @@ window.addEventListener("load", ev => {
         chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
     }
 
-    onResolutionCange();
-
     const onTimeLengthUpdate = () => {
         timeBar.max = timeLengthInput.value;
 
@@ -119,6 +117,8 @@ window.addEventListener("load", ev => {
     }
 
     loadFromSessionStorage();
+    onResolutionCange();
+
     window.addEventListener("beforeunload", ev => {
         saveToSessionStorage();
     })

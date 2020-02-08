@@ -383,7 +383,7 @@ export class Chromatic {
                     render(pass);
                 });
 
-                if (!this.needsUpdate) {
+                if (this.isPlaying) {
                     this.time += timeDelta;
                 }
 

@@ -130,7 +130,7 @@ vec3 opRep(vec3 p, vec3 c) {
 	return mod(p, c) - 0.5 * c;
 }
 
-uniform float gMandelboxScale;// 1 5
+uniform float gMandelboxScale;// 2.7 1 5
 uniform float gMandelboxRepeat;
 
 float map(vec3 p) {;

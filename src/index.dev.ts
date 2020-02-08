@@ -2,15 +2,7 @@ import { Chromatic } from "./chromatic"
 import * as dat from 'dat.gui';
 
 window.addEventListener("load", ev => {
-    const text = {
-        message: "dat/gui",
-        speed: 0.8,
-        displayOutline: false,
-    };
-    const gui = new dat.GUI();
-    gui.add(text, 'message');
-    gui.add(text, 'speed', -5, 5);
-    gui.add(text, 'displayOutline');
+    const globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [];
 
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
@@ -34,8 +26,20 @@ window.addEventListener("load", ev => {
         require("./shaders/bloom-upsample.glsl").default,
         require("./shaders/bloom-final.glsl").default,
 
-        require("./shaders/sound-template.glsl").default
+        require("./shaders/sound-template.glsl").default,
+        globalDebugUniforms,
     );
+
+    const gui = new dat.GUI();
+    const text = {
+        message: "dat/gui",
+        speed: 0.8,
+        displayOutline: false,
+    };
+
+    gui.add(text, 'message');
+    gui.add(text, 'speed', -5, 5);
+    gui.add(text, 'displayOutline');
 
 
     // consts

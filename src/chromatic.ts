@@ -55,7 +55,8 @@ export class Chromatic {
         bloomUpsampleShader: string,
         bloomFinalShader: string,
 
-        soundShader: string
+        soundShader: string,
+        globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [],
     ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
@@ -149,6 +150,21 @@ export class Chromatic {
         };
 
         const loadProgram = (fragmentShader: string) => {
+            if (!PRODUCTION) {
+                // for Debug dat.GUI
+                let reg = /uniform float (g.+);(\/\/ (\d) (\d))?/g;
+                let result: RegExpExecArray;
+                while ((result = reg.exec(fragmentShader)) !== null) {
+                    globalDebugUniforms.push({
+                        key: result[1],
+                        value: 1.0,
+                        min: result[3] !== undefined ? parseFloat(result[3]) : 0,
+                        max: result[4] !== undefined ? parseFloat(result[4]) : 1,
+                    });
+                }
+                console.log(globalDebugUniforms);
+            }
+
             const shaders = [
                 loadShader(vertexShader, gl.VERTEX_SHADER),
                 loadShader(fragmentShader, gl.FRAGMENT_SHADER)
@@ -429,4 +445,6 @@ export class Chromatic {
 
         this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }
+
+
 }

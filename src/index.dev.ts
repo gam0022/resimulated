@@ -31,15 +31,11 @@ window.addEventListener("load", ev => {
     );
 
     const gui = new dat.GUI();
-    const text = {
-        message: "dat/gui",
-        speed: 0.8,
-        displayOutline: false,
-    };
-
-    gui.add(text, 'message');
-    gui.add(text, 'speed', -5, 5);
-    gui.add(text, 'displayOutline');
+    let globalDebugUnifomrsKV: { [key: string]: number; } = {};
+    globalDebugUniforms.forEach(unifrom => {
+        globalDebugUnifomrsKV[unifrom.key] = unifrom.value;
+        gui.add(globalDebugUnifomrsKV, unifrom.key, unifrom.min, unifrom.max);
+    })
 
 
     // consts

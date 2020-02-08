@@ -162,7 +162,6 @@ export class Chromatic {
                         max: result[4] !== undefined ? parseFloat(result[4]) : 1,
                     });
                 }
-                console.log(globalDebugUniforms);
             }
 
             const shaders = [

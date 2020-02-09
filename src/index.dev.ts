@@ -2,15 +2,8 @@ import { Chromatic } from "./chromatic"
 import * as dat from 'dat.gui';
 
 window.addEventListener("load", ev => {
-    const text = {
-        message: "dat/gui",
-        speed: 0.8,
-        displayOutline: false,
-    };
-    const gui = new dat.GUI();
-    gui.add(text, 'message');
-    gui.add(text, 'speed', -5, 5);
-    gui.add(text, 'displayOutline');
+    const globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [];
+    const globalDebugUniformValues: { [key: string]: number; } = {};
 
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
@@ -34,8 +27,18 @@ window.addEventListener("load", ev => {
         require("./shaders/bloom-upsample.glsl").default,
         require("./shaders/bloom-final.glsl").default,
 
-        require("./shaders/sound-template.glsl").default
+        require("./shaders/sound-template.glsl").default,
+        globalDebugUniforms,
+        globalDebugUniformValues,
     );
+
+    const gui = new dat.GUI();
+    globalDebugUniforms.forEach(unifrom => {
+        globalDebugUniformValues[unifrom.key] = unifrom.value;
+        gui.add(globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+            chromatic.needsUpdate = true;
+        });
+    })
 
 
     // consts
@@ -59,8 +62,6 @@ window.addEventListener("load", ev => {
         const resolutionScale = parseFloat(resolutionScaleSelect.value);
         chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
     }
-
-    onResolutionCange();
 
     const onTimeLengthUpdate = () => {
         timeBar.max = timeLengthInput.value;
@@ -116,6 +117,8 @@ window.addEventListener("load", ev => {
     }
 
     loadFromSessionStorage();
+    onResolutionCange();
+
     window.addEventListener("beforeunload", ev => {
         saveToSessionStorage();
     })

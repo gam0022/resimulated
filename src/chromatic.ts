@@ -266,14 +266,15 @@ export class Chromatic {
 
         if (!PRODUCTION) {
             getDebugUniforms(imageCommonHeaderShader);
-            getDebugUniforms(bloomPrefilterShader);
-            getDebugUniforms(bloomDownsampleShader);
-            getDebugUniforms(bloomUpsampleShader);
-            getDebugUniforms(bloomFinalShader);
 
             imageShaders.forEach(shader => {
                 getDebugUniforms(shader);
             });
+
+            getDebugUniforms(bloomPrefilterShader);
+            getDebugUniforms(bloomDownsampleShader);
+            getDebugUniforms(bloomUpsampleShader);
+            getDebugUniforms(bloomFinalShader);
         }
 
         this.imagePasses = [];

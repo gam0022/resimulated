@@ -1,9 +1,15 @@
 import { Chromatic } from "./chromatic"
 import * as dat from 'dat.gui';
+import * as THREE from 'three';
 
 window.addEventListener("load", ev => {
     const globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [];
     const globalDebugUniformValues: { [key: string]: number; } = {};
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1.0, 1, 1000);
+    camera.position.set(0, 0, -9);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）

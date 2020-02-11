@@ -369,6 +369,13 @@ export class Chromatic {
             requestAnimationFrame(update);
             const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
+            if (!PRODUCTION)
+            {
+                if (this.onUpdate != null) {
+                    this.onUpdate();
+                }
+            }
+
             if (this.isPlaying || lastRenderTime !== this.time || this.needsUpdate) {
                 if (!PRODUCTION) {
                     if (this.onRender != null) {
@@ -391,13 +398,6 @@ export class Chromatic {
                 }
 
                 lastRenderTime = this.time;
-            }
-
-            if (!PRODUCTION)
-            {
-                if (this.onUpdate != null) {
-                    this.onUpdate();
-                }
             }
 
             this.needsUpdate = false;

@@ -16,10 +16,6 @@ const float PIH = 1.57079632679;
 
 const float GROUND_BASE = 0.0;
 
-
-// globals
-const vec3 lightDir = vec3( -0.48666426339228763, 0.8111071056538127, 0.3244428422615251 );
-
 // ray
 struct Ray {
     vec3 origin;
@@ -173,6 +169,10 @@ float calcEdge(vec3 p) {
 
 uniform float gSceneEps;// 0.001 0.00001 0.001
 
+uniform float gBaseColor;// 0.5
+uniform float gRoughness;// 0.1
+uniform float gMetallic;// 0.4
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -195,9 +195,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.normal = calcNormal(p, map);
         //if (abs(map(p)) < EPS) {
         {
-            intersection.baseColor = vec3(0.5);
-            intersection.roughness = 0.1;
-            intersection.metallic = 0.4;
+            intersection.baseColor = vec3(gBaseColor);
+            intersection.roughness = gRoughness;
+            intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
             intersection.emission = vec3(0.0 * edge);
@@ -275,13 +275,29 @@ vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     return (diffuse + specular) * radiance * max(0.0, dot(l, n)) / (len * len);
 }
 
+vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radiance) {
+    vec3 n = i.normal;
+    vec3 p = i.position;
+    vec3 ref = mix(vec3(i.reflectance), i.baseColor, i.metallic);
+
+    vec3 l = lightDir;
+    vec3 h = normalize(l + v);
+
+    vec3 diffuse = mix(1.0 - ref, vec3(0.0), i.metallic) * i.baseColor / PI;
+
+    float m = roughnessToExponent(i.roughness);
+    vec3 specular = ref * pow(max(0.0, dot(n, h) ), m) * (m + 2.0) / (8.0 * PI);
+    return (diffuse + specular) * radiance * max(0.0, dot(l, n));
+}
+
 void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
     intersection.hit = false;
     intersectScene(intersection, ray);
 
     if (intersection.hit) {
-        intersection.color = evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(10.0));
-        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(5.0));
+        intersection.color = evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(80.0, 80.0, 100.0));
+        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
+        intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), vec3(2.0, 1.0, 1.0));
 
         // fog
         //intersection.color = mix(intersection.color, vec3(0.6),

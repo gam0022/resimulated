@@ -10,10 +10,6 @@ const float INF = 1e+10;
 const float EPS = 0.01;
 const float OFFSET = EPS * 10.0;
 
-const float PI = 3.14159265359;
-const float TAU = 6.28318530718;
-const float PIH = 1.57079632679;
-
 const float GROUND_BASE = 0.0;
 
 // ray
@@ -140,10 +136,12 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, saturate(p - K.xxx), c.y);
 }
 
+uniform float gEdgeEps;// 0.0005 0.0001 0.01
+
 // https://www.shadertoy.com/view/lttGDn
 float calcEdge(vec3 p) {
     float edge = 0.0;
-    vec2 e = vec2(.001, 0);
+    vec2 e = vec2(gEdgeEps, 0);
 
     // Take some distance function measurements from either side of the hit point on all three axes.
 	float d1 = map(p + e.xyy), d2 = map(p - e.xyy);
@@ -173,6 +171,8 @@ uniform float gBaseColor;// 0.5
 uniform float gRoughness;// 0.1
 uniform float gMetallic;// 0.4
 
+#define beat (iTime * 2.0)
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -200,7 +200,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = vec3(0.0 * edge);
+            intersection.emission = vec3(0.5, 2.5, 0.5) * edge * saturate(cos(beat * 2.0 - mod(0.5 * intersection.position.z, TAU)));
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;
@@ -295,7 +295,8 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
     intersectScene(intersection, ray);
 
     if (intersection.hit) {
-        intersection.color = evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(80.0, 80.0, 100.0));
+        intersection.color = intersection.emission;
+        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(80.0, 80.0, 100.0));
         intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), vec3(2.0, 1.0, 1.0));
 

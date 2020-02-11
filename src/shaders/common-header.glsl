@@ -1,7 +1,20 @@
 #version 300 es
 precision highp float;precision highp int;precision mediump sampler3D;
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord);
-out vec4 outColor;void main(void){vec4 c;mainImage(c, gl_FragCoord.xy);outColor = c;}
+
+out vec4 outColor;
+void main(void){
+    vec4 c;
+    mainImage(c, gl_FragCoord.xy);
+    outColor = c;
+}
+
+// consts
+const float PI = 3.14159265359;
+const float TAU = 6.28318530718;
+const float PIH = 1.57079632679;
+
 #define saturate(x) clamp(x, 0.0, 1.0)
 
 uniform vec3 iResolution;

@@ -270,7 +270,7 @@ vec3 evalLight(vec3 p, vec3 n, vec3 v, vec3 lp, vec3 baseColor, float roughness,
     vec3 diffuse = mix(1.0 - ref, vec3(0.0), metallic) * baseColor / PI;
 
     float m = roughnessToExponent(roughness);
-	vec3 specular = ref * pow( max( 0.0, dot( n, h ) ), m ) * ( m + 2.0 ) / ( 8.0*PI );
+    vec3 specular = ref * pow(max(0.0, dot(n, h) ), m) * (m + 2.0) / (8.0 * PI);
     return (diffuse + specular) * radiance * max(0.0, dot(l, n)) / (len*len);
 }
 

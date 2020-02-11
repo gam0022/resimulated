@@ -172,20 +172,24 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
+uniform float gSceneEps;// 0.0006 0.0001 0.001
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
     vec3 p = ray.origin;
+    float eps;
 
-    for (float i = 0.0; i < 100.0; i++) {
+    for (float i = 0.0; i < 300.0; i++) {
         d = abs(map(p));
         distance += d;
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
-        if (d < EPS || distance > 100.0) break;
+        eps = gSceneEps * distance;
+        if (d < eps) break;
     }
 
-    if (abs(d) < EPS && distance < intersection.distance) {
+    if (distance < intersection.distance) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;
@@ -238,13 +242,45 @@ float calcShadow(in vec3 p, in vec3 rd) {
     return shadowIntensity + (1.0 - shadowIntensity) * bright;
 }
 
+
+uniform float gCameraEyeX;// 0 -100 100
+uniform float gCameraEyeY;// 2.8 -100 100
+uniform float gCameraEyeZ;// -8 -100 100
+
+uniform float gCameraTargetX;// 0 -2 2
+uniform float gCameraTargetY;// -0.05 -2 2
+uniform float gCameraTargetZ;// 1 -2 2
+
+#define FLT_EPS  5.960464478e-8
+
+float roughnessToExponent(float roughness)
+{
+    return clamp(2.0 * (1.0 / (roughness * roughness)) - 2.0, FLT_EPS, 1.0 / FLT_EPS);
+}
+
+vec3 evalLight(vec3 p, vec3 n, vec3 v, vec3 lp, vec3 baseColor, float roughness, float reflectance, float metallic, vec3 radiance) {
+    vec3 ref = mix(vec3(reflectance), baseColor, metallic);
+
+    vec3 l = lp - p;
+    float len = length(l);
+    l /= len;
+
+    vec3 h = normalize(l + v);
+
+    vec3 diffuse = mix(1.0 - ref, vec3(0.0), metallic) * baseColor / PI;
+
+    float m = roughnessToExponent(roughness);
+	vec3 specular = ref * pow( max( 0.0, dot( n, h ) ), m ) * ( m + 2.0 ) / ( 8.0*PI );
+    return (diffuse + specular) * radiance * max(0.0, dot(l, n)) / (len*len);
+}
+
 void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
     intersection.hit = false;
     intersectScene(intersection, ray);
 
     if (intersection.hit) {
         // shading
-        float diffuse = saturate(dot(lightDir, intersection.normal));
+        /*float diffuse = saturate(dot(lightDir, intersection.normal));
         float specular = pow(saturate(dot(reflect(lightDir, intersection.normal), ray.direction)), 10.0);
 
         float ao = calcAo(intersection.position, intersection.normal);
@@ -258,23 +294,18 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
             intersection.diffuse * diffuse * shadow +
             intersection.specular * specular * shadow +
             intersection.emission;
-        #endif
+        #endif*/
+
+        intersection.color = evalLight(intersection.position, intersection.normal, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(0.1), 0.2, 0.4, 0.5, vec3(10.0));
+        intersection.color += evalLight(intersection.position, intersection.normal, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.1), 0.2, 0.4, 0.5, vec3(5.0));
 
         // fog
         //intersection.color = mix(intersection.color, vec3(0.6),
         //                         1.0 - exp(-0.0001 * intersection.distance * intersection.distance * intersection.distance));
     } else {
-        intersection.color = vec3(0.8);
+        intersection.color = vec3(0.01);
     }
 }
-
-uniform float gCameraEyeX;// 0 -100 100
-uniform float gCameraEyeY;// 2.8 -100 100
-uniform float gCameraEyeZ;// -8 -100 100
-
-uniform float gCameraTargetX;// 0 -2 2
-uniform float gCameraTargetY;// -0.05 -2 2
-uniform float gCameraTargetZ;// 1 -2 2
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);

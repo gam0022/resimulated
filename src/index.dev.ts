@@ -46,10 +46,10 @@ window.addEventListener("load", ev => {
     // THREE.OrbitControls
     const camera = new THREE.PerspectiveCamera(75, 1.0, 1, 1000);
     camera.position.set(globalDebugUniformValues.gCameraEyeX, globalDebugUniformValues.gCameraEyeY, globalDebugUniformValues.gCameraEyeZ);
-    //camera.lookAt();
 
     const controls = new THREE.OrbitControls(camera, chromatic.canvas);
     controls.target = new THREE.Vector3(globalDebugUniformValues.gCameraTargetX, globalDebugUniformValues.gCameraTargetY, globalDebugUniformValues.gCameraTargetZ);
+    controls.zoomSpeed = 3.0;
     controls.screenSpacePanning = true;
     controls.mouseButtons = {
         LEFT: THREE.MOUSE.ROTATE,
@@ -153,7 +153,7 @@ window.addEventListener("load", ev => {
 
     chromatic.onUpdate = () => {
         controls.update();
-        
+
         globalDebugUniformValues.gCameraEyeX = camera.position.x;
         globalDebugUniformValues.gCameraEyeY = camera.position.y;
         globalDebugUniformValues.gCameraEyeZ = camera.position.z;

@@ -8,7 +8,6 @@
 // consts
 const float INF = 1e+10;
 const float EPS = 0.01;
-const float EPS_N = 1e-4;
 const float OFFSET = EPS * 10.0;
 
 const float PI = 3.14159265359;
@@ -69,7 +68,7 @@ struct Intersection {
 
 // util
 
-#define calcNormal(p, dFunc) normalize(vec2(EPS_N, -EPS_N).xyy * dFunc(p + vec2(EPS_N, -EPS_N).xyy) + vec2(EPS_N, -EPS_N).yyx * dFunc(p + vec2(EPS_N, -EPS_N).yyx ) + vec2(EPS_N, -EPS_N).yxy * dFunc(p + vec2(EPS_N, -EPS_N).yxy) + vec2(EPS_N, -EPS_N).xxx * dFunc(p + vec2(EPS_N, -EPS_N).xxx))
+#define calcNormal(p, dFunc) normalize(vec2(gSceneEps, -gSceneEps).xyy * dFunc(p + vec2(gSceneEps, -gSceneEps).xyy) + vec2(gSceneEps, -gSceneEps).yyx * dFunc(p + vec2(gSceneEps, -gSceneEps).yyx ) + vec2(gSceneEps, -gSceneEps).yxy * dFunc(p + vec2(gSceneEps, -gSceneEps).yxy) + vec2(gSceneEps, -gSceneEps).xxx * dFunc(p + vec2(gSceneEps, -gSceneEps).xxx))
 
 // Distance Functions
 float sdBox( vec3 p, vec3 b ) {
@@ -172,7 +171,7 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
-uniform float gSceneEps;// 0.0006 0.0001 0.001
+uniform float gSceneEps;// 0.001 0.00001 0.001
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;

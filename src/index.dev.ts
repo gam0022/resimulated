@@ -32,7 +32,7 @@ window.addEventListener("load", ev => {
         globalDebugUniformValues,
     );
 
-    const gui = new dat.GUI();
+    const gui = new dat.GUI({ width: 1000, });
     globalDebugUniforms.forEach(unifrom => {
         globalDebugUniformValues[unifrom.key] = unifrom.value;
         gui.add(globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
@@ -61,6 +61,7 @@ window.addEventListener("load", ev => {
     const onResolutionCange = () => {
         const resolutionScale = parseFloat(resolutionScaleSelect.value);
         chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+        chromatic.needsUpdate = true;
     }
 
     const onTimeLengthUpdate = () => {

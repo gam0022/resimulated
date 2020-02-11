@@ -1,15 +1,12 @@
 import { Chromatic } from "./chromatic"
 import * as dat from 'dat.gui';
-import * as THREE from 'three';
+
+const THREE = require('three')
+import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
 window.addEventListener("load", ev => {
     const globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [];
     const globalDebugUniformValues: { [key: string]: number; } = {};
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1.0, 1, 1000);
-    camera.position.set(0, 0, -9);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
@@ -45,6 +42,20 @@ window.addEventListener("load", ev => {
             chromatic.needsUpdate = true;
         });
     })
+
+    // THREE.OrbitControls
+    const camera = new THREE.PerspectiveCamera(75, 1.0, 1, 1000);
+    camera.position.set(globalDebugUniformValues.gCameraEyeX, globalDebugUniformValues.gCameraEyeY, globalDebugUniformValues.gCameraEyeZ);
+    //camera.lookAt();
+
+    const controls = new THREE.OrbitControls(camera, chromatic.canvas);
+    controls.target = new THREE.Vector3(globalDebugUniformValues.gCameraTargetX, globalDebugUniformValues.gCameraTargetY, globalDebugUniformValues.gCameraTargetZ);
+    controls.screenSpacePanning = true;
+    controls.mouseButtons = {
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.PAN,
+        RIGHT: THREE.MOUSE.DOLLY,
+    };
 
 
     // consts
@@ -135,8 +146,23 @@ window.addEventListener("load", ev => {
     chromatic.onRender = (time, timeDelta) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
+
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
+    }
+
+    chromatic.onUpdate = () => {
+        controls.update();
+        
+        globalDebugUniformValues.gCameraEyeX = camera.position.x;
+        globalDebugUniformValues.gCameraEyeY = camera.position.y;
+        globalDebugUniformValues.gCameraEyeZ = camera.position.z;
+
+        globalDebugUniformValues.gCameraTargetX = controls.target.x;
+        globalDebugUniformValues.gCameraTargetY = controls.target.y;
+        globalDebugUniformValues.gCameraTargetZ = controls.target.z;
+
+        gui.updateDisplay();
     }
 
     if (chromatic.isPlaying) {

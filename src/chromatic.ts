@@ -39,6 +39,10 @@ export class Chromatic {
     /** レンダリング時に実行されるコールバック関数です */
     onRender: (time: number, timeDelta: number) => void;
 
+    /** 毎フレーム実行されるコールバック関数です */
+    onUpdate: () => void;
+
+    canvas: HTMLCanvasElement;
     gl: WebGL2RenderingContext;
     audioContext: AudioContext;
     audioSource: AudioBufferSourceNode;
@@ -71,7 +75,7 @@ export class Chromatic {
         const audio = this.audioContext = new window.AudioContext();
 
         // setup WebGL
-        const canvas = document.createElement("canvas");
+        const canvas = this.canvas = document.createElement("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         window.document.body.appendChild(canvas);
@@ -387,6 +391,13 @@ export class Chromatic {
                 }
 
                 lastRenderTime = this.time;
+            }
+
+            if (!PRODUCTION)
+            {
+                if (this.onUpdate != null) {
+                    this.onUpdate();
+                }
             }
 
             this.needsUpdate = false;

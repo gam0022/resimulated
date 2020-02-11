@@ -246,9 +246,9 @@ uniform float gCameraEyeX;// 0 -100 100
 uniform float gCameraEyeY;// 2.8 -100 100
 uniform float gCameraEyeZ;// -8 -100 100
 
-uniform float gCameraTargetX;// 0 -2 2
-uniform float gCameraTargetY;// -0.05 -2 2
-uniform float gCameraTargetZ;// 1 -2 2
+uniform float gCameraTargetX;// 0 -100 100
+uniform float gCameraTargetY;// 2.75 -100 100
+uniform float gCameraTargetZ;// -7 -100 100
 
 #define FLT_EPS  5.960464478e-8
 
@@ -314,7 +314,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // camera and ray
     Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
-    camera.target = camera.eye + vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
+    camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
     camera.up = vec3(0.0, 1.0, 0.0);// y-up
     camera.zoom = 9.0;
     Ray ray = cameraShootRay(camera, uv);

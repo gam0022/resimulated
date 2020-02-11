@@ -54,13 +54,13 @@ struct Intersection {
     vec2 uv;
     float count;
 
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    vec3 baseColor;
+    float roughness;
+    float reflectance;// vec3 ?
+    float metallic;
     vec3 emission;
 
     bool transparent;
-    vec3 reflectance;
     float refractiveIndex;
 
     vec3 color;
@@ -195,15 +195,15 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.normal = calcNormal(p, map);
         //if (abs(map(p)) < EPS) {
         {
-            intersection.ambient = vec3(0.5);
-            intersection.diffuse = vec3(0.3);
-            intersection.specular = vec3(0.5);
+            intersection.baseColor = vec3(0.5);
+            intersection.roughness = 0.1;
+            intersection.metallic = 0.4;
 
             float edge = calcEdge(p);
             intersection.emission = vec3(0.0 * edge);
 
             intersection.transparent = false;
-            intersection.reflectance = vec3(0.0);
+            intersection.reflectance = 0.0;
         }
     }
 }
@@ -257,8 +257,10 @@ float roughnessToExponent(float roughness)
     return clamp(2.0 * (1.0 / (roughness * roughness)) - 2.0, FLT_EPS, 1.0 / FLT_EPS);
 }
 
-vec3 evalLight(vec3 p, vec3 n, vec3 v, vec3 lp, vec3 baseColor, float roughness, float reflectance, float metallic, vec3 radiance) {
-    vec3 ref = mix(vec3(reflectance), baseColor, metallic);
+vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
+    vec3 n = i.normal;
+    vec3 p = i.position;
+    vec3 ref = mix(vec3(i.reflectance), i.baseColor, i.metallic);
 
     vec3 l = lp - p;
     float len = length(l);
@@ -266,11 +268,11 @@ vec3 evalLight(vec3 p, vec3 n, vec3 v, vec3 lp, vec3 baseColor, float roughness,
 
     vec3 h = normalize(l + v);
 
-    vec3 diffuse = mix(1.0 - ref, vec3(0.0), metallic) * baseColor / PI;
+    vec3 diffuse = mix(1.0 - ref, vec3(0.0), i.metallic) * i.baseColor / PI;
 
-    float m = roughnessToExponent(roughness);
+    float m = roughnessToExponent(i.roughness);
     vec3 specular = ref * pow(max(0.0, dot(n, h) ), m) * (m + 2.0) / (8.0 * PI);
-    return (diffuse + specular) * radiance * max(0.0, dot(l, n)) / (len*len);
+    return (diffuse + specular) * radiance * max(0.0, dot(l, n)) / (len * len);
 }
 
 void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
@@ -278,25 +280,8 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
     intersectScene(intersection, ray);
 
     if (intersection.hit) {
-        // shading
-        /*float diffuse = saturate(dot(lightDir, intersection.normal));
-        float specular = pow(saturate(dot(reflect(lightDir, intersection.normal), ray.direction)), 10.0);
-
-        float ao = calcAo(intersection.position, intersection.normal);
-        float shadow = calcShadow(intersection.position, lightDir);
-
-        #ifdef DEBUG_AO
-        intersection.color = vec3(ao);
-        #else
-        intersection.color =
-            intersection.ambient * ao +
-            intersection.diffuse * diffuse * shadow +
-            intersection.specular * specular * shadow +
-            intersection.emission;
-        #endif*/
-
-        intersection.color = evalLight(intersection.position, intersection.normal, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(0.1), 0.2, 0.4, 0.5, vec3(10.0));
-        intersection.color += evalLight(intersection.position, intersection.normal, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.1), 0.2, 0.4, 0.5, vec3(5.0));
+        intersection.color = evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(10.0));
+        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(5.0));
 
         // fog
         //intersection.color = mix(intersection.color, vec3(0.6),

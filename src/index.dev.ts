@@ -61,6 +61,7 @@ window.addEventListener("load", ev => {
     const onResolutionCange = () => {
         const resolutionScale = parseFloat(resolutionScaleSelect.value);
         chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+        chromatic.needsUpdate = true;
     }
 
     const onTimeLengthUpdate = () => {

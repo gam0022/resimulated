@@ -156,7 +156,7 @@ export class Chromatic {
 
         const getDebugUniforms = (fragmentShader: string) => {
             // for Debug dat.GUI
-            let reg = /uniform float (g.+);(\/\/ ([\d\.]+))?( ([\d\.]+) ([\d\.]+))?/g;
+            let reg = /uniform float (g.+);(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
             let result: RegExpExecArray;
             while ((result = reg.exec(fragmentShader)) !== null) {
                 globalDebugUniforms.push({

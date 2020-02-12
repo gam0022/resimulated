@@ -5,20 +5,20 @@
 #endif
 
 // debug uniforms
-float gCameraEyeX;// 0 -100 100
-float gCameraEyeY;// 2.8 -100 100
-float gCameraEyeZ;// -8 -100 100
-float gCameraTargetX;// 0 -100 100
-float gCameraTargetY;// 2.75 -100 100
-float gCameraTargetZ;// 0 -100 100
+uniform float gCameraEyeX;// 0 -100 100
+uniform float gCameraEyeY;// 2.8 -100 100
+uniform float gCameraEyeZ;// -8 -100 100
+uniform float gCameraTargetX;// 0 -100 100
+uniform float gCameraTargetY;// 2.75 -100 100
+uniform float gCameraTargetZ;// 0 -100 100
 
-float gMandelboxScale;// 2.7 1 5
-float gMandelboxRepeat;// 10 1 100
-float gSceneEps;// 0.001 0.00001 0.001
-float gEdgeEps;// 0.0005 0.0001 0.01
-float gBaseColor;// 0.5
-float gRoughness;// 0.1
-float gMetallic;// 0.4
+uniform float gMandelboxScale;// 2.7 1 5
+uniform float gMandelboxRepeat;// 10 1 100
+uniform float gSceneEps;// 0.001 0.00001 0.001
+uniform float gEdgeEps;// 0.0005 0.0001 0.01
+uniform float gBaseColor;// 0.5
+uniform float gRoughness;// 0.1
+uniform float gMetallic;// 0.4
 
 // consts
 const float INF = 1e+10;
@@ -306,6 +306,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // no debug
+    /*
     gCameraEyeX = 0.0;// 0 -100 100
     gCameraEyeY = 2.8;// 2.8 -100 100
     gCameraEyeZ = -8.0;// -8 -100 100
@@ -321,6 +322,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     gBaseColor = 0.5;// 0.5
     gRoughness = 0.1;// 0.1
     gMetallic = 0.4;// 0.4
+    */
 
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 

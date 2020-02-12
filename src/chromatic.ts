@@ -1,5 +1,6 @@
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
+declare var DEBUG_UNIFORMS: boolean;
 
 enum PassType {
     Image,
@@ -49,6 +50,10 @@ export class Chromatic {
 
     imagePasses: Pass[];
 
+    // debug uniforms
+    globalDebugUniforms: { key: string, value: number, min: number, max: number }[];
+    globalDebugUniformValues: { [key: string]: number; };
+
     constructor(
         timeLength: number,
         vertexShader: string,
@@ -63,13 +68,15 @@ export class Chromatic {
         bloomFinalShader: string,
 
         soundShader: string,
-        globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [],
-        globalDebugUniformValues: { [key: string]: number; } = {},
     ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
         this.needsUpdate = false;
         this.time = 0;
+
+        // debug uniforms
+        this.globalDebugUniforms = [];
+        this.globalDebugUniformValues = {};
 
         // setup WebAudio
         const audio = this.audioContext = new window.AudioContext();
@@ -163,12 +170,14 @@ export class Chromatic {
             let reg = /uniform float (g.+);(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
             let result: RegExpExecArray;
             while ((result = reg.exec(fragmentShader)) !== null) {
-                globalDebugUniforms.push({
+                const uniform = {
                     key: result[1],
                     value: result[3] !== undefined ? parseFloat(result[3]) : 0,
                     min: result[5] !== undefined ? parseFloat(result[5]) : 0,
                     max: result[6] !== undefined ? parseFloat(result[6]) : 1,
-                });
+                };
+                this.globalDebugUniforms.push(uniform);
+                this.globalDebugUniformValues[uniform.key] = uniform.value;
             }
         };
 
@@ -221,8 +230,8 @@ export class Chromatic {
                 pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
             }
 
-            if (!PRODUCTION) {
-                globalDebugUniforms.forEach(unifrom => {
+            if (DEBUG_UNIFORMS) {
+                this.globalDebugUniforms.forEach(unifrom => {
                     pass.uniforms[unifrom.key] = { type: "f", value: unifrom.value };
                 })
             }
@@ -266,7 +275,7 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
-        if (!PRODUCTION) {
+        if (DEBUG_UNIFORMS) {
             getDebugUniforms(imageCommonHeaderShader);
 
             imageShaders.forEach(shader => {
@@ -384,8 +393,8 @@ export class Chromatic {
 
                 this.imagePasses.forEach((pass) => {
                     pass.uniforms.iTime.value = this.time;
-                    if (!PRODUCTION) {
-                        for (const [key, value] of Object.entries(globalDebugUniformValues)) {
+                    if (DEBUG_UNIFORMS) {
+                        for (const [key, value] of Object.entries(this.globalDebugUniformValues)) {
                             pass.uniforms[key].value = value;
                         }
                     }

@@ -1,5 +1,6 @@
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
+declare var DEBUG_UNIFORMS: boolean;
 
 enum PassType {
     Image,
@@ -223,7 +224,7 @@ export class Chromatic {
                 pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
             }
 
-            if (!PRODUCTION) {
+            if (DEBUG_UNIFORMS) {
                 globalDebugUniforms.forEach(unifrom => {
                     pass.uniforms[unifrom.key] = { type: "f", value: unifrom.value };
                 })
@@ -268,7 +269,7 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
-        if (!PRODUCTION) {
+        if (DEBUG_UNIFORMS) {
             getDebugUniforms(imageCommonHeaderShader);
 
             imageShaders.forEach(shader => {
@@ -386,7 +387,7 @@ export class Chromatic {
 
                 this.imagePasses.forEach((pass) => {
                     pass.uniforms.iTime.value = this.time;
-                    if (!PRODUCTION) {
+                    if (DEBUG_UNIFORMS) {
                         for (const [key, value] of Object.entries(globalDebugUniformValues)) {
                             pass.uniforms[key].value = value;
                         }

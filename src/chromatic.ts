@@ -163,12 +163,14 @@ export class Chromatic {
             let reg = /uniform float (g.+);(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
             let result: RegExpExecArray;
             while ((result = reg.exec(fragmentShader)) !== null) {
-                globalDebugUniforms.push({
+                const uniform = {
                     key: result[1],
                     value: result[3] !== undefined ? parseFloat(result[3]) : 0,
                     min: result[5] !== undefined ? parseFloat(result[5]) : 0,
                     max: result[6] !== undefined ? parseFloat(result[6]) : 1,
-                });
+                };
+                globalDebugUniforms.push(uniform);
+                globalDebugUniformValues[uniform.key] = uniform.value;
             }
         };
 

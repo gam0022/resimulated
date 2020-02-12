@@ -6,9 +6,6 @@ const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
 window.addEventListener("load", ev => {
-    const globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [];
-    const globalDebugUniformValues: { [key: string]: number; } = {};
-
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
         require("./shaders/vertex.glsl").default,
@@ -32,28 +29,26 @@ window.addEventListener("load", ev => {
         require("./shaders/bloom-final.glsl").default,
 
         require("./shaders/sound-template.glsl").default,
-        globalDebugUniforms,
-        globalDebugUniformValues,
     );
 
     const gui = new dat.GUI({ width: 1000, });
-    globalDebugUniforms.forEach(unifrom => {
-        gui.add(globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+    chromatic.globalDebugUniforms.forEach(unifrom => {
+        gui.add(chromatic.globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
             chromatic.needsUpdate = true;
         });
     })
 
-    const enableCameraDebug = "gCameraEyeX" in globalDebugUniformValues;
+    const enableCameraDebug = "gCameraEyeX" in chromatic.globalDebugUniformValues;
 
     // THREE.OrbitControls
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
 
     if (enableCameraDebug) {
-        camera.position.set(globalDebugUniformValues.gCameraEyeX, globalDebugUniformValues.gCameraEyeY, globalDebugUniformValues.gCameraEyeZ);
+        camera.position.set(chromatic.globalDebugUniformValues.gCameraEyeX, chromatic.globalDebugUniformValues.gCameraEyeY, chromatic.globalDebugUniformValues.gCameraEyeZ);
     }
 
     const controls = new THREE.OrbitControls(camera, chromatic.canvas);
-    controls.target = new three.Vector3(globalDebugUniformValues.gCameraTargetX, globalDebugUniformValues.gCameraTargetY, globalDebugUniformValues.gCameraTargetZ);
+    controls.target = new three.Vector3(chromatic.globalDebugUniformValues.gCameraTargetX, chromatic.globalDebugUniformValues.gCameraTargetY, chromatic.globalDebugUniformValues.gCameraTargetZ);
     controls.zoomSpeed = 3.0;
     controls.screenSpacePanning = true;
     controls.mouseButtons = {
@@ -164,13 +159,13 @@ window.addEventListener("load", ev => {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {
-                globalDebugUniformValues.gCameraEyeX = camera.position.x;
-                globalDebugUniformValues.gCameraEyeY = camera.position.y;
-                globalDebugUniformValues.gCameraEyeZ = camera.position.z;
+                chromatic.globalDebugUniformValues.gCameraEyeX = camera.position.x;
+                chromatic.globalDebugUniformValues.gCameraEyeY = camera.position.y;
+                chromatic.globalDebugUniformValues.gCameraEyeZ = camera.position.z;
 
-                globalDebugUniformValues.gCameraTargetX = controls.target.x;
-                globalDebugUniformValues.gCameraTargetY = controls.target.y;
-                globalDebugUniformValues.gCameraTargetZ = controls.target.z;
+                chromatic.globalDebugUniformValues.gCameraTargetX = controls.target.x;
+                chromatic.globalDebugUniformValues.gCameraTargetY = controls.target.y;
+                chromatic.globalDebugUniformValues.gCameraTargetZ = controls.target.z;
 
                 gui.updateDisplay();
                 chromatic.needsUpdate = true;

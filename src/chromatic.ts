@@ -50,6 +50,10 @@ export class Chromatic {
 
     imagePasses: Pass[];
 
+    // debug uniforms
+    globalDebugUniforms: { key: string, value: number, min: number, max: number }[];
+    globalDebugUniformValues: { [key: string]: number; };
+
     constructor(
         timeLength: number,
         vertexShader: string,
@@ -64,13 +68,15 @@ export class Chromatic {
         bloomFinalShader: string,
 
         soundShader: string,
-        globalDebugUniforms: { key: string, value: number, min: number, max: number }[] = [],
-        globalDebugUniformValues: { [key: string]: number; } = {},
     ) {
         this.timeLength = timeLength;
         this.isPlaying = true;
         this.needsUpdate = false;
         this.time = 0;
+
+        // debug uniforms
+        this.globalDebugUniforms = [];
+        this.globalDebugUniformValues = {};
 
         // setup WebAudio
         const audio = this.audioContext = new window.AudioContext();
@@ -170,8 +176,8 @@ export class Chromatic {
                     min: result[5] !== undefined ? parseFloat(result[5]) : 0,
                     max: result[6] !== undefined ? parseFloat(result[6]) : 1,
                 };
-                globalDebugUniforms.push(uniform);
-                globalDebugUniformValues[uniform.key] = uniform.value;
+                this.globalDebugUniforms.push(uniform);
+                this.globalDebugUniformValues[uniform.key] = uniform.value;
             }
         };
 
@@ -225,7 +231,7 @@ export class Chromatic {
             }
 
             if (DEBUG_UNIFORMS) {
-                globalDebugUniforms.forEach(unifrom => {
+                this.globalDebugUniforms.forEach(unifrom => {
                     pass.uniforms[unifrom.key] = { type: "f", value: unifrom.value };
                 })
             }
@@ -388,7 +394,7 @@ export class Chromatic {
                 this.imagePasses.forEach((pass) => {
                     pass.uniforms.iTime.value = this.time;
                     if (DEBUG_UNIFORMS) {
-                        for (const [key, value] of Object.entries(globalDebugUniformValues)) {
+                        for (const [key, value] of Object.entries(this.globalDebugUniformValues)) {
                             pass.uniforms[key].value = value;
                         }
                     }

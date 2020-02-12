@@ -242,13 +242,13 @@ float calcShadow(in vec3 p, in vec3 rd) {
 }
 
 
-uniform float gCameraEyeX;// 0 -100 100
-uniform float gCameraEyeY;// 2.8 -100 100
-uniform float gCameraEyeZ;// -8 -100 100
+float gCameraEyeX;// 0 -100 100
+float gCameraEyeY;// 2.8 -100 100
+float gCameraEyeZ;// -8 -100 100
 
-uniform float gCameraTargetX;// 0 -100 100
-uniform float gCameraTargetY;// 2.75 -100 100
-uniform float gCameraTargetZ;// 0 -100 100
+float gCameraTargetX;// 0 -100 100
+float gCameraTargetY;// 2.75 -100 100
+float gCameraTargetZ;// 0 -100 100
 
 #define FLT_EPS  5.960464478e-8
 
@@ -309,6 +309,15 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    // test
+    gCameraEyeX = 0.0;// 0 -100 100
+    gCameraEyeY = 2.8;// 2.8 -100 100
+    gCameraEyeZ = -8.0;// -8 -100 100
+
+    gCameraTargetX = 0.0;// 0 -100 100
+    gCameraTargetY = 2.75;// 2.75 -100 100
+    gCameraTargetZ = 0.0;// 0 -100 100
+
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 
     // camera and ray

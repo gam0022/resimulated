@@ -44,9 +44,14 @@ window.addEventListener("load", ev => {
         });
     })
 
+    const enableCameraDebug = "gCameraEyeX" in globalDebugUniformValues;
+
     // THREE.OrbitControls
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
-    camera.position.set(globalDebugUniformValues.gCameraEyeX, globalDebugUniformValues.gCameraEyeY, globalDebugUniformValues.gCameraEyeZ);
+
+    if (enableCameraDebug) {
+        camera.position.set(globalDebugUniformValues.gCameraEyeX, globalDebugUniformValues.gCameraEyeY, globalDebugUniformValues.gCameraEyeZ);
+    }
 
     const controls = new THREE.OrbitControls(camera, chromatic.canvas);
     controls.target = new three.Vector3(globalDebugUniformValues.gCameraTargetX, globalDebugUniformValues.gCameraTargetY, globalDebugUniformValues.gCameraTargetZ);
@@ -155,24 +160,26 @@ window.addEventListener("load", ev => {
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
     }
 
-    chromatic.onUpdate = () => {
-        controls.update();
+    if (enableCameraDebug) {
+        chromatic.onUpdate = () => {
+            controls.update();
 
-        if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {
-            globalDebugUniformValues.gCameraEyeX = camera.position.x;
-            globalDebugUniformValues.gCameraEyeY = camera.position.y;
-            globalDebugUniformValues.gCameraEyeZ = camera.position.z;
+            if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {
+                globalDebugUniformValues.gCameraEyeX = camera.position.x;
+                globalDebugUniformValues.gCameraEyeY = camera.position.y;
+                globalDebugUniformValues.gCameraEyeZ = camera.position.z;
 
-            globalDebugUniformValues.gCameraTargetX = controls.target.x;
-            globalDebugUniformValues.gCameraTargetY = controls.target.y;
-            globalDebugUniformValues.gCameraTargetZ = controls.target.z;
+                globalDebugUniformValues.gCameraTargetX = controls.target.x;
+                globalDebugUniformValues.gCameraTargetY = controls.target.y;
+                globalDebugUniformValues.gCameraTargetZ = controls.target.z;
 
-            gui.updateDisplay();
-            chromatic.needsUpdate = true;
+                gui.updateDisplay();
+                chromatic.needsUpdate = true;
+            }
+
+            prevCameraPosotion.copy(camera.position);
+            prevCameraTarget.copy(controls.target);
         }
-
-        prevCameraPosotion.copy(camera.position);
-        prevCameraTarget.copy(controls.target);
     }
 
     if (chromatic.isPlaying) {

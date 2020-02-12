@@ -248,7 +248,7 @@ uniform float gCameraEyeZ;// -8 -100 100
 
 uniform float gCameraTargetX;// 0 -100 100
 uniform float gCameraTargetY;// 2.75 -100 100
-uniform float gCameraTargetZ;// -7 -100 100
+uniform float gCameraTargetZ;// 0 -100 100
 
 #define FLT_EPS  5.960464478e-8
 

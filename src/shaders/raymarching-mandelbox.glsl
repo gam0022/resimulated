@@ -4,12 +4,26 @@
 #define BOUNCE_LIMIT (2)
 #endif
 
+// debug uniforms
+float gCameraEyeX;// 0 -100 100
+float gCameraEyeY;// 2.8 -100 100
+float gCameraEyeZ;// -8 -100 100
+float gCameraTargetX;// 0 -100 100
+float gCameraTargetY;// 2.75 -100 100
+float gCameraTargetZ;// 0 -100 100
+
+float gMandelboxScale;// 2.7 1 5
+float gMandelboxRepeat;// 10 1 100
+float gSceneEps;// 0.001 0.00001 0.001
+float gEdgeEps;// 0.0005 0.0001 0.01
+float gBaseColor;// 0.5
+float gRoughness;// 0.1
+float gMetallic;// 0.4
 
 // consts
 const float INF = 1e+10;
 const float EPS = 0.01;
 const float OFFSET = EPS * 10.0;
-
 const float GROUND_BASE = 0.0;
 
 // ray
@@ -121,9 +135,6 @@ vec3 opRep(vec3 p, vec3 c) {
 	return mod(p, c) - 0.5 * c;
 }
 
-uniform float gMandelboxScale;// 2.7 1 5
-uniform float gMandelboxRepeat;// 10 1 100
-
 float map(vec3 p) {;
 	float d = dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
 	return d;
@@ -135,8 +146,6 @@ vec3 hsv2rgb(vec3 c) {
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, saturate(p - K.xxx), c.y);
 }
-
-uniform float gEdgeEps;// 0.0005 0.0001 0.01
 
 // https://www.shadertoy.com/view/lttGDn
 float calcEdge(vec3 p) {
@@ -165,11 +174,7 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
-uniform float gSceneEps;// 0.001 0.00001 0.001
 
-uniform float gBaseColor;// 0.5
-uniform float gRoughness;// 0.1
-uniform float gMetallic;// 0.4
 
 #define beat (iTime * 2.0)
 
@@ -241,15 +246,6 @@ float calcShadow(in vec3 p, in vec3 rd) {
     return shadowIntensity + (1.0 - shadowIntensity) * bright;
 }
 
-
-float gCameraEyeX;// 0 -100 100
-float gCameraEyeY;// 2.8 -100 100
-float gCameraEyeZ;// -8 -100 100
-
-float gCameraTargetX;// 0 -100 100
-float gCameraTargetY;// 2.75 -100 100
-float gCameraTargetZ;// 0 -100 100
-
 #define FLT_EPS  5.960464478e-8
 
 float roughnessToExponent(float roughness)
@@ -309,7 +305,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    // test
+    // no debug
     gCameraEyeX = 0.0;// 0 -100 100
     gCameraEyeY = 2.8;// 2.8 -100 100
     gCameraEyeZ = -8.0;// -8 -100 100
@@ -317,6 +313,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     gCameraTargetX = 0.0;// 0 -100 100
     gCameraTargetY = 2.75;// 2.75 -100 100
     gCameraTargetZ = 0.0;// 0 -100 100
+
+    gMandelboxScale = 2.7;// 2.7 1 5
+    gMandelboxRepeat = 10.0;// 10 1 100
+    gSceneEps = 0.001;// 0.001 0.00001 0.001
+    gEdgeEps = 0.0005;// 0.0005 0.0001 0.01
+    gBaseColor = 0.5;// 0.5
+    gRoughness = 0.1;// 0.1
+    gMetallic = 0.4;// 0.4
 
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 

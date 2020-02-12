@@ -75,8 +75,10 @@ export class Chromatic {
         this.time = 0;
 
         // debug uniforms
-        this.globalDebugUniforms = [];
-        this.globalDebugUniformValues = {};
+        if (DEBUG_UNIFORMS) {
+            this.globalDebugUniforms = [];
+            this.globalDebugUniformValues = {};
+        }
 
         // setup WebAudio
         const audio = this.audioContext = new window.AudioContext();

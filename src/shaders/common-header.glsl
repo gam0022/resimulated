@@ -1,5 +1,7 @@
 #version 300 es
-precision highp float;precision highp int;precision mediump sampler3D;
+precision highp float;
+precision highp int;
+precision mediump sampler3D;
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord);
 

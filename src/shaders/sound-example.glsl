@@ -9,18 +9,12 @@ uniform float iBlockOffset;
 
 #define PI 3.141592
 
-float tri(in float freq, in float time)
-{
-    return -abs(1. - mod(freq * time * 2., 2.));
-}
+float tri(in float freq, in float time) { return -abs(1. - mod(freq * time * 2., 2.)); }
 
-vec2 mainSound(float time)
-{
+vec2 mainSound(float time) {
     float freq = 440.;
     freq *= pow(1.06 * 1.06, floor(mod(time, 6. * 4.)));
-    return vec2(
-        tri(freq, time) * sin(time * PI),
-        tri(freq, time) * sin(time * PI));
+    return vec2(tri(freq, time) * sin(time * PI), tri(freq, time) * sin(time * PI));
 }
 
 //--------------------
@@ -28,8 +22,7 @@ vec2 mainSound(float time)
 //--------------------
 
 out vec4 outColor;
-void main()
-{
+void main() {
     float t = iBlockOffset + ((gl_FragCoord.x - 0.5) + (gl_FragCoord.y - 0.5) * 512.0) / iSampleRate;
     vec2 y = mainSound(t);
     vec2 v = floor((0.5 + 0.5 * y) * 65536.0);

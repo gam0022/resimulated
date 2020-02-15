@@ -6,7 +6,7 @@ precision mediump sampler3D;
 void mainImage(out vec4 fragColor, in vec2 fragCoord);
 
 out vec4 outColor;
-void main(void){
+void main(void) {
     vec4 c;
     mainImage(c, gl_FragCoord.xy);
     outColor = c;
@@ -23,8 +23,7 @@ uniform vec3 iResolution;
 uniform float iTime;
 uniform sampler2D iPrevPass;
 
-vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize)
-{
+vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);
 
     vec3 s;

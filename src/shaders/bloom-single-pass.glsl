@@ -25,5 +25,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     vec4 Highlight = clamp(BlurColor(uv, iPrevPass, BlurSize) - Threshold, 0.0, 1.0) * 1.0 / (1.0 - Threshold);
 
-    fragColor = 1.0 - (1.0 - Color) * (1.0 - Highlight * Intensity); // Screen Blend Mode
+    fragColor = 1.0 - (1.0 - Color) * (1.0 - Highlight * Intensity);  // Screen Blend Mode
 }

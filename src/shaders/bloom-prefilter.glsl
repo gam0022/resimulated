@@ -1,7 +1,7 @@
 float brightness(vec3 c) { return max(max(c.r, c.g), c.b); }
 
-uniform float gBloomThreshold; // 1.0 0 100
-uniform float gBloomSoftKnee;  // 0.5 0 4
+uniform float gBloomThreshold;  // 1.0 0 100
+uniform float gBloomSoftKnee;   // 0.5 0 4
 
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Runtime/Components/BloomComponent.cs#L78-L109
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

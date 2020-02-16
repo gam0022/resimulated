@@ -5,20 +5,20 @@
 #endif
 
 // debug uniforms
-uniform float gCameraEyeX;    // 0 -100 100
-uniform float gCameraEyeY;    // 2.8 -100 100
-uniform float gCameraEyeZ;    // -8 -100 100
-uniform float gCameraTargetX; // 0 -100 100
-uniform float gCameraTargetY; // 2.75 -100 100
-uniform float gCameraTargetZ; // 0 -100 100
+uniform float gCameraEyeX;     // 0 -100 100
+uniform float gCameraEyeY;     // 2.8 -100 100
+uniform float gCameraEyeZ;     // -8 -100 100
+uniform float gCameraTargetX;  // 0 -100 100
+uniform float gCameraTargetY;  // 2.75 -100 100
+uniform float gCameraTargetZ;  // 0 -100 100
 
-uniform float gMandelboxScale;  // 2.7 1 5
-uniform float gMandelboxRepeat; // 10 1 100
-uniform float gSceneEps;        // 0.001 0.00001 0.001
-uniform float gEdgeEps;         // 0.0005 0.0001 0.01
-uniform float gBaseColor;       // 0.5
-uniform float gRoughness;       // 0.1
-uniform float gMetallic;        // 0.4
+uniform float gMandelboxScale;   // 2.7 1 5
+uniform float gMandelboxRepeat;  // 10 1 100
+uniform float gSceneEps;         // 0.001 0.00001 0.001
+uniform float gEdgeEps;          // 0.0005 0.0001 0.01
+uniform float gBaseColor;        // 0.5
+uniform float gRoughness;        // 0.1
+uniform float gMetallic;         // 0.4
 
 // consts
 const float INF = 1e+10;
@@ -62,7 +62,7 @@ struct Intersection {
 
     vec3 baseColor;
     float roughness;
-    float reflectance; // vec3 ?
+    float reflectance;  // vec3 ?
     float metallic;
     vec3 emission;
 
@@ -74,8 +74,8 @@ struct Intersection {
 
 // util
 
-#define calcNormal(p, dFunc)                                                                                                                                                                           \
-    normalize(vec2(gSceneEps, -gSceneEps).xyy *dFunc(p + vec2(gSceneEps, -gSceneEps).xyy) + vec2(gSceneEps, -gSceneEps).yyx * dFunc(p + vec2(gSceneEps, -gSceneEps).yyx) +                             \
+#define calcNormal(p, dFunc)                                                                                                                                               \
+    normalize(vec2(gSceneEps, -gSceneEps).xyy *dFunc(p + vec2(gSceneEps, -gSceneEps).xyy) + vec2(gSceneEps, -gSceneEps).yyx * dFunc(p + vec2(gSceneEps, -gSceneEps).yyx) + \
               vec2(gSceneEps, -gSceneEps).yxy * dFunc(p + vec2(gSceneEps, -gSceneEps).yxy) + vec2(gSceneEps, -gSceneEps).xxx * dFunc(p + vec2(gSceneEps, -gSceneEps).xxx))
 
 // Distance Functions
@@ -96,12 +96,9 @@ float dMenger(vec3 z0, vec3 offset, float scale) {
     for (int n = 0; n < 5; n++) {
         z = abs(z);
 
-        if (z.x < z.y)
-            z.xy = z.yx;
-        if (z.x < z.z)
-            z.xz = z.zx;
-        if (z.y < z.z)
-            z.yz = z.zy;
+        if (z.x < z.y) z.xy = z.yx;
+        if (z.x < z.z) z.xz = z.zx;
+        if (z.y < z.z) z.yz = z.zy;
 
         z *= scale;
         z.xyz -= offset * (scale - 1.0);
@@ -159,8 +156,8 @@ float calcEdge(vec3 p) {
     float d1 = map(p + e.xyy), d2 = map(p - e.xyy);
     float d3 = map(p + e.yxy), d4 = map(p - e.yxy);
     float d5 = map(p + e.yyx), d6 = map(p - e.yyx);
-    float d = map(p) * 2.; // The hit point itself - Doubled to cut down on
-                           // calculations. See below.
+    float d = map(p) * 2.;  // The hit point itself - Doubled to cut down on
+                            // calculations. See below.
 
     // Edges - Take a geometry measurement from either side of the hit point.
     // Average them, then see how much the value differs from the hit point
@@ -195,8 +192,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
         eps = gSceneEps * distance;
-        if (d < eps)
-            break;
+        if (d < eps) break;
     }
 
     if (distance < intersection.distance) {
@@ -244,8 +240,7 @@ float calcShadow(in vec3 p, in vec3 rd) {
 
     for (int i = 0; i < 30; i++) {
         d = map(p + rd * distance);
-        if (d < EPS)
-            return shadowIntensity;
+        if (d < EPS) return shadowIntensity;
         bright = min(bright, shadowSharpness * d / distance);
         distance += d;
     }
@@ -336,7 +331,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
-    camera.up = vec3(0.0, 1.0, 0.0); // y-up
+    camera.up = vec3(0.0, 1.0, 0.0);  // y-up
     camera.zoom = 9.0;
     Ray ray = cameraShootRay(camera, uv);
 
@@ -347,8 +342,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     for (int bounce = 0; bounce < BOUNCE_LIMIT; bounce++) {
         calcRadiance(intersection, ray, bounce);
         color += reflection * intersection.color;
-        if (!intersection.hit)
-            break;
+        if (!intersection.hit) break;
         reflection *= intersection.reflectance;
 
         bool isIncoming = dot(ray.direction, intersection.normal) < 0.0;

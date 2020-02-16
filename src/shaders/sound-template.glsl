@@ -32,7 +32,7 @@ float beatToTime(float b) { return b / BPM * 60.0; }
 
 float noteToFreq(float n) { return 440.0 * pow(2.0, (n - 69.0) / 12.0); }
 
-float chord(float n) { return (n < 1.0 ? 55.0 : n < 2.0 ? 58.0 : n < 3.0 ? 62.0 : 65.0); }
+float chord(float n) { return n < 1.0 ? 55.0 : n < 2.0 ? 58.0 : n < 3.0 ? 62.0 : 65.0; }
 
 // https://www.shadertoy.com/view/4djSRW
 vec4 noise(float p) {

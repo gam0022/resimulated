@@ -67,8 +67,8 @@ struct Intersection {
 
 // util
 
-#define calcNormal(p, dFunc)                                                                                                                                                                           \
-    normalize(vec2(EPS_N, -EPS_N).xyy *dFunc(p + vec2(EPS_N, -EPS_N).xyy) + vec2(EPS_N, -EPS_N).yyx * dFunc(p + vec2(EPS_N, -EPS_N).yyx) +                                                             \
+#define calcNormal(p, dFunc)                                                                                                               \
+    normalize(vec2(EPS_N, -EPS_N).xyy *dFunc(p + vec2(EPS_N, -EPS_N).xyy) + vec2(EPS_N, -EPS_N).yyx * dFunc(p + vec2(EPS_N, -EPS_N).yyx) + \
               vec2(EPS_N, -EPS_N).yxy * dFunc(p + vec2(EPS_N, -EPS_N).yxy) + vec2(EPS_N, -EPS_N).xxx * dFunc(p + vec2(EPS_N, -EPS_N).xxx))
 
 // Distance Functions
@@ -89,12 +89,9 @@ float dMenger(vec3 z0, vec3 offset, float scale) {
     for (int n = 0; n < 5; n++) {
         z = abs(z);
 
-        if (z.x < z.y)
-            z.xy = z.yx;
-        if (z.x < z.z)
-            z.xz = z.zx;
-        if (z.y < z.z)
-            z.yz = z.zy;
+        if (z.x < z.y) z.xy = z.yx;
+        if (z.x < z.z) z.xz = z.zx;
+        if (z.y < z.z) z.yz = z.zy;
 
         z *= scale;
         z.xyz -= offset * (scale - 1.0);
@@ -141,8 +138,8 @@ float calcEdge(vec3 p) {
     float d1 = map(p + e.xyy), d2 = map(p - e.xyy);
     float d3 = map(p + e.yxy), d4 = map(p - e.yxy);
     float d5 = map(p + e.yyx), d6 = map(p - e.yyx);
-    float d = map(p) * 2.; // The hit point itself - Doubled to cut down on
-                           // calculations. See below.
+    float d = map(p) * 2.;  // The hit point itself - Doubled to cut down on
+                            // calculations. See below.
 
     // Edges - Take a geometry measurement from either side of the hit point.
     // Average them, then see how much the value differs from the hit point
@@ -173,8 +170,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         distance += d;
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
-        if (d < EPS || distance > 100.0)
-            break;
+        if (d < EPS || distance > 100.0) break;
     }
 
     if (abs(d) < EPS && distance < intersection.distance) {
@@ -222,8 +218,7 @@ float calcShadow(in vec3 p, in vec3 rd) {
 
     for (int i = 0; i < 30; i++) {
         d = map(p + rd * distance);
-        if (d < EPS)
-            return shadowIntensity;
+        if (d < EPS) return shadowIntensity;
         bright = min(bright, shadowSharpness * d / distance);
         distance += d;
     }
@@ -263,7 +258,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     Camera camera;
     camera.eye = vec3(0.0, 0.0, iTime);
     camera.target = camera.eye + vec3(0.05 * sin((iTime)), 0.0, 1.0);
-    camera.up = vec3(0.0, 1.0, 0.0); // y-up
+    camera.up = vec3(0.0, 1.0, 0.0);  // y-up
     camera.zoom = 9.0;
     Ray ray = cameraShootRay(camera, uv);
 
@@ -274,8 +269,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     for (int bounce = 0; bounce < BOUNCE_LIMIT; bounce++) {
         calcRadiance(intersection, ray, bounce);
         color += reflection * intersection.color;
-        if (!intersection.hit)
-            break;
+        if (!intersection.hit) break;
         reflection *= intersection.reflectance;
 
         bool isIncoming = dot(ray.direction, intersection.normal) < 0.0;

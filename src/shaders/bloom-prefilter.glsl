@@ -5,7 +5,7 @@ uniform float gBloomSoftKnee;   // 0.5 0 4
 
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Runtime/Components/BloomComponent.cs#L78-L109
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    float softKnee = 0.5;
+    float softKnee = gBloomSoftKnee;
     float lthresh = gBloomThreshold;
 
     vec2 uv = fragCoord.xy / iResolution.xy;

@@ -13,7 +13,7 @@ window.addEventListener("load", ev => {
         [
             //require("./shaders/kaleidoscope.glsl").default,
             require("./shaders/raymarching-mandelbox.glsl").default,
-            require("./shaders/blit.glsl").default,
+            require("./shaders/tone-mapping.glsl").default,
 
             //require("./shaders/kaleidoscope.glsl").default,
             //require("./shaders/invert.glsl").default,
@@ -22,7 +22,7 @@ window.addEventListener("load", ev => {
         ],
 
         1,
-        3,
+        5,
         require("./shaders/bloom-prefilter.glsl").default,
         require("./shaders/bloom-downsample.glsl").default,
         require("./shaders/bloom-upsample.glsl").default,

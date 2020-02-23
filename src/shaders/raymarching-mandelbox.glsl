@@ -16,6 +16,7 @@ uniform float gMandelboxScale;   // 2.7 1 5
 uniform float gMandelboxRepeat;  // 10 1 100
 uniform float gSceneEps;         // 0.001 0.00001 0.001
 uniform float gEdgeEps;          // 0.0005 0.0001 0.01
+uniform float gEdgePower;        // 1 0.1 10
 uniform float gBaseColor;        // 0.5
 uniform float gRoughness;        // 0.1
 uniform float gMetallic;         // 0.4
@@ -207,7 +208,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = vec3(0.5, 2.5, 0.5) * edge * saturate(cos(beat * 2.0 - mod(0.5 * intersection.position.z, TAU)));
+            intersection.emission = 6.0 * vec3(0.5, 2.5, 0.5) * pow(edge, gEdgePower) * saturate(cos(beat * 2.0 - mod(0.5 * intersection.position.z, TAU)));
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;

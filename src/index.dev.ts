@@ -32,6 +32,17 @@ window.addEventListener("load", ev => {
     );
 
     const gui = new dat.GUI({ width: 1000, });
+
+    const imageFunctions = {
+        saveImage: () => {
+            const a = document.createElement("a");
+            a.href = chromatic.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            a.download = "chromatic.png";
+            a.click();
+        }
+    };
+    gui.add(imageFunctions, "saveImage");
+
     chromatic.globalDebugUniforms.forEach(unifrom => {
         gui.add(chromatic.globalDebugUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
             chromatic.needsUpdate = true;

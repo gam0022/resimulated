@@ -5,6 +5,8 @@ import * as three from 'three';
 const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
+import { saveAs } from 'file-saver';
+
 window.addEventListener("load", ev => {
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
@@ -35,10 +37,9 @@ window.addEventListener("load", ev => {
 
     const imageFunctions = {
         saveImage: () => {
-            const a = document.createElement("a");
-            a.href = chromatic.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-            a.download = "chromatic.png";
-            a.click();
+            chromatic.canvas.toBlob(function (blob) {
+                saveAs(blob, "chromatic.png");
+            });
         }
     };
     gui.add(imageFunctions, "saveImage");

@@ -90,7 +90,7 @@ export class Chromatic {
         window.document.body.appendChild(canvas);
 
         // webgl2 enabled default from: firefox-51, chrome-56
-        const gl = this.gl = canvas.getContext("webgl2");
+        const gl = this.gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
         if (!gl) {
             console.log("WebGL 2 is not supported...");
             return;

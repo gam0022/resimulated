@@ -51,7 +51,7 @@ export class Chromatic {
     imagePasses: Pass[];
 
     // global uniforms
-    globalUniforms: { key: string, value: number, min: number, max: number }[];
+    globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
 
     constructor(
@@ -174,12 +174,12 @@ export class Chromatic {
             while ((result = reg.exec(fragmentShader)) !== null) {
                 const uniform = {
                     key: result[1],
-                    value: result[3] !== undefined ? parseFloat(result[3]) : 0,
+                    initValue: result[3] !== undefined ? parseFloat(result[3]) : 0,
                     min: result[5] !== undefined ? parseFloat(result[5]) : 0,
                     max: result[6] !== undefined ? parseFloat(result[6]) : 1,
                 };
                 this.globalUniforms.push(uniform);
-                this.globalUniformValues[uniform.key] = uniform.value;
+                this.globalUniformValues[uniform.key] = uniform.initValue;
             }
         };
 
@@ -234,7 +234,7 @@ export class Chromatic {
 
             if (DEBUG_UNIFORMS) {
                 this.globalUniforms.forEach(unifrom => {
-                    pass.uniforms[unifrom.key] = { type: "f", value: unifrom.value };
+                    pass.uniforms[unifrom.key] = { type: "f", value: unifrom.initValue };
                 })
             }
 

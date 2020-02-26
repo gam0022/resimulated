@@ -164,6 +164,10 @@ window.addEventListener("load", ev => {
 
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
+
+        // animate uniforms
+        chromatic.globalDebugUniformValues.gMandelboxScale = 3.0 + 3.0 * Math.sin(time);
+        gui.updateDisplay();
     }
 
     if (enableCameraDebug) {

@@ -50,9 +50,9 @@ export class Chromatic {
 
     imagePasses: Pass[];
 
-    // debug uniforms
-    globalDebugUniforms: { key: string, value: number, min: number, max: number }[];
-    globalDebugUniformValues: { [key: string]: number; };
+    // global uniforms
+    globalUniforms: { key: string, value: number, min: number, max: number }[];
+    globalUniformValues: { [key: string]: number; };
 
     constructor(
         timeLength: number,
@@ -76,8 +76,8 @@ export class Chromatic {
 
         // debug uniforms
         if (DEBUG_UNIFORMS) {
-            this.globalDebugUniforms = [];
-            this.globalDebugUniformValues = {};
+            this.globalUniforms = [];
+            this.globalUniformValues = {};
         }
 
         // setup WebAudio
@@ -178,8 +178,8 @@ export class Chromatic {
                     min: result[5] !== undefined ? parseFloat(result[5]) : 0,
                     max: result[6] !== undefined ? parseFloat(result[6]) : 1,
                 };
-                this.globalDebugUniforms.push(uniform);
-                this.globalDebugUniformValues[uniform.key] = uniform.value;
+                this.globalUniforms.push(uniform);
+                this.globalUniformValues[uniform.key] = uniform.value;
             }
         };
 
@@ -233,7 +233,7 @@ export class Chromatic {
             }
 
             if (DEBUG_UNIFORMS) {
-                this.globalDebugUniforms.forEach(unifrom => {
+                this.globalUniforms.forEach(unifrom => {
                     pass.uniforms[unifrom.key] = { type: "f", value: unifrom.value };
                 })
             }
@@ -396,7 +396,7 @@ export class Chromatic {
                 this.imagePasses.forEach((pass) => {
                     pass.uniforms.iTime.value = this.time;
                     if (DEBUG_UNIFORMS) {
-                        for (const [key, value] of Object.entries(this.globalDebugUniformValues)) {
+                        for (const [key, value] of Object.entries(this.globalUniformValues)) {
                             pass.uniforms[key].value = value;
                         }
                     }

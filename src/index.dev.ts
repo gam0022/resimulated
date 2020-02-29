@@ -1,4 +1,6 @@
 import { Chromatic } from "./chromatic"
+import { mix, clamp, saturate } from "./easing"
+
 import * as dat from 'dat.gui';
 
 import * as three from 'three';
@@ -34,7 +36,7 @@ window.addEventListener("load", ev => {
     );
 
     const animateUniforms = (time: number) => {
-        chromatic.globalUniformValues.gMandelboxScale = 3.0 + 3.0 * Math.sin(time);
+        chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
     }
 
     const gui = new dat.GUI({ width: 1000, });

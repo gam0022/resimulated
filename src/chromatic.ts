@@ -387,10 +387,8 @@ export class Chromatic {
             }
 
             if (this.isPlaying || lastRenderTime !== this.time || this.needsUpdate) {
-                if (!PRODUCTION) {
-                    if (this.onRender != null) {
-                        this.onRender(this.time, timeDelta);
-                    }
+                if (this.onRender != null) {
+                    this.onRender(this.time, timeDelta);
                 }
 
                 this.imagePasses.forEach((pass) => {

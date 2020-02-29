@@ -33,6 +33,10 @@ window.addEventListener("load", ev => {
         require("./shaders/sound-template.glsl").default,
     );
 
+    const animateUniforms = (time: number) => {
+        chromatic.globalUniformValues.gMandelboxScale = 3.0 + 3.0 * Math.sin(time);
+    }
+
     const gui = new dat.GUI({ width: 1000, });
 
     const imageFunctions = {
@@ -165,8 +169,7 @@ window.addEventListener("load", ev => {
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
 
-        // animate uniforms
-        chromatic.globalUniformValues.gMandelboxScale = 3.0 + 3.0 * Math.sin(time);
+        animateUniforms(time);
         gui.updateDisplay();
     }
 

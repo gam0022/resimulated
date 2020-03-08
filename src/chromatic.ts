@@ -2,15 +2,15 @@
 declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;
 
-type PassType = number;
-
 const PassType = {
-    Image: 0,
-    FinalImage: 1,
-    Bloom: 2,
-    BloomUpsample: 3,
-    Sound: 4,
+    Image: 0 as const,
+    FinalImage: 1 as const,
+    Bloom: 2 as const,
+    BloomUpsample: 3 as const,
+    Sound: 4 as const,
 }
+
+type PassType = typeof PassType[keyof typeof PassType]
 
 class Pass {
     type: PassType;

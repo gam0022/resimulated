@@ -4,9 +4,9 @@ export const saturate = (x: number) => clamp(x, 0, 1);
 
 export class Vector3 {
     constructor(
-        public x: number = 0,
-        public y: number = 0,
-        public z: number = 0
+        public x: number,
+        public y: number,
+        public z: number
     ) {
     }
 

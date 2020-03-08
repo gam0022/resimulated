@@ -10,7 +10,7 @@ export class Vector3 {
     ) {
     }
 
-    static lerp(v1: Vector3, v2: Vector3, a: number) {
+    static mix(v1: Vector3, v2: Vector3, a: number) {
         return new Vector3(mix(v1.x, v2.x, a), mix(v1.y, v2.y, a), mix(v1.z, v2.z, a));
     }
 }

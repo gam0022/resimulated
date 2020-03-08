@@ -42,7 +42,7 @@ window.addEventListener("load", ev => {
                 const camera1 = new Vector3(0, 2.8, -8);
                 const camera2 = new Vector3(0, 0, -32);
 
-                const camera = Vector3.lerp(camera1, camera2, saturate(0.1 * time));
+                const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
                 chromatic.globalUniformValues.gCameraEyeX = camera.x;
                 chromatic.globalUniformValues.gCameraEyeY = camera.y;
                 chromatic.globalUniformValues.gCameraEyeZ = camera.z;

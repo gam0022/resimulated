@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate } from "./easing"
+import { mix, clamp, saturate, Vector3 } from "./math"
 
 import * as dat from 'dat.gui';
 
@@ -37,6 +37,14 @@ window.addEventListener("load", ev => {
 
     const animateUniforms = (time: number) => {
         chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
+
+        const camera1 = new Vector3(0, 2.8, -8);
+        const camera2 = new Vector3(0, 0, -32);
+
+        const camera = Vector3.lerp(camera1, camera2, saturate(0.1 * time));
+        chromatic.globalUniformValues.gCameraEyeX = camera.x;
+        chromatic.globalUniformValues.gCameraEyeY = camera.y;
+        chromatic.globalUniformValues.gCameraEyeZ = camera.z;
     }
 
     const gui = new dat.GUI({ width: 1000, });

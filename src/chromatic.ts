@@ -4,7 +4,7 @@ declare var GLOBAL_UNIFORMS: boolean;
 
 type PassType = number;
 
-const PASS_TYPE = {
+const PassType = {
     Image: 0,
     FinalImage: 1,
     Bloom: 2,
@@ -228,7 +228,7 @@ export class Chromatic {
                 pass.uniforms[`iPass${i}`] = { type: "t", value: i };
             });
 
-            if (type === PASS_TYPE.BloomUpsample) {
+            if (type === PassType.BloomUpsample) {
                 const bloomDonwsampleEndIndex = bloomPassBeginIndex + bloomDonwsampleIterations;
                 const upCount = index - bloomDonwsampleEndIndex;
                 pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
@@ -299,7 +299,7 @@ export class Chromatic {
                 this.imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                     passIndex,
-                    PASS_TYPE.Bloom,
+                    PassType.Bloom,
                     1
                 ));
                 passIndex++;
@@ -310,7 +310,7 @@ export class Chromatic {
                     this.imagePasses.push(initPass(
                         loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
                         passIndex,
-                        PASS_TYPE.Bloom,
+                        PassType.Bloom,
                         scale,
                     ));
                     passIndex++;
@@ -321,7 +321,7 @@ export class Chromatic {
                     this.imagePasses.push(initPass(
                         loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
                         passIndex,
-                        PASS_TYPE.BloomUpsample,
+                        PassType.BloomUpsample,
                         scale,
                     ));
                     passIndex++;
@@ -330,7 +330,7 @@ export class Chromatic {
                 this.imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + bloomFinalShader),
                     passIndex,
-                    PASS_TYPE.BloomUpsample,
+                    PassType.BloomUpsample,
                     1,
                 ));
                 passIndex++;
@@ -339,7 +339,7 @@ export class Chromatic {
             this.imagePasses.push(initPass(
                 loadProgram(imageCommonHeaderShader + shader),
                 passIndex,
-                i < ary.length - 1 ? PASS_TYPE.Image : PASS_TYPE.FinalImage,
+                i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
                 1
             ));
 
@@ -351,7 +351,7 @@ export class Chromatic {
         const samples = SOUND_WIDTH * SOUND_HEIGHT;
         const numBlocks = (audio.sampleRate * timeLength) / samples;
         const soundProgram = loadProgram(soundShader);
-        const soundPass = initPass(soundProgram, 0, PASS_TYPE.Sound, 1);
+        const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
             soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
@@ -418,7 +418,7 @@ export class Chromatic {
 
     setupFrameBuffer(pass: Pass) {
         // FIXME: setupFrameBuffer の呼び出し側でやるべき
-        if (pass.type === PASS_TYPE.FinalImage) {
+        if (pass.type === PassType.FinalImage) {
             return;
         }
 
@@ -430,7 +430,7 @@ export class Chromatic {
         let format = gl.RGBA32F;
         let filter = gl.LINEAR;
 
-        if (pass.type === PASS_TYPE.Sound) {
+        if (pass.type === PassType.Sound) {
             width = SOUND_WIDTH;
             height = SOUND_HEIGHT;
             type = gl.UNSIGNED_BYTE;

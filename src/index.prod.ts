@@ -1,4 +1,5 @@
 import { Chromatic } from "./chromatic"
+import { mix, clamp, saturate } from "./easing"
 
 window.addEventListener("load", ev => {
     const style = document.createElement("style");
@@ -34,6 +35,14 @@ window.addEventListener("load", ev => {
 
                 require("./shaders/sound-template.glsl").default,
             );
+
+            const animateUniforms = (time: number) => {
+                chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
+            }
+            chromatic.onRender = (time, timeDelta) => {
+                animateUniforms(time);
+            }
+
             chromatic.playSound();
         });
     }

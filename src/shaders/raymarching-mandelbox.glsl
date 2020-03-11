@@ -135,7 +135,6 @@ vec2 foldRotate(vec2 p, float s) {
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
-    ;
     float d = dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
     return d;
 }
@@ -179,8 +178,6 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
-#define beat (iTime * 2.0)
-
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -208,7 +205,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = 6.0 * vec3(0.5, 2.5, 0.5) * pow(edge, gEdgePower) * saturate(cos(beat * 2.0 - mod(0.5 * intersection.position.z, TAU)));
+            intersection.emission = 6.0 * vec3(0.5, 2.5, 0.5) * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;

@@ -1,3 +1,5 @@
+import { saveAs } from 'file-saver';
+
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;
@@ -55,6 +57,9 @@ export class Chromatic {
     // global uniforms
     globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
+
+    mediaRecorder: MediaRecorder;
+    dest: MediaStreamAudioDestinationNode;
 
     constructor(
         timeLength: number,
@@ -373,7 +378,24 @@ export class Chromatic {
         this.audioSource = audio.createBufferSource();
         this.audioSource.buffer = audioBuffer;
         this.audioSource.loop = true;
-        this.audioSource.connect(audio.destination);
+        // this.audioSource.connect(audio.destination);
+
+        // for save
+        this.dest = audio.createMediaStreamDestination();
+        this.mediaRecorder = new MediaRecorder(this.dest.stream);
+        this.audioSource.connect(this.dest);
+
+        const chunks: Blob[] = [];
+        this.mediaRecorder.ondataavailable = function (evt) {
+            // それぞれの chunk(blobs)を配列に入れる
+            chunks.push(evt.data);
+        };
+
+        this.mediaRecorder.onstop = function (evt) {
+            // blob を作成し開く
+            var blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' });
+            saveAs(blob, "chromatic.ogg");
+        };
 
         // Start Rendering
         let lastTimestamp = 0;
@@ -486,6 +508,7 @@ export class Chromatic {
     }
 
     stopSound() {
+        this.mediaRecorder.stop();
         this.audioSource.stop();
     }
 
@@ -493,9 +516,12 @@ export class Chromatic {
         const newAudioSource = this.audioContext.createBufferSource();
         newAudioSource.buffer = this.audioSource.buffer;
         newAudioSource.loop = this.audioSource.loop;
-        newAudioSource.connect(this.audioContext.destination);
-        this.audioSource = newAudioSource;
 
+        this.audioSource = newAudioSource;
+        // newAudioSource.connect(this.audioContext.destination);
+        this.audioSource.connect(this.dest);
+
+        this.mediaRecorder.start();
         this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }
 }

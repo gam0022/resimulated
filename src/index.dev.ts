@@ -48,7 +48,7 @@ window.addEventListener("load", ev => {
         chromatic.globalUniformValues.gCameraEyeZ = camera.z;
     }
 
-    const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * 48);
+    const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
     saveAs(waveBlob, "chromatic.wav");
 
     const gui = new dat.GUI({ width: 1000, });

@@ -8,6 +8,7 @@ const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
 import { saveAs } from 'file-saver';
+import { bufferToWave } from "./buffer-to-wave";
 
 window.addEventListener("load", ev => {
     const chromatic = new Chromatic(
@@ -49,14 +50,19 @@ window.addEventListener("load", ev => {
 
     const gui = new dat.GUI({ width: 1000, });
 
-    const imageFunctions = {
+    const saevFunctions = {
         saveImage: () => {
             chromatic.canvas.toBlob(function (blob) {
                 saveAs(blob, "chromatic.png");
             });
+        },
+        saveSound: () => {
+            const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
+            saveAs(waveBlob, "chromatic.wav");
         }
     };
-    gui.add(imageFunctions, "saveImage");
+    gui.add(saevFunctions, "saveImage");
+    gui.add(saevFunctions, "saveSound");
 
     chromatic.globalUniforms.forEach(unifrom => {
         gui.add(chromatic.globalUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {

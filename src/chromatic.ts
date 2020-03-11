@@ -378,7 +378,7 @@ export class Chromatic {
         this.audioSource = audio.createBufferSource();
         this.audioSource.buffer = audioBuffer;
         this.audioSource.loop = true;
-        // this.audioSource.connect(audio.destination);
+        this.audioSource.connect(audio.destination);
 
         // for save
         this.dest = audio.createMediaStreamDestination();
@@ -518,7 +518,7 @@ export class Chromatic {
         newAudioSource.loop = this.audioSource.loop;
 
         this.audioSource = newAudioSource;
-        // newAudioSource.connect(this.audioContext.destination);
+        this.audioSource.connect(this.audioContext.destination);
         this.audioSource.connect(this.dest);
 
         this.mediaRecorder.start();

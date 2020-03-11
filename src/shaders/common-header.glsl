@@ -34,3 +34,6 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
 
     return s * (1.0 / 4.0);
 }
+
+#define BPM 140.0
+#define beat (iTime * BPM / 60.0)

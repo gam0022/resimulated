@@ -48,19 +48,21 @@ window.addEventListener("load", ev => {
         chromatic.globalUniformValues.gCameraEyeZ = camera.z;
     }
 
-    const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
-    saveAs(waveBlob, "chromatic.wav");
-
     const gui = new dat.GUI({ width: 1000, });
 
-    const imageFunctions = {
+    const saevFunctions = {
         saveImage: () => {
             chromatic.canvas.toBlob(function (blob) {
                 saveAs(blob, "chromatic.png");
             });
+        },
+        saveSound: () => {
+            const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
+            saveAs(waveBlob, "chromatic.wav");
         }
     };
-    gui.add(imageFunctions, "saveImage");
+    gui.add(saevFunctions, "saveImage");
+    gui.add(saevFunctions, "saveSound");
 
     chromatic.globalUniforms.forEach(unifrom => {
         gui.add(chromatic.globalUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {

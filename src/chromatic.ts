@@ -2,13 +2,15 @@
 declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;
 
-enum PassType {
-    Image,
-    FinalImage,
-    Bloom,
-    BloomUpsample,
-    Sound,
+const PassType = {
+    Image: 0 as const,
+    FinalImage: 1 as const,
+    Bloom: 2 as const,
+    BloomUpsample: 3 as const,
+    Sound: 4 as const,
 }
+
+type PassType = typeof PassType[keyof typeof PassType]
 
 class Pass {
     type: PassType;

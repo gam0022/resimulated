@@ -8,6 +8,7 @@ const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
 import { saveAs } from 'file-saver';
+import { bufferToWave } from "./buffer-to-wave";
 
 window.addEventListener("load", ev => {
     const chromatic = new Chromatic(
@@ -46,6 +47,9 @@ window.addEventListener("load", ev => {
         chromatic.globalUniformValues.gCameraEyeY = camera.y;
         chromatic.globalUniformValues.gCameraEyeZ = camera.z;
     }
+
+    const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * 48);
+    saveAs(waveBlob, "chromatic.wav");
 
     const gui = new dat.GUI({ width: 1000, });
 

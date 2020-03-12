@@ -402,7 +402,7 @@ export class Chromatic {
                 }
             }
 
-            if (this.isPlaying || lastRenderTime !== this.time || this.needsUpdate) {
+            if (this.isPlaying || this.needsUpdate) {
                 if (this.onRender != null) {
                     this.onRender(this.time, timeDelta);
                 }

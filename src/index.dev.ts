@@ -62,13 +62,17 @@ window.addEventListener("load", ev => {
             }
 
             chromatic.isPlaying = false;
-            chromatic.time = 0;
             playPauseButton.value = playChar;
 
             const fps = 60;
             for (let frame = 0; frame < 0.5 * fps; frame++) {
-                chromatic.time = frame / fps;
+                const time = frame / fps;
+                timeBar.valueAsNumber = time;
+                timeInput.valueAsNumber = time;
+                chromatic.time = time;
+
                 chromatic.render();
+
                 chromatic.canvas.toBlob(blob => {
                     saveAs(blob, `chromatic${frame.toString().padStart(4, "0")}.png`);
                 });
@@ -267,6 +271,7 @@ window.addEventListener("load", ev => {
         chromatic.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
 
         if (chromatic.isPlaying) {
             chromatic.playSound()
@@ -279,6 +284,7 @@ window.addEventListener("load", ev => {
         chromatic.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
         chromatic.stopSound();
     })
 

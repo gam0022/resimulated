@@ -55,6 +55,9 @@ export class Chromatic {
     // global uniforms
     globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
+    vertexArray: WebGLVertexArrayObject;
+    index: number[][];
+    indexData: Uint16Array;
 
     constructor(
         timeLength: number,
@@ -120,18 +123,18 @@ export class Chromatic {
         gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-        const index = [[0, 1, 2], [3, 2, 1]];
-        const indexData = new Uint16Array([].concat(...index));
+        this.index = [[0, 1, 2], [3, 2, 1]];
+        this.indexData = new Uint16Array([].concat(...this.index));
         const indexBuf = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         // opengl3 VAO
-        const vertexArray = gl.createVertexArray();
+        this.vertexArray = gl.createVertexArray();
         const setupVAO = (program: WebGLProgram) => {
             // setup buffers and attributes to the VAO
-            gl.bindVertexArray(vertexArray);
+            gl.bindVertexArray(this.vertexArray);
             // bind buffer data
             gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
@@ -246,39 +249,6 @@ export class Chromatic {
             return pass;
         };
 
-        const render = (pass: Pass) => {
-            gl.useProgram(pass.program);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-            for (const [key, uniform] of Object.entries(pass.uniforms)) {
-                if (uniform.type === "t" && key.indexOf("iPass") === 0) {
-                    gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
-                }
-
-                const methods: { [index: string]: any } = {
-                    f: gl.uniform1f,
-                    // v2: gl.uniform2fv,
-                    v3: gl.uniform3fv,
-                    // v4: gl.uniform4fv,
-                    t: gl.uniform1i,
-                }
-
-                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
-            }
-
-            // draw the buffer with VAO
-            // NOTE: binding vert and index buffer is not required
-            gl.bindVertexArray(vertexArray);
-            const indexOffset = 0 * index[0].length;
-            gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, indexOffset);
-            const error = gl.getError();
-            if (error !== gl.NO_ERROR) console.log(error);
-            gl.bindVertexArray(null);
-            gl.useProgram(null);
-        };
-
         if (GLOBAL_UNIFORMS) {
             getDebugUniforms(imageCommonHeaderShader);
 
@@ -355,7 +325,7 @@ export class Chromatic {
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
             soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
-            render(soundPass);
+            this.renderPass(soundPass);
 
             // Read pixels
             const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
@@ -393,15 +363,7 @@ export class Chromatic {
                     this.onRender(this.time, timeDelta);
                 }
 
-                this.imagePasses.forEach((pass) => {
-                    pass.uniforms.iTime.value = this.time;
-                    if (GLOBAL_UNIFORMS) {
-                        for (const [key, value] of Object.entries(this.globalUniformValues)) {
-                            pass.uniforms[key].value = value;
-                        }
-                    }
-                    render(pass);
-                });
+                this.render();
 
                 if (this.isPlaying) {
                     this.time += timeDelta;
@@ -414,6 +376,53 @@ export class Chromatic {
             lastTimestamp = timestamp;
         };
         update(0);
+    }
+
+    renderPass(pass: Pass) {
+        const gl = this.gl;
+
+        gl.useProgram(pass.program);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        for (const [key, uniform] of Object.entries(pass.uniforms)) {
+            if (uniform.type === "t" && key.indexOf("iPass") === 0) {
+                gl.activeTexture(gl.TEXTURE0 + uniform.value);
+                gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
+            }
+
+            const methods: { [index: string]: any } = {
+                f: gl.uniform1f,
+                // v2: gl.uniform2fv,
+                v3: gl.uniform3fv,
+                // v4: gl.uniform4fv,
+                t: gl.uniform1i,
+            }
+
+            methods[uniform.type].call(gl, pass.locations[key], uniform.value);
+        }
+
+        // draw the buffer with VAO
+        // NOTE: binding vert and index buffer is not required
+        gl.bindVertexArray(this.vertexArray);
+        const indexOffset = 0 * this.index[0].length;
+        gl.drawElements(gl.TRIANGLES, this.indexData.length, gl.UNSIGNED_SHORT, indexOffset);
+        const error = gl.getError();
+        if (error !== gl.NO_ERROR) console.log(error);
+        gl.bindVertexArray(null);
+        gl.useProgram(null);
+    };
+
+    render() {
+        this.imagePasses.forEach((pass) => {
+            pass.uniforms.iTime.value = this.time;
+            if (GLOBAL_UNIFORMS) {
+                for (const [key, value] of Object.entries(this.globalUniformValues)) {
+                    pass.uniforms[key].value = value;
+                }
+            }
+            this.renderPass(pass);
+        });
     }
 
     setupFrameBuffer(pass: Pass) {

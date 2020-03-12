@@ -52,7 +52,7 @@ window.addEventListener("load", ev => {
 
     const saevFunctions = {
         saveImage: () => {
-            chromatic.canvas.toBlob(function (blob) {
+            chromatic.canvas.toBlob(blob => {
                 saveAs(blob, "chromatic.png");
             });
         },

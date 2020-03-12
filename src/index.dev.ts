@@ -62,13 +62,14 @@ window.addEventListener("load", ev => {
             }
 
             chromatic.isPlaying = false;
+            chromatic.needsUpdate = false;
             playPauseButton.value = playChar;
 
             const fps = 60;
             for (let frame = 0; frame < 0.5 * fps; frame++) {
                 const time = frame / fps;
-                timeBar.valueAsNumber = time;
-                timeInput.valueAsNumber = time;
+                // timeBar.valueAsNumber = time;
+                // timeInput.valueAsNumber = time;
                 chromatic.time = time;
 
                 chromatic.render();
@@ -281,11 +282,14 @@ window.addEventListener("load", ev => {
     })
 
     timeBar.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
         chromatic.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
         chromatic.needsUpdate = true;
-        chromatic.stopSound();
     })
 
     timeLengthInput.addEventListener("input", ev => {

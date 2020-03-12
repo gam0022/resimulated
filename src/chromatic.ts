@@ -391,7 +391,6 @@ export class Chromatic {
 
         // Start Rendering
         let lastTimestamp = 0;
-        let lastRenderTime = 0;
         const update = (timestamp: number) => {
             requestAnimationFrame(update);
             const timeDelta = (timestamp - lastTimestamp) * 0.001;
@@ -412,8 +411,6 @@ export class Chromatic {
                 if (this.isPlaying) {
                     this.time += timeDelta;
                 }
-
-                lastRenderTime = this.time;
             }
 
             this.needsUpdate = false;

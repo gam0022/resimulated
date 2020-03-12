@@ -52,9 +52,27 @@ window.addEventListener("load", ev => {
 
     const saevFunctions = {
         saveImage: () => {
-            chromatic.canvas.toBlob(function (blob) {
+            chromatic.canvas.toBlob(blob => {
                 saveAs(blob, "chromatic.png");
             });
+        },
+        saveImageSequence: () => {
+            if (chromatic.isPlaying) {
+                chromatic.stopSound();
+            }
+
+            chromatic.isPlaying = false;
+            chromatic.time = 0;
+            playPauseButton.value = playChar;
+
+            const fps = 60;
+            for (let frame = 0; frame < 0.5 * fps; frame++) {
+                chromatic.time = frame / fps;
+                chromatic.render();
+                chromatic.canvas.toBlob(blob => {
+                    saveAs(blob, `chromatic${frame.toString().padStart(4, "0")}.png`);
+                });
+            }
         },
         saveSound: () => {
             const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
@@ -62,6 +80,7 @@ window.addEventListener("load", ev => {
         }
     };
     gui.add(saevFunctions, "saveImage");
+    gui.add(saevFunctions, "saveImageSequence");
     gui.add(saevFunctions, "saveSound");
 
     chromatic.globalUniforms.forEach(unifrom => {
@@ -224,10 +243,13 @@ window.addEventListener("load", ev => {
     })
 
     stopButton.addEventListener("click", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
         chromatic.isPlaying = false;
         chromatic.time = 0;
         playPauseButton.value = playChar;
-        chromatic.stopSound();
     })
 
     playPauseButton.addEventListener("click", ev => {

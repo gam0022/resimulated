@@ -271,16 +271,14 @@ window.addEventListener("load", ev => {
     })
 
     timeInput.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
         chromatic.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
         chromatic.needsUpdate = true;
-
-        if (chromatic.isPlaying) {
-            chromatic.playSound()
-        } else {
-            chromatic.stopSound();
-        }
     })
 
     timeBar.addEventListener("input", ev => {

@@ -68,10 +68,11 @@ window.addEventListener("load", ev => {
             const fps = 60;
             for (let frame = 0; frame < 0.5 * fps; frame++) {
                 const time = frame / fps;
-                // timeBar.valueAsNumber = time;
-                // timeInput.valueAsNumber = time;
+                timeBar.valueAsNumber = time;
+                timeInput.valueAsNumber = time;
                 chromatic.time = time;
 
+                animateUniforms(time);
                 chromatic.render();
 
                 chromatic.canvas.toBlob(blob => {
@@ -253,6 +254,7 @@ window.addEventListener("load", ev => {
         }
 
         chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
         chromatic.time = 0;
         playPauseButton.value = playChar;
     })

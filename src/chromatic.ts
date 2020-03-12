@@ -56,6 +56,8 @@ export class Chromatic {
     globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
 
+    render: () => void;
+
     constructor(
         timeLength: number,
         vertexShader: string,
@@ -246,7 +248,7 @@ export class Chromatic {
             return pass;
         };
 
-        const render = (pass: Pass) => {
+        const renderPass = (pass: Pass) => {
             gl.useProgram(pass.program);
             gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -355,7 +357,7 @@ export class Chromatic {
         for (let i = 0; i < numBlocks; i++) {
             // Update uniform & Render
             soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
-            render(soundPass);
+            renderPass(soundPass);
 
             // Read pixels
             const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
@@ -375,6 +377,18 @@ export class Chromatic {
         this.audioSource.loop = true;
         this.audioSource.connect(audio.destination);
 
+        this.render = () => {
+            this.imagePasses.forEach((pass) => {
+                pass.uniforms.iTime.value = this.time;
+                if (GLOBAL_UNIFORMS) {
+                    for (const [key, value] of Object.entries(this.globalUniformValues)) {
+                        pass.uniforms[key].value = value;
+                    }
+                }
+                renderPass(pass);
+            });
+        }
+
         // Start Rendering
         let lastTimestamp = 0;
         let lastRenderTime = 0;
@@ -393,15 +407,7 @@ export class Chromatic {
                     this.onRender(this.time, timeDelta);
                 }
 
-                this.imagePasses.forEach((pass) => {
-                    pass.uniforms.iTime.value = this.time;
-                    if (GLOBAL_UNIFORMS) {
-                        for (const [key, value] of Object.entries(this.globalUniformValues)) {
-                            pass.uniforms[key].value = value;
-                        }
-                    }
-                    render(pass);
-                });
+                this.render();
 
                 if (this.isPlaying) {
                     this.time += timeDelta;

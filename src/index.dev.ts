@@ -66,7 +66,12 @@ window.addEventListener("load", ev => {
             playPauseButton.value = playChar;
 
             const fps = 60;
-            for (let frame = 0; frame < 0.5 * fps; frame++) {
+            let frame = 0;
+            const update = (timestamp: number) => {
+                if (frame < fps * chromatic.timeLength) {
+                    requestAnimationFrame(update);
+                }
+
                 const time = frame / fps;
                 timeBar.valueAsNumber = time;
                 timeInput.valueAsNumber = time;
@@ -75,10 +80,15 @@ window.addEventListener("load", ev => {
                 animateUniforms(time);
                 chromatic.render();
 
+                const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
                 chromatic.canvas.toBlob(blob => {
-                    saveAs(blob, `chromatic${frame.toString().padStart(4, "0")}.png`);
+                    saveAs(blob, filename);
                 });
+
+                frame++;
             }
+
+            requestAnimationFrame(update);
         },
         saveSound: () => {
             const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);

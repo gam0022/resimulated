@@ -52,9 +52,43 @@ window.addEventListener("load", ev => {
 
     const saevFunctions = {
         saveImage: () => {
-            chromatic.canvas.toBlob(function (blob) {
+            chromatic.canvas.toBlob(blob => {
                 saveAs(blob, "chromatic.png");
             });
+        },
+        saveImageSequence: () => {
+            if (chromatic.isPlaying) {
+                chromatic.stopSound();
+            }
+
+            chromatic.isPlaying = false;
+            chromatic.needsUpdate = false;
+            playPauseButton.value = playChar;
+
+            const fps = 60;
+            let frame = 0;
+            const update = (timestamp: number) => {
+                if (frame < fps * chromatic.timeLength) {
+                    requestAnimationFrame(update);
+                }
+
+                const time = frame / fps;
+                timeBar.valueAsNumber = time;
+                timeInput.valueAsNumber = time;
+                chromatic.time = time;
+
+                animateUniforms(time);
+                chromatic.render();
+
+                const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
+                chromatic.canvas.toBlob(blob => {
+                    saveAs(blob, filename);
+                });
+
+                frame++;
+            }
+
+            requestAnimationFrame(update);
         },
         saveSound: () => {
             const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
@@ -62,6 +96,7 @@ window.addEventListener("load", ev => {
         }
     };
     gui.add(saevFunctions, "saveImage");
+    gui.add(saevFunctions, "saveImageSequence");
     gui.add(saevFunctions, "saveSound");
 
     chromatic.globalUniforms.forEach(unifrom => {
@@ -224,10 +259,14 @@ window.addEventListener("load", ev => {
     })
 
     stopButton.addEventListener("click", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
         chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
         chromatic.time = 0;
         playPauseButton.value = playChar;
-        chromatic.stopSound();
     })
 
     playPauseButton.addEventListener("click", ev => {
@@ -242,22 +281,25 @@ window.addEventListener("load", ev => {
     })
 
     timeInput.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
         chromatic.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
-
-        if (chromatic.isPlaying) {
-            chromatic.playSound()
-        } else {
-            chromatic.stopSound();
-        }
+        chromatic.needsUpdate = true;
     })
 
     timeBar.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
         chromatic.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
-        chromatic.stopSound();
+        chromatic.needsUpdate = true;
     })
 
     timeLengthInput.addEventListener("input", ev => {

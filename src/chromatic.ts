@@ -57,7 +57,6 @@ export class Chromatic {
     globalUniformValues: { [key: string]: number; };
 
     render: () => void;
-    setupFrameBuffer: (pass: Pass) => void;
     setSize: (width: number, height: number) => void;
 
     constructor(
@@ -211,7 +210,7 @@ export class Chromatic {
             return locations;
         };
 
-        this.setupFrameBuffer = (pass: Pass) => {
+        const setupFrameBuffer = (pass: Pass) => {
             // FIXME: setupFrameBuffer の呼び出し側でやるべき
             if (pass.type === PassType.FinalImage) {
                 return;
@@ -296,7 +295,7 @@ export class Chromatic {
 
             pass.locations = createLocations(pass);
 
-            this.setupFrameBuffer(pass);
+            setupFrameBuffer(pass);
             return pass;
         };
 
@@ -335,17 +334,17 @@ export class Chromatic {
 
         this.setSize = (width: number, height: number) => {
             if (!PRODUCTION) {
-                const canvas = this.gl.canvas;
+                const canvas = gl.canvas;
                 canvas.width = width;
                 canvas.height = height;
 
-                this.gl.viewport(0, 0, width, height);
+                gl.viewport(0, 0, width, height);
 
                 this.imagePasses.forEach(pass => {
-                    this.gl.deleteFramebuffer(pass.frameBuffer);
-                    this.gl.deleteTexture(pass.texture);
+                    gl.deleteFramebuffer(pass.frameBuffer);
+                    gl.deleteTexture(pass.texture);
                     pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
-                    this.setupFrameBuffer(pass);
+                    setupFrameBuffer(pass);
                 });
             }
         }

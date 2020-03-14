@@ -489,11 +489,13 @@ export class Chromatic {
     }
 
     playSound() {
-        const newAudioSource = this.audioContext.createBufferSource();
-        newAudioSource.buffer = this.audioSource.buffer;
-        newAudioSource.loop = this.audioSource.loop;
-        newAudioSource.connect(this.audioContext.destination);
-        this.audioSource = newAudioSource;
+        if (!PRODUCTION) {
+            const newAudioSource = this.audioContext.createBufferSource();
+            newAudioSource.buffer = this.audioSource.buffer;
+            newAudioSource.loop = this.audioSource.loop;
+            newAudioSource.connect(this.audioContext.destination);
+            this.audioSource = newAudioSource;
+        }
 
         this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }

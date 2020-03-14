@@ -1,6 +1,7 @@
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;
+declare var PLAY_SOUND_FILE: string;
 
 const PassType = {
     Image: 0 as const,
@@ -438,7 +439,19 @@ export class Chromatic {
         }
 
         this.audioSource = audio.createBufferSource();
-        this.audioSource.buffer = audioBuffer;
+
+        if (PLAY_SOUND_FILE) {
+            fetch(PLAY_SOUND_FILE).then(response => {
+                return response.arrayBuffer();
+            }).then(arrayBuffer => {
+                audio.decodeAudioData(arrayBuffer, buffer => {
+                    this.audioSource.buffer = buffer;
+                });
+            })
+        } else {
+            this.audioSource.buffer = audioBuffer;
+        }
+
         this.audioSource.loop = true;
         this.audioSource.connect(audio.destination);
 

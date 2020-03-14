@@ -8,5 +8,6 @@ module.exports = merge(common, {
     plugins: [new webpack.DefinePlugin({
         PRODUCTION: JSON.stringify(true),
         GLOBAL_UNIFORMS: JSON.stringify(true),
+        PLAY_SOUND_FILE: JSON.stringify(false),
     })],
 });

@@ -58,6 +58,7 @@ export class Chromatic {
 
     render: () => void;
     setupFrameBuffer: (pass: Pass) => void;
+    setSize: (width: number, height: number) => void;
 
     constructor(
         timeLength: number,
@@ -332,6 +333,23 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
+        this.setSize = (width: number, height: number) => {
+            if (!PRODUCTION) {
+                const canvas = this.gl.canvas;
+                canvas.width = width;
+                canvas.height = height;
+
+                this.gl.viewport(0, 0, width, height);
+
+                this.imagePasses.forEach(pass => {
+                    this.gl.deleteFramebuffer(pass.frameBuffer);
+                    this.gl.deleteTexture(pass.texture);
+                    pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
+                    this.setupFrameBuffer(pass);
+                });
+            }
+        }
+
         if (GLOBAL_UNIFORMS) {
             getDebugUniforms(imageCommonHeaderShader);
 
@@ -468,23 +486,6 @@ export class Chromatic {
             lastTimestamp = timestamp;
         };
         update(0);
-    }
-
-    setSize(width: number, height: number) {
-        if (!PRODUCTION) {
-            const canvas = this.gl.canvas;
-            canvas.width = width;
-            canvas.height = height;
-
-            this.gl.viewport(0, 0, width, height);
-
-            this.imagePasses.forEach(pass => {
-                this.gl.deleteFramebuffer(pass.frameBuffer);
-                this.gl.deleteTexture(pass.texture);
-                pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
-                this.setupFrameBuffer(pass);
-            });
-        }
     }
 
     stopSound() {

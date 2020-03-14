@@ -39,21 +39,31 @@ window.addEventListener("load", ev => {
     const animateUniforms = (time: number) => {
         chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
 
-        const camera1 = new Vector3(0, 2.8, -8);
-        const camera2 = new Vector3(0, 0, -32);
+        if (!config.cameraDebug) {
+            const camera1 = new Vector3(0, 2.8, -8);
+            const camera2 = new Vector3(0, 0, -32);
 
-        const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
-        chromatic.globalUniformValues.gCameraEyeX = camera.x;
-        chromatic.globalUniformValues.gCameraEyeY = camera.y;
-        chromatic.globalUniformValues.gCameraEyeZ = camera.z;
+            const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
+            chromatic.globalUniformValues.gCameraEyeX = camera.x;
+            chromatic.globalUniformValues.gCameraEyeY = camera.y;
+            chromatic.globalUniformValues.gCameraEyeZ = camera.z;
+
+            chromatic.globalUniformValues.gCameraTargetX = 0;
+            chromatic.globalUniformValues.gCameraTargetY = 2.75;
+            chromatic.globalUniformValues.gCameraTargetZ = 0;
+        }
     }
 
     const gui = new dat.GUI({ width: 1000, });
 
     const config = {
+        cameraDebug: true,
         resolution: "1920x1080",
     }
 
+    gui.add(config, "cameraDebug").onChange(value => {
+        chromatic.needsUpdate = true;
+    });
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
@@ -113,13 +123,12 @@ window.addEventListener("load", ev => {
         });
     })
 
-    const enableCameraDebug = "gCameraEyeX" in chromatic.globalUniformValues;
-
     // THREE.OrbitControls
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
 
-    if (enableCameraDebug) {
+    if (config.cameraDebug) {
         camera.position.set(chromatic.globalUniformValues.gCameraEyeX, chromatic.globalUniformValues.gCameraEyeY, chromatic.globalUniformValues.gCameraEyeZ);
+        camera.lookAt(chromatic.globalUniformValues.gCameraTargetX, chromatic.globalUniformValues.gCameraTargetY, chromatic.globalUniformValues.gCameraTargetZ);
     }
 
     const controls = new THREE.OrbitControls(camera, chromatic.canvas);
@@ -239,8 +248,8 @@ window.addEventListener("load", ev => {
         gui.updateDisplay();
     }
 
-    if (enableCameraDebug) {
-        chromatic.onUpdate = () => {
+    chromatic.onUpdate = () => {
+        if (config.cameraDebug) {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {

@@ -304,7 +304,7 @@ export class Chromatic {
                     // v2: gl.uniform2fv,
                     v3: gl.uniform3fv,
                     // v4: gl.uniform4fv,
-                    t: gl.uniform1i,
+                    // t: gl.uniform1i,
                 }
 
                 const textureUnitIds: { [index: string]: number } = {
@@ -316,7 +316,8 @@ export class Chromatic {
                 if (uniform.type === "t") {
                     gl.activeTexture(gl.TEXTURE0 + textureUnitIds[key]);
                     gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
-                    methods[uniform.type].call(gl, pass.locations[key], textureUnitIds[key]);
+                    // methods[uniform.type].call(gl, pass.locations[key], textureUnitIds[key]);
+                    gl.uniform1i(pass.locations[key], textureUnitIds[key]);
                 } else {
                     methods[uniform.type].call(gl, pass.locations[key], uniform.value);
                 }

@@ -37,12 +37,12 @@ window.addEventListener("load", ev => {
             );
 
             // FIXME: 削減可能
-            const config = { cameraDebug: false };
+            const config = { debugCamera: false };
 
             const animateUniforms = (time: number) => {
                 chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
 
-                if (!config.cameraDebug) {
+                if (!config.debugCamera) {
                     const camera1 = new Vector3(0, 2.8, -8);
                     const camera2 = new Vector3(0, 0, -32);
 

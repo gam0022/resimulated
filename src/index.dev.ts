@@ -39,7 +39,7 @@ window.addEventListener("load", ev => {
     const animateUniforms = (time: number) => {
         chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
 
-        if (!config.cameraDebug) {
+        if (!config.debugCamera) {
             const camera1 = new Vector3(0, 2.8, -8);
             const camera2 = new Vector3(0, 0, -32);
 
@@ -57,11 +57,11 @@ window.addEventListener("load", ev => {
     const gui = new dat.GUI({ width: 1000, });
 
     const config = {
-        cameraDebug: true,
+        debugCamera: true,
         resolution: "1920x1080",
     }
 
-    gui.add(config, "cameraDebug").onChange(value => {
+    gui.add(config, "debugCamera").onChange(value => {
         chromatic.needsUpdate = true;
     });
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
@@ -126,7 +126,7 @@ window.addEventListener("load", ev => {
     // THREE.OrbitControls
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
 
-    if (config.cameraDebug) {
+    if (config.debugCamera) {
         camera.position.set(chromatic.globalUniformValues.gCameraEyeX, chromatic.globalUniformValues.gCameraEyeY, chromatic.globalUniformValues.gCameraEyeZ);
         camera.lookAt(chromatic.globalUniformValues.gCameraTargetX, chromatic.globalUniformValues.gCameraTargetY, chromatic.globalUniformValues.gCameraTargetZ);
     }
@@ -195,7 +195,7 @@ window.addEventListener("load", ev => {
 
     // SessionStorage
     const saveToSessionStorage = () => {
-        sessionStorage.setItem("cameraDebug", config.cameraDebug.toString());
+        sessionStorage.setItem("debugCamera", config.debugCamera.toString());
         sessionStorage.setItem("resolution", config.resolution);
 
         sessionStorage.setItem("time", chromatic.time.toString());
@@ -213,9 +213,9 @@ window.addEventListener("load", ev => {
             config.resolution = resolutionStr;
         }
 
-        const cameraDebugStr = sessionStorage.getItem("cameraDebug");
+        const cameraDebugStr = sessionStorage.getItem("debugCamera");
         if (cameraDebugStr) {
-            config.cameraDebug = parseBool(cameraDebugStr);
+            config.debugCamera = parseBool(cameraDebugStr);
         }
 
         const timeStr = sessionStorage.getItem("time")
@@ -260,7 +260,7 @@ window.addEventListener("load", ev => {
     }
 
     chromatic.onUpdate = () => {
-        if (config.cameraDebug) {
+        if (config.debugCamera) {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {

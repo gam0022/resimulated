@@ -58,10 +58,14 @@ window.addEventListener("load", ev => {
 
     const config = {
         debugCamera: true,
+        debugParams: false,
         resolution: "1920x1080",
     }
 
     gui.add(config, "debugCamera").onChange(value => {
+        chromatic.needsUpdate = true;
+    });
+    gui.add(config, "debugParams").onChange(value => {
         chromatic.needsUpdate = true;
     });
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
@@ -255,7 +259,10 @@ window.addEventListener("load", ev => {
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
 
-        animateUniforms(time);
+        if (!config.debugParams) {
+            animateUniforms(time);
+        }
+
         gui.updateDisplay();
     }
 

@@ -50,6 +50,14 @@ window.addEventListener("load", ev => {
 
     const gui = new dat.GUI({ width: 1000, });
 
+    const config = {
+        resolution: "1920x1080",
+    }
+
+    gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900"]).onChange(value => {
+        onResolutionCange();
+    });
+
     const saevFunctions = {
         saveImage: () => {
             chromatic.canvas.toBlob(blob => {
@@ -146,8 +154,14 @@ window.addEventListener("load", ev => {
 
     // Common Callbacks
     const onResolutionCange = () => {
-        const resolutionScale = parseFloat(resolutionScaleSelect.value);
-        chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+        const ret = config.resolution.match(/(\d+)x(\d+)/);
+        if (ret) {
+            chromatic.setSize(parseInt(ret[1]), parseInt(ret[2]));
+        } else {
+            const resolutionScale = parseFloat(config.resolution);
+            chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+        }
+
         chromatic.needsUpdate = true;
     }
 

@@ -275,10 +275,6 @@ export class Chromatic {
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
 
-            imagePasses.forEach((_, i) => {
-                pass.uniforms[`iPass${i}`] = { type: "t", value: i };
-            });
-
             if (type === PassType.BloomUpsample) {
                 const bloomDonwsampleEndIndex = bloomPassBeginIndex + bloomDonwsampleIterations;
                 const upCount = index - bloomDonwsampleEndIndex;
@@ -303,11 +299,6 @@ export class Chromatic {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             for (const [key, uniform] of Object.entries(pass.uniforms)) {
-                if (uniform.type === "t" && key.indexOf("iPass") === 0) {
-                    gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
-                }
-
                 const methods: { [index: string]: any } = {
                     f: gl.uniform1f,
                     // v2: gl.uniform2fv,
@@ -316,7 +307,19 @@ export class Chromatic {
                     t: gl.uniform1i,
                 }
 
-                methods[uniform.type].call(gl, pass.locations[key], uniform.value);
+                const textureUnitIds: { [index: string]: number } = {
+                    iPrevPass: 0,
+                    iBeforeBloom: 1,
+                    iPairBloomDown: 2,
+                }
+
+                if (uniform.type === "t") {
+                    gl.activeTexture(gl.TEXTURE0 + textureUnitIds[key]);
+                    gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
+                    methods[uniform.type].call(gl, pass.locations[key], textureUnitIds[key]);
+                } else {
+                    methods[uniform.type].call(gl, pass.locations[key], uniform.value);
+                }
             }
 
             // draw the buffer with VAO

@@ -50,8 +50,6 @@ export class Chromatic {
     audioContext: AudioContext;
     audioSource: AudioBufferSourceNode;
 
-    imagePasses: Pass[];
-
     // global uniforms
     globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
@@ -277,7 +275,7 @@ export class Chromatic {
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
 
-            this.imagePasses.forEach((_, i) => {
+            imagePasses.forEach((_, i) => {
                 pass.uniforms[`iPass${i}`] = { type: "t", value: i };
             });
 
@@ -307,7 +305,7 @@ export class Chromatic {
             for (const [key, uniform] of Object.entries(pass.uniforms)) {
                 if (uniform.type === "t" && key.indexOf("iPass") === 0) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
+                    gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
                 }
 
                 const methods: { [index: string]: any } = {
@@ -340,7 +338,7 @@ export class Chromatic {
 
                 gl.viewport(0, 0, width, height);
 
-                this.imagePasses.forEach(pass => {
+                imagePasses.forEach(pass => {
                     gl.deleteFramebuffer(pass.frameBuffer);
                     gl.deleteTexture(pass.texture);
                     pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
@@ -362,11 +360,11 @@ export class Chromatic {
             getDebugUniforms(bloomFinalShader);
         }
 
-        this.imagePasses = [];
+        const imagePasses: Pass[] = [];
         let passIndex = 0;
         imageShaders.forEach((shader, i, ary) => {
             if (i === bloomPassBeginIndex) {
-                this.imagePasses.push(initPass(
+                imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                     passIndex,
                     PassType.Bloom,
@@ -377,7 +375,7 @@ export class Chromatic {
                 let scale = 1;
                 for (let j = 0; j < bloomDonwsampleIterations; j++) {
                     scale *= 0.5;
-                    this.imagePasses.push(initPass(
+                    imagePasses.push(initPass(
                         loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
                         passIndex,
                         PassType.Bloom,
@@ -388,7 +386,7 @@ export class Chromatic {
 
                 for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
                     scale *= 2;
-                    this.imagePasses.push(initPass(
+                    imagePasses.push(initPass(
                         loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
                         passIndex,
                         PassType.BloomUpsample,
@@ -397,7 +395,7 @@ export class Chromatic {
                     passIndex++;
                 }
 
-                this.imagePasses.push(initPass(
+                imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + bloomFinalShader),
                     passIndex,
                     PassType.BloomUpsample,
@@ -406,7 +404,7 @@ export class Chromatic {
                 passIndex++;
             }
 
-            this.imagePasses.push(initPass(
+            imagePasses.push(initPass(
                 loadProgram(imageCommonHeaderShader + shader),
                 passIndex,
                 i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
@@ -446,7 +444,7 @@ export class Chromatic {
         this.audioSource.connect(audio.destination);
 
         this.render = () => {
-            this.imagePasses.forEach((pass) => {
+            imagePasses.forEach((pass) => {
                 pass.uniforms.iTime.value = this.time;
                 if (GLOBAL_UNIFORMS) {
                     for (const [key, value] of Object.entries(this.globalUniformValues)) {

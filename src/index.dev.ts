@@ -143,7 +143,6 @@ window.addEventListener("load", ev => {
 
     // HTMLElements
     const fpsSpan = document.getElementById("fps-span");
-    const resolutionScaleSelect = <HTMLSelectElement>document.getElementById("resolution-scale");
     const stopButton = <HTMLInputElement>document.getElementById("stop-button");
     const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
     const timeInput = <HTMLInputElement>document.getElementById("time-input");
@@ -156,8 +155,10 @@ window.addEventListener("load", ev => {
     const onResolutionCange = () => {
         const ret = config.resolution.match(/(\d+)x(\d+)/);
         if (ret) {
+            // Fixed Resolution
             chromatic.setSize(parseInt(ret[1]), parseInt(ret[2]));
         } else {
+            // Scaled Resolution
             const resolutionScale = parseFloat(config.resolution);
             chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
         }
@@ -187,7 +188,7 @@ window.addEventListener("load", ev => {
     const saveToSessionStorage = () => {
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying ? "true" : "false");
-        sessionStorage.setItem("resolutionScale", resolutionScaleSelect.value);
+        sessionStorage.setItem("resolution", config.resolution);
         sessionStorage.setItem("timeLength", timeLengthInput.value);
     }
 
@@ -203,9 +204,9 @@ window.addEventListener("load", ev => {
             playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
         }
 
-        const resolutionScaleStr = sessionStorage.getItem("resolutionScale");
-        if (resolutionScaleStr) {
-            resolutionScaleSelect.value = resolutionScaleStr;
+        const resolution = sessionStorage.getItem("resolution");
+        if (resolution) {
+            config.resolution = resolution;
         }
 
         const timeLengthStr = sessionStorage.getItem("timeLength");
@@ -267,10 +268,6 @@ window.addEventListener("load", ev => {
 
     // UI Events
     window.addEventListener("resize", onResolutionCange);
-
-    resolutionScaleSelect.addEventListener("input", ev => {
-        onResolutionCange();
-    })
 
     stopButton.addEventListener("click", ev => {
         if (chromatic.isPlaying) {

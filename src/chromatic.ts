@@ -46,7 +46,6 @@ export class Chromatic {
     onUpdate: () => void;
 
     canvas: HTMLCanvasElement;
-    audioContext: AudioContext;
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
@@ -55,6 +54,7 @@ export class Chromatic {
 
     render: () => void;
     setSize: (width: number, height: number) => void;
+    playSound: () => void;
 
     constructor(
         timeLength: number,
@@ -83,7 +83,7 @@ export class Chromatic {
         }
 
         // setup WebAudio
-        const audio = this.audioContext = new window.AudioContext();
+        const audio = new window.AudioContext();
 
         // setup WebGL
         const canvas = this.canvas = document.createElement("canvas");
@@ -437,10 +437,22 @@ export class Chromatic {
             }
         }
 
-        this.audioSource = audio.createBufferSource();
-        this.audioSource.buffer = audioBuffer;
-        this.audioSource.loop = true;
-        this.audioSource.connect(audio.destination);
+        let audioSource = this.audioSource = audio.createBufferSource();
+        audioSource.buffer = audioBuffer;
+        audioSource.loop = true;
+        audioSource.connect(audio.destination);
+
+        this.playSound = () => {
+            if (!PRODUCTION) {
+                const newAudioSource = audio.createBufferSource();
+                newAudioSource.buffer = audioSource.buffer;
+                newAudioSource.loop = audioSource.loop;
+                newAudioSource.connect(audio.destination);
+                audioSource = this.audioSource = newAudioSource;
+            }
+
+            audioSource.start(audio.currentTime, this.time % this.timeLength);
+        }
 
         this.render = () => {
             imagePasses.forEach((pass) => {
@@ -486,17 +498,5 @@ export class Chromatic {
 
     stopSound() {
         this.audioSource.stop();
-    }
-
-    playSound() {
-        if (!PRODUCTION) {
-            const newAudioSource = this.audioContext.createBufferSource();
-            newAudioSource.buffer = this.audioSource.buffer;
-            newAudioSource.loop = this.audioSource.loop;
-            newAudioSource.connect(this.audioContext.destination);
-            this.audioSource = newAudioSource;
-        }
-
-        this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }
 }

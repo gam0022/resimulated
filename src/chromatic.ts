@@ -437,21 +437,21 @@ export class Chromatic {
             }
         }
 
-        let audioSource = this.audioSource = audio.createBufferSource();
-        audioSource.buffer = audioBuffer;
-        audioSource.loop = true;
-        audioSource.connect(audio.destination);
+        this.audioSource = audio.createBufferSource();
+        this.audioSource.buffer = audioBuffer;
+        this.audioSource.loop = true;
+        this.audioSource.connect(audio.destination);
 
         this.playSound = () => {
             if (!PRODUCTION) {
                 const newAudioSource = audio.createBufferSource();
-                newAudioSource.buffer = audioSource.buffer;
-                newAudioSource.loop = audioSource.loop;
+                newAudioSource.buffer = this.audioSource.buffer;
+                newAudioSource.loop = this.audioSource.loop;
                 newAudioSource.connect(audio.destination);
-                audioSource = this.audioSource = newAudioSource;
+                this.audioSource = newAudioSource;
             }
 
-            audioSource.start(audio.currentTime, this.time % this.timeLength);
+            this.audioSource.start(audio.currentTime, this.time % this.timeLength);
         }
 
         this.render = () => {

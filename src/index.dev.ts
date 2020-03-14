@@ -54,7 +54,7 @@ window.addEventListener("load", ev => {
         resolution: "1920x1080",
     }
 
-    gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900"]).onChange(value => {
+    gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
 

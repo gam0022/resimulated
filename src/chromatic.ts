@@ -329,8 +329,8 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
-        this.setSize = (width: number, height: number) => {
-            if (!PRODUCTION) {
+        if (!PRODUCTION) {
+            this.setSize = (width: number, height: number) => {
                 const canvas = gl.canvas;
                 canvas.width = width;
                 canvas.height = height;

@@ -91,7 +91,7 @@ window.addEventListener("load", ev => {
             requestAnimationFrame(update);
         },
         saveSound: () => {
-            const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioSource.context.sampleRate * chromatic.timeLength);
+            const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
             saveAs(waveBlob, "chromatic.wav");
         }
     };

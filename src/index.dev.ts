@@ -40,25 +40,25 @@ window.addEventListener("load", ev => {
         const bpm = 140;
         const beat = time * bpm / 60;
 
-        chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
+        let camera = new Vector3(0, 0, 10);
+        let target = new Vector3(0, 0, 0);
+
+        if (beat < 8) {
+            const camera1 = new Vector3(0, 2.8, -8);
+            const camera2 = new Vector3(0, 0, -32);
+
+            camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
+            target = new Vector3(0, 2.75, 0);
+
+            chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
+        } else if (beat < 16) {
+            camera = new Vector3(0, 0.2, -17.3);
+            target = new Vector3(0, 0, 0);
+
+            chromatic.globalUniformValues.gMandelboxScale = 1.8;
+        }
 
         if (!config.debugCamera) {
-            let camera = new Vector3(0, 0, 0);
-            let target = new Vector3(0, 0, 0);
-
-            if (beat < 8) {
-                const camera1 = new Vector3(0, 2.8, -8);
-                const camera2 = new Vector3(0, 0, -32);
-
-                camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
-                target = new Vector3(0, 2.75, 0);
-            }
-            else if (beat < 16) {
-                chromatic.globalUniformValues.gMandelboxScale = 1.8;
-                camera = new Vector3(0, 0.2, -17.3);
-                target = new Vector3(0, 0, 0);
-            }
-
             chromatic.globalUniformValues.gCameraEyeX = camera.x;
             chromatic.globalUniformValues.gCameraEyeY = camera.y;
             chromatic.globalUniformValues.gCameraEyeZ = camera.z;

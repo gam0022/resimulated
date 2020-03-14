@@ -47,8 +47,9 @@ window.addEventListener("load", ev => {
                 chromatic.globalUniformValues.gCameraEyeY = camera.y;
                 chromatic.globalUniformValues.gCameraEyeZ = camera.z;
             }
-            chromatic.onRender = (time, timeDelta) => {
-                animateUniforms(time);
+
+            chromatic.onUpdate = () => {
+                animateUniforms(chromatic.time);
             }
 
             chromatic.playSound();

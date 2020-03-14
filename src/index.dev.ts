@@ -219,13 +219,10 @@ window.addEventListener("load", ev => {
 
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
-
-        animateUniforms(time);
-        gui.updateDisplay();
     }
 
-    if (enableCameraDebug) {
-        chromatic.onUpdate = () => {
+    chromatic.onUpdate = () => {
+        if (enableCameraDebug) {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {
@@ -244,6 +241,9 @@ window.addEventListener("load", ev => {
             prevCameraPosotion.copy(camera.position);
             prevCameraTarget.copy(controls.target);
         }
+
+        animateUniforms(chromatic.time);
+        gui.updateDisplay();
     }
 
     if (chromatic.isPlaying) {

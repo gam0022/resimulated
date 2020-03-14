@@ -39,21 +39,35 @@ window.addEventListener("load", ev => {
     const animateUniforms = (time: number) => {
         chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
 
-        const camera1 = new Vector3(0, 2.8, -8);
-        const camera2 = new Vector3(0, 0, -32);
+        if (!config.debugCamera) {
+            const camera1 = new Vector3(0, 2.8, -8);
+            const camera2 = new Vector3(0, 0, -32);
 
-        const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
-        chromatic.globalUniformValues.gCameraEyeX = camera.x;
-        chromatic.globalUniformValues.gCameraEyeY = camera.y;
-        chromatic.globalUniformValues.gCameraEyeZ = camera.z;
+            const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
+            chromatic.globalUniformValues.gCameraEyeX = camera.x;
+            chromatic.globalUniformValues.gCameraEyeY = camera.y;
+            chromatic.globalUniformValues.gCameraEyeZ = camera.z;
+
+            chromatic.globalUniformValues.gCameraTargetX = 0;
+            chromatic.globalUniformValues.gCameraTargetY = 2.75;
+            chromatic.globalUniformValues.gCameraTargetZ = 0;
+        }
     }
 
     const gui = new dat.GUI({ width: 1000, });
 
     const config = {
+        debugCamera: true,
+        debugParams: false,
         resolution: "1920x1080",
     }
 
+    gui.add(config, "debugCamera").onChange(value => {
+        chromatic.needsUpdate = true;
+    });
+    gui.add(config, "debugParams").onChange(value => {
+        chromatic.needsUpdate = true;
+    });
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
@@ -113,13 +127,12 @@ window.addEventListener("load", ev => {
         });
     })
 
-    const enableCameraDebug = "gCameraEyeX" in chromatic.globalUniformValues;
-
     // THREE.OrbitControls
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
 
-    if (enableCameraDebug) {
+    if (config.debugCamera) {
         camera.position.set(chromatic.globalUniformValues.gCameraEyeX, chromatic.globalUniformValues.gCameraEyeY, chromatic.globalUniformValues.gCameraEyeZ);
+        camera.lookAt(chromatic.globalUniformValues.gCameraTargetX, chromatic.globalUniformValues.gCameraTargetY, chromatic.globalUniformValues.gCameraTargetZ);
     }
 
     const controls = new THREE.OrbitControls(camera, chromatic.canvas);
@@ -186,13 +199,29 @@ window.addEventListener("load", ev => {
 
     // SessionStorage
     const saveToSessionStorage = () => {
-        sessionStorage.setItem("time", chromatic.time.toString());
-        sessionStorage.setItem("isPlaying", chromatic.isPlaying ? "true" : "false");
+        sessionStorage.setItem("debugCamera", config.debugCamera.toString());
         sessionStorage.setItem("resolution", config.resolution);
+
+        sessionStorage.setItem("time", chromatic.time.toString());
+        sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
     }
 
     const loadFromSessionStorage = () => {
+        const parseBool = (value: string) => {
+            return value === "true"
+        }
+
+        const resolutionStr = sessionStorage.getItem("resolution");
+        if (resolutionStr) {
+            config.resolution = resolutionStr;
+        }
+
+        const cameraDebugStr = sessionStorage.getItem("debugCamera");
+        if (cameraDebugStr) {
+            config.debugCamera = parseBool(cameraDebugStr);
+        }
+
         const timeStr = sessionStorage.getItem("time")
         if (timeStr) {
             chromatic.time = parseFloat(timeStr);
@@ -200,13 +229,8 @@ window.addEventListener("load", ev => {
 
         const isPlayingStr = sessionStorage.getItem("isPlaying");
         if (isPlayingStr) {
-            chromatic.isPlaying = isPlayingStr === "true";
+            chromatic.isPlaying = parseBool(isPlayingStr);
             playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
-        }
-
-        const resolution = sessionStorage.getItem("resolution");
-        if (resolution) {
-            config.resolution = resolution;
         }
 
         const timeLengthStr = sessionStorage.getItem("timeLength");
@@ -235,12 +259,15 @@ window.addEventListener("load", ev => {
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
 
-        animateUniforms(time);
+        if (!config.debugParams) {
+            animateUniforms(time);
+        }
+
         gui.updateDisplay();
     }
 
-    if (enableCameraDebug) {
-        chromatic.onUpdate = () => {
+    chromatic.onUpdate = () => {
+        if (config.debugCamera) {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {

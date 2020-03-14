@@ -46,17 +46,15 @@ export class Chromatic {
     onUpdate: () => void;
 
     canvas: HTMLCanvasElement;
-    gl: WebGL2RenderingContext;
     audioContext: AudioContext;
     audioSource: AudioBufferSourceNode;
-
-    imagePasses: Pass[];
 
     // global uniforms
     globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
 
     render: () => void;
+    setSize: (width: number, height: number) => void;
 
     constructor(
         timeLength: number,
@@ -94,7 +92,7 @@ export class Chromatic {
         window.document.body.appendChild(canvas);
 
         // webgl2 enabled default from: firefox-51, chrome-56
-        const gl = this.gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
+        const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
         if (!gl) {
             console.log("WebGL 2 is not supported...");
             return;
@@ -209,6 +207,56 @@ export class Chromatic {
             return locations;
         };
 
+        const setupFrameBuffer = (pass: Pass) => {
+            // FIXME: setupFrameBuffer の呼び出し側でやるべき
+            if (pass.type === PassType.FinalImage) {
+                return;
+            }
+
+            let width = pass.uniforms.iResolution.value[0];
+            let height = pass.uniforms.iResolution.value[1];
+            let type = gl.FLOAT;
+            let format = gl.RGBA32F;
+            let filter = gl.LINEAR;
+
+            if (pass.type === PassType.Sound) {
+                width = SOUND_WIDTH;
+                height = SOUND_HEIGHT;
+                type = gl.UNSIGNED_BYTE;
+                format = gl.RGBA;
+                filter = gl.NEAREST;
+            }
+
+            // フレームバッファの生成
+            pass.frameBuffer = gl.createFramebuffer();
+
+            // フレームバッファをWebGLにバインド
+            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+
+            // フレームバッファ用テクスチャの生成
+            pass.texture = gl.createTexture();
+
+            // フレームバッファ用のテクスチャをバインド
+            gl.bindTexture(gl.TEXTURE_2D, pass.texture);
+
+            // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
+            gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
+
+            // テクスチャパラメータ
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            // フレームバッファにテクスチャを関連付ける
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
+
+            // 各種オブジェクトのバインドを解除
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
+
         const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
             setupVAO(program);
             const pass = new Pass();
@@ -226,7 +274,7 @@ export class Chromatic {
                 iSampleRate: { type: "f", value: audio.sampleRate },
             };
 
-            this.imagePasses.forEach((_, i) => {
+            imagePasses.forEach((_, i) => {
                 pass.uniforms[`iPass${i}`] = { type: "t", value: i };
             });
 
@@ -244,7 +292,7 @@ export class Chromatic {
 
             pass.locations = createLocations(pass);
 
-            this.setupFrameBuffer(pass);
+            setupFrameBuffer(pass);
             return pass;
         };
 
@@ -256,7 +304,7 @@ export class Chromatic {
             for (const [key, uniform] of Object.entries(pass.uniforms)) {
                 if (uniform.type === "t" && key.indexOf("iPass") === 0) {
                     gl.activeTexture(gl.TEXTURE0 + uniform.value);
-                    gl.bindTexture(gl.TEXTURE_2D, this.imagePasses[uniform.value].texture);
+                    gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
                 }
 
                 const methods: { [index: string]: any } = {
@@ -281,6 +329,23 @@ export class Chromatic {
             gl.useProgram(null);
         };
 
+        if (!PRODUCTION) {
+            this.setSize = (width: number, height: number) => {
+                const canvas = gl.canvas;
+                canvas.width = width;
+                canvas.height = height;
+
+                gl.viewport(0, 0, width, height);
+
+                imagePasses.forEach(pass => {
+                    gl.deleteFramebuffer(pass.frameBuffer);
+                    gl.deleteTexture(pass.texture);
+                    pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
+                    setupFrameBuffer(pass);
+                });
+            }
+        }
+
         if (GLOBAL_UNIFORMS) {
             getDebugUniforms(imageCommonHeaderShader);
 
@@ -294,11 +359,11 @@ export class Chromatic {
             getDebugUniforms(bloomFinalShader);
         }
 
-        this.imagePasses = [];
+        const imagePasses: Pass[] = [];
         let passIndex = 0;
         imageShaders.forEach((shader, i, ary) => {
             if (i === bloomPassBeginIndex) {
-                this.imagePasses.push(initPass(
+                imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                     passIndex,
                     PassType.Bloom,
@@ -309,7 +374,7 @@ export class Chromatic {
                 let scale = 1;
                 for (let j = 0; j < bloomDonwsampleIterations; j++) {
                     scale *= 0.5;
-                    this.imagePasses.push(initPass(
+                    imagePasses.push(initPass(
                         loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
                         passIndex,
                         PassType.Bloom,
@@ -320,7 +385,7 @@ export class Chromatic {
 
                 for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
                     scale *= 2;
-                    this.imagePasses.push(initPass(
+                    imagePasses.push(initPass(
                         loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
                         passIndex,
                         PassType.BloomUpsample,
@@ -329,7 +394,7 @@ export class Chromatic {
                     passIndex++;
                 }
 
-                this.imagePasses.push(initPass(
+                imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + bloomFinalShader),
                     passIndex,
                     PassType.BloomUpsample,
@@ -338,7 +403,7 @@ export class Chromatic {
                 passIndex++;
             }
 
-            this.imagePasses.push(initPass(
+            imagePasses.push(initPass(
                 loadProgram(imageCommonHeaderShader + shader),
                 passIndex,
                 i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
@@ -378,7 +443,7 @@ export class Chromatic {
         this.audioSource.connect(audio.destination);
 
         this.render = () => {
-            this.imagePasses.forEach((pass) => {
+            imagePasses.forEach((pass) => {
                 pass.uniforms.iTime.value = this.time;
                 if (GLOBAL_UNIFORMS) {
                     for (const [key, value] of Object.entries(this.globalUniformValues)) {
@@ -419,85 +484,18 @@ export class Chromatic {
         update(0);
     }
 
-    setupFrameBuffer(pass: Pass) {
-        // FIXME: setupFrameBuffer の呼び出し側でやるべき
-        if (pass.type === PassType.FinalImage) {
-            return;
-        }
-
-        const gl = this.gl;
-
-        let width = pass.uniforms.iResolution.value[0];
-        let height = pass.uniforms.iResolution.value[1];
-        let type = gl.FLOAT;
-        let format = gl.RGBA32F;
-        let filter = gl.LINEAR;
-
-        if (pass.type === PassType.Sound) {
-            width = SOUND_WIDTH;
-            height = SOUND_HEIGHT;
-            type = gl.UNSIGNED_BYTE;
-            format = gl.RGBA;
-            filter = gl.NEAREST;
-        }
-
-        // フレームバッファの生成
-        pass.frameBuffer = gl.createFramebuffer();
-
-        // フレームバッファをWebGLにバインド
-        gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
-
-        // フレームバッファ用テクスチャの生成
-        pass.texture = gl.createTexture();
-
-        // フレームバッファ用のテクスチャをバインド
-        gl.bindTexture(gl.TEXTURE_2D, pass.texture);
-
-        // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
-        gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
-
-        // テクスチャパラメータ
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-        // フレームバッファにテクスチャを関連付ける
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
-
-        // 各種オブジェクトのバインドを解除
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    }
-
-    setSize(width: number, height: number) {
-        if (!PRODUCTION) {
-            const canvas = this.gl.canvas;
-            canvas.width = width;
-            canvas.height = height;
-
-            this.gl.viewport(0, 0, width, height);
-
-            this.imagePasses.forEach(pass => {
-                this.gl.deleteFramebuffer(pass.frameBuffer);
-                this.gl.deleteTexture(pass.texture);
-                pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
-                this.setupFrameBuffer(pass);
-            });
-        }
-    }
-
     stopSound() {
         this.audioSource.stop();
     }
 
     playSound() {
-        const newAudioSource = this.audioContext.createBufferSource();
-        newAudioSource.buffer = this.audioSource.buffer;
-        newAudioSource.loop = this.audioSource.loop;
-        newAudioSource.connect(this.audioContext.destination);
-        this.audioSource = newAudioSource;
+        if (!PRODUCTION) {
+            const newAudioSource = this.audioContext.createBufferSource();
+            newAudioSource.buffer = this.audioSource.buffer;
+            newAudioSource.loop = this.audioSource.loop;
+            newAudioSource.connect(this.audioContext.destination);
+            this.audioSource = newAudioSource;
+        }
 
         this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }

@@ -57,6 +57,7 @@ export class Chromatic {
     globalUniformValues: { [key: string]: number; };
 
     render: () => void;
+    setupFrameBuffer: (pass: Pass) => void;
 
     constructor(
         timeLength: number,
@@ -208,6 +209,56 @@ export class Chromatic {
             });
             return locations;
         };
+
+        this.setupFrameBuffer = (pass: Pass) => {
+            // FIXME: setupFrameBuffer の呼び出し側でやるべき
+            if (pass.type === PassType.FinalImage) {
+                return;
+            }
+
+            let width = pass.uniforms.iResolution.value[0];
+            let height = pass.uniforms.iResolution.value[1];
+            let type = gl.FLOAT;
+            let format = gl.RGBA32F;
+            let filter = gl.LINEAR;
+
+            if (pass.type === PassType.Sound) {
+                width = SOUND_WIDTH;
+                height = SOUND_HEIGHT;
+                type = gl.UNSIGNED_BYTE;
+                format = gl.RGBA;
+                filter = gl.NEAREST;
+            }
+
+            // フレームバッファの生成
+            pass.frameBuffer = gl.createFramebuffer();
+
+            // フレームバッファをWebGLにバインド
+            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+
+            // フレームバッファ用テクスチャの生成
+            pass.texture = gl.createTexture();
+
+            // フレームバッファ用のテクスチャをバインド
+            gl.bindTexture(gl.TEXTURE_2D, pass.texture);
+
+            // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
+            gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
+
+            // テクスチャパラメータ
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            // フレームバッファにテクスチャを関連付ける
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
+
+            // 各種オブジェクトのバインドを解除
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
 
         const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
             setupVAO(program);
@@ -417,58 +468,6 @@ export class Chromatic {
             lastTimestamp = timestamp;
         };
         update(0);
-    }
-
-    setupFrameBuffer(pass: Pass) {
-        // FIXME: setupFrameBuffer の呼び出し側でやるべき
-        if (pass.type === PassType.FinalImage) {
-            return;
-        }
-
-        const gl = this.gl;
-
-        let width = pass.uniforms.iResolution.value[0];
-        let height = pass.uniforms.iResolution.value[1];
-        let type = gl.FLOAT;
-        let format = gl.RGBA32F;
-        let filter = gl.LINEAR;
-
-        if (pass.type === PassType.Sound) {
-            width = SOUND_WIDTH;
-            height = SOUND_HEIGHT;
-            type = gl.UNSIGNED_BYTE;
-            format = gl.RGBA;
-            filter = gl.NEAREST;
-        }
-
-        // フレームバッファの生成
-        pass.frameBuffer = gl.createFramebuffer();
-
-        // フレームバッファをWebGLにバインド
-        gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
-
-        // フレームバッファ用テクスチャの生成
-        pass.texture = gl.createTexture();
-
-        // フレームバッファ用のテクスチャをバインド
-        gl.bindTexture(gl.TEXTURE_2D, pass.texture);
-
-        // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
-        gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
-
-        // テクスチャパラメータ
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-        // フレームバッファにテクスチャを関連付ける
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
-
-        // 各種オブジェクトのバインドを解除
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
     setSize(width: number, height: number) {

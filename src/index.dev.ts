@@ -37,20 +37,34 @@ window.addEventListener("load", ev => {
     );
 
     const animateUniforms = (time: number) => {
+        const bpm = 140;
+        const beat = time * bpm / 60;
+
         chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
 
         if (!config.debugCamera) {
-            const camera1 = new Vector3(0, 2.8, -8);
-            const camera2 = new Vector3(0, 0, -32);
+            let camera = new Vector3(0, 0, 0);
+            let target = new Vector3(0, 0, 0);
 
-            const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
+            if (beat < 8) {
+                const camera1 = new Vector3(0, 2.8, -8);
+                const camera2 = new Vector3(0, 0, -32);
+
+                camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
+                target = new Vector3(0, 2.75, 0);
+            }
+            else if (beat < 16) {
+                chromatic.globalUniformValues.gMandelboxScale = 1.8;
+                camera = new Vector3(0, 0.2, -17.3);
+                target = new Vector3(0, 0, 0);
+            }
+
             chromatic.globalUniformValues.gCameraEyeX = camera.x;
             chromatic.globalUniformValues.gCameraEyeY = camera.y;
             chromatic.globalUniformValues.gCameraEyeZ = camera.z;
-
-            chromatic.globalUniformValues.gCameraTargetX = 0;
-            chromatic.globalUniformValues.gCameraTargetY = 2.75;
-            chromatic.globalUniformValues.gCameraTargetZ = 0;
+            chromatic.globalUniformValues.gCameraTargetX = target.x;
+            chromatic.globalUniformValues.gCameraTargetY = target.y;
+            chromatic.globalUniformValues.gCameraTargetZ = target.z;
         }
     }
 

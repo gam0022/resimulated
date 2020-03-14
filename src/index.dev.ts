@@ -195,13 +195,29 @@ window.addEventListener("load", ev => {
 
     // SessionStorage
     const saveToSessionStorage = () => {
-        sessionStorage.setItem("time", chromatic.time.toString());
-        sessionStorage.setItem("isPlaying", chromatic.isPlaying ? "true" : "false");
+        sessionStorage.setItem("cameraDebug", config.cameraDebug.toString());
         sessionStorage.setItem("resolution", config.resolution);
+
+        sessionStorage.setItem("time", chromatic.time.toString());
+        sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
     }
 
     const loadFromSessionStorage = () => {
+        const parseBool = (value: string) => {
+            return value === "true"
+        }
+
+        const resolutionStr = sessionStorage.getItem("resolution");
+        if (resolutionStr) {
+            config.resolution = resolutionStr;
+        }
+
+        const cameraDebugStr = sessionStorage.getItem("cameraDebug");
+        if (cameraDebugStr) {
+            config.cameraDebug = parseBool(cameraDebugStr);
+        }
+
         const timeStr = sessionStorage.getItem("time")
         if (timeStr) {
             chromatic.time = parseFloat(timeStr);
@@ -209,13 +225,8 @@ window.addEventListener("load", ev => {
 
         const isPlayingStr = sessionStorage.getItem("isPlaying");
         if (isPlayingStr) {
-            chromatic.isPlaying = isPlayingStr === "true";
+            chromatic.isPlaying = parseBool(isPlayingStr);
             playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
-        }
-
-        const resolution = sessionStorage.getItem("resolution");
-        if (resolution) {
-            config.resolution = resolution;
         }
 
         const timeLengthStr = sessionStorage.getItem("timeLength");

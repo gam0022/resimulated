@@ -80,10 +80,8 @@ window.addEventListener("load", ev => {
             chromatic.globalUniformValues.gEmissiveIntensity = 6;
         }
 
-        if (!PRODUCTION) {
-            if (config.debugCamera) {
-                return;
-            }
+        if (!PRODUCTION && config.debugCamera) {
+            return;
         }
 
         chromatic.globalUniformValues.gCameraEyeX = camera.x;

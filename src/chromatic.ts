@@ -57,8 +57,8 @@ export class Chromatic {
     play: () => void;
     render: () => void;
     setSize: (width: number, height: number) => void;
-    stopSound: () => void;
     playSound: () => void;
+    stopSound: () => void;
 
     constructor(
         timeLength: number,

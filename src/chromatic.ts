@@ -58,6 +58,7 @@ export class Chromatic {
     render: () => void;
     setSize: (width: number, height: number) => void;
     stopSound: () => void;
+    playSound: () => void;
 
     constructor(
         timeLength: number,
@@ -353,6 +354,18 @@ export class Chromatic {
                     });
                 }
 
+                this.playSound = () => {
+                    if (!PRODUCTION) {
+                        const newAudioSource = this.audioContext.createBufferSource();
+                        newAudioSource.buffer = this.audioSource.buffer;
+                        newAudioSource.loop = this.audioSource.loop;
+                        newAudioSource.connect(this.audioContext.destination);
+                        this.audioSource = newAudioSource;
+                    }
+
+                    this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
+                }
+
                 this.stopSound = () => {
                     this.audioSource.stop();
                 }
@@ -508,17 +521,5 @@ export class Chromatic {
 
             update(0);
         }
-    }
-
-    playSound() {
-        if (!PRODUCTION) {
-            const newAudioSource = this.audioContext.createBufferSource();
-            newAudioSource.buffer = this.audioSource.buffer;
-            newAudioSource.loop = this.audioSource.loop;
-            newAudioSource.connect(this.audioContext.destination);
-            this.audioSource = newAudioSource;
-        }
-
-        this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
     }
 }

@@ -338,6 +338,18 @@ export class Chromatic {
                 gl.useProgram(null);
             };
 
+            this.playSound = () => {
+                if (!PRODUCTION) {
+                    const newAudioSource = this.audioContext.createBufferSource();
+                    newAudioSource.buffer = this.audioSource.buffer;
+                    newAudioSource.loop = this.audioSource.loop;
+                    newAudioSource.connect(this.audioContext.destination);
+                    this.audioSource = newAudioSource;
+                }
+
+                this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
+            }
+
             if (!PRODUCTION) {
                 this.setSize = (width: number, height: number) => {
                     const canvas = gl.canvas;
@@ -352,18 +364,6 @@ export class Chromatic {
                         pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
                         setupFrameBuffer(pass);
                     });
-                }
-
-                this.playSound = () => {
-                    if (!PRODUCTION) {
-                        const newAudioSource = this.audioContext.createBufferSource();
-                        newAudioSource.buffer = this.audioSource.buffer;
-                        newAudioSource.loop = this.audioSource.loop;
-                        newAudioSource.connect(this.audioContext.destination);
-                        this.audioSource = newAudioSource;
-                    }
-
-                    this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
                 }
 
                 this.stopSound = () => {

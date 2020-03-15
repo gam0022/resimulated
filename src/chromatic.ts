@@ -54,6 +54,7 @@ export class Chromatic {
     globalUniforms: { key: string, initValue: number, min: number, max: number }[];
     globalUniformValues: { [key: string]: number; };
 
+    play: () => void;
     render: () => void;
     setSize: (width: number, height: number) => void;
 
@@ -72,433 +73,436 @@ export class Chromatic {
 
         soundShader: string,
     ) {
-        this.timeLength = timeLength;
-        this.isPlaying = true;
-        this.needsUpdate = false;
-        this.time = 0;
+        this.play = () => {
+            this.timeLength = timeLength;
+            this.isPlaying = true;
+            this.needsUpdate = false;
+            this.time = 0;
 
-        // debug uniforms
-        if (GLOBAL_UNIFORMS) {
-            this.globalUniforms = [];
-            this.globalUniformValues = {};
-        }
-
-        // setup WebAudio
-        const audio = this.audioContext = new window.AudioContext();
-
-        // setup WebGL
-        const canvas = this.canvas = document.createElement("canvas");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        window.document.body.appendChild(canvas);
-
-        // webgl2 enabled default from: firefox-51, chrome-56
-        const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
-        if (!gl) {
-            console.log("WebGL 2 is not supported...");
-            return;
-        }
-
-        const ext = gl.getExtension("EXT_color_buffer_float");
-        if (!ext) {
-            alert("need EXT_color_buffer_float");
-            return;
-        }
-
-        const ext2 = gl.getExtension("OES_texture_float_linear");
-        if (!ext2) {
-            alert("need OES_texture_float_linear");
-            return;
-        }
-
-        gl.enable(gl.CULL_FACE);
-
-        // drawing data (as viewport square)
-        const vert2d = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
-        const vert2dData = new Float32Array([].concat(...vert2d));
-        const vertBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
-        gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        const index = [[0, 1, 2], [3, 2, 1]];
-        const indexData = new Uint16Array([].concat(...index));
-        const indexBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-        // opengl3 VAO
-        const vertexArray = gl.createVertexArray();
-        const setupVAO = (program: WebGLProgram) => {
-            // setup buffers and attributes to the VAO
-            gl.bindVertexArray(vertexArray);
-            // bind buffer data
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
-
-            // set attribute types
-            const vert2dId = gl.getAttribLocation(program, "vert2d");
-            const elem = gl.FLOAT, count = vert2d[0].length, normalize = false;
-            const offset = 0, stride = count * Float32Array.BYTES_PER_ELEMENT;
-            gl.enableVertexAttribArray(vert2dId);
-            gl.vertexAttribPointer(vert2dId, count, elem, normalize, stride, offset);
-            gl.bindVertexArray(null);
-            //NOTE: these unbound buffers is not required; works fine if unbound
-            //gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        };
-
-        const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
-
-        // shader loader
-        const loadShader = (src: string, type: number) => {
-            const shader = gl.createShader(type);
-            gl.shaderSource(shader, src);
-            gl.compileShader(shader);
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
-                    const line = parseInt(p2);
-                    if (line <= imageCommonHeaderShaderLineCount) {
-                        return `${p1}:${line} (common header)`;
-                    } else {
-                        return `${p1}:${line - imageCommonHeaderShaderLineCount}`;
-                    }
-                });
-                console.log(src, log);
+            // debug uniforms
+            if (GLOBAL_UNIFORMS) {
+                this.globalUniforms = [];
+                this.globalUniformValues = {};
             }
-            return shader;
-        };
 
-        const getDebugUniforms = (fragmentShader: string) => {
-            // for Debug dat.GUI
-            let reg = /uniform float (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
-            let result: RegExpExecArray;
-            while ((result = reg.exec(fragmentShader)) !== null) {
-                const uniform = {
-                    key: result[1],
-                    initValue: result[3] !== undefined ? parseFloat(result[3]) : 0,
-                    min: result[5] !== undefined ? parseFloat(result[5]) : 0,
-                    max: result[6] !== undefined ? parseFloat(result[6]) : 1,
-                };
-                this.globalUniforms.push(uniform);
-                this.globalUniformValues[uniform.key] = uniform.initValue;
-            }
-        };
+            // setup WebAudio
+            const audio = this.audioContext = new window.AudioContext();
 
-        const loadProgram = (fragmentShader: string) => {
-            const shaders = [
-                loadShader(vertexShader, gl.VERTEX_SHADER),
-                loadShader(fragmentShader, gl.FRAGMENT_SHADER)
-            ];
-            const program = gl.createProgram();
-            shaders.forEach(shader => gl.attachShader(program, shader));
-            gl.linkProgram(program);
-            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                console.log(gl.getProgramInfoLog(program));
-            };
-            return program;
-        };
+            // setup WebGL
+            const canvas = this.canvas = document.createElement("canvas");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            window.document.body.appendChild(canvas);
 
-        const createLocations = (pass: Pass) => {
-            const locations: { [index: string]: WebGLUniformLocation } = {};
-            Object.keys(pass.uniforms).forEach(key => {
-                locations[key] = gl.getUniformLocation(pass.program, key);
-            });
-            return locations;
-        };
-
-        const setupFrameBuffer = (pass: Pass) => {
-            // FIXME: setupFrameBuffer の呼び出し側でやるべき
-            if (pass.type === PassType.FinalImage) {
+            // webgl2 enabled default from: firefox-51, chrome-56
+            const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
+            if (!gl) {
+                console.log("WebGL 2 is not supported...");
                 return;
             }
 
-            let width = pass.uniforms.iResolution.value[0];
-            let height = pass.uniforms.iResolution.value[1];
-            let type = gl.FLOAT;
-            let format = gl.RGBA32F;
-            let filter = gl.LINEAR;
-
-            if (pass.type === PassType.Sound) {
-                width = SOUND_WIDTH;
-                height = SOUND_HEIGHT;
-                type = gl.UNSIGNED_BYTE;
-                format = gl.RGBA;
-                filter = gl.NEAREST;
+            const ext = gl.getExtension("EXT_color_buffer_float");
+            if (!ext) {
+                alert("need EXT_color_buffer_float");
+                return;
             }
 
-            // フレームバッファの生成
-            pass.frameBuffer = gl.createFramebuffer();
+            const ext2 = gl.getExtension("OES_texture_float_linear");
+            if (!ext2) {
+                alert("need OES_texture_float_linear");
+                return;
+            }
 
-            // フレームバッファをWebGLにバインド
-            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+            gl.enable(gl.CULL_FACE);
 
-            // フレームバッファ用テクスチャの生成
-            pass.texture = gl.createTexture();
+            // drawing data (as viewport square)
+            const vert2d = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+            const vert2dData = new Float32Array([].concat(...vert2d));
+            const vertBuf = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
+            gl.bufferData(gl.ARRAY_BUFFER, vert2dData, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-            // フレームバッファ用のテクスチャをバインド
-            gl.bindTexture(gl.TEXTURE_2D, pass.texture);
+            const index = [[0, 1, 2], [3, 2, 1]];
+            const indexData = new Uint16Array([].concat(...index));
+            const indexBuf = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-            // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
-            gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
+            // opengl3 VAO
+            const vertexArray = gl.createVertexArray();
+            const setupVAO = (program: WebGLProgram) => {
+                // setup buffers and attributes to the VAO
+                gl.bindVertexArray(vertexArray);
+                // bind buffer data
+                gl.bindBuffer(gl.ARRAY_BUFFER, vertBuf);
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
 
-            // テクスチャパラメータ
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-            // フレームバッファにテクスチャを関連付ける
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
-
-            // 各種オブジェクトのバインドを解除
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        }
-
-        const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
-            setupVAO(program);
-            const pass = new Pass();
-            pass.type = type;
-            pass.index = index;
-            pass.scale = scale;
-            pass.program = program;
-
-            pass.uniforms = {
-                iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
-                iTime: { type: "f", value: 0.0 },
-                iPrevPass: { type: "t", value: Math.max(pass.index - 1, 0) },
-                iBeforeBloom: { type: "t", value: Math.max(bloomPassBeginIndex - 1, 0) },
-                iBlockOffset: { type: "f", value: 0.0 },
-                iSampleRate: { type: "f", value: audio.sampleRate },
+                // set attribute types
+                const vert2dId = gl.getAttribLocation(program, "vert2d");
+                const elem = gl.FLOAT, count = vert2d[0].length, normalize = false;
+                const offset = 0, stride = count * Float32Array.BYTES_PER_ELEMENT;
+                gl.enableVertexAttribArray(vert2dId);
+                gl.vertexAttribPointer(vert2dId, count, elem, normalize, stride, offset);
+                gl.bindVertexArray(null);
+                //NOTE: these unbound buffers is not required; works fine if unbound
+                //gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             };
 
-            if (type === PassType.BloomUpsample) {
-                const bloomDonwsampleEndIndex = bloomPassBeginIndex + bloomDonwsampleIterations;
-                const upCount = index - bloomDonwsampleEndIndex;
-                pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
+            const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
+
+            // shader loader
+            const loadShader = (src: string, type: number) => {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, src);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
+                        const line = parseInt(p2);
+                        if (line <= imageCommonHeaderShaderLineCount) {
+                            return `${p1}:${line} (common header)`;
+                        } else {
+                            return `${p1}:${line - imageCommonHeaderShaderLineCount}`;
+                        }
+                    });
+                    console.log(src, log);
+                }
+                return shader;
+            };
+
+            const getDebugUniforms = (fragmentShader: string) => {
+                // for Debug dat.GUI
+                let reg = /uniform float (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
+                let result: RegExpExecArray;
+                while ((result = reg.exec(fragmentShader)) !== null) {
+                    const uniform = {
+                        key: result[1],
+                        initValue: result[3] !== undefined ? parseFloat(result[3]) : 0,
+                        min: result[5] !== undefined ? parseFloat(result[5]) : 0,
+                        max: result[6] !== undefined ? parseFloat(result[6]) : 1,
+                    };
+                    this.globalUniforms.push(uniform);
+                    this.globalUniformValues[uniform.key] = uniform.initValue;
+                }
+            };
+
+            const loadProgram = (fragmentShader: string) => {
+                const shaders = [
+                    loadShader(vertexShader, gl.VERTEX_SHADER),
+                    loadShader(fragmentShader, gl.FRAGMENT_SHADER)
+                ];
+                const program = gl.createProgram();
+                shaders.forEach(shader => gl.attachShader(program, shader));
+                gl.linkProgram(program);
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    console.log(gl.getProgramInfoLog(program));
+                };
+                return program;
+            };
+
+            const createLocations = (pass: Pass) => {
+                const locations: { [index: string]: WebGLUniformLocation } = {};
+                Object.keys(pass.uniforms).forEach(key => {
+                    locations[key] = gl.getUniformLocation(pass.program, key);
+                });
+                return locations;
+            };
+
+            const setupFrameBuffer = (pass: Pass) => {
+                // FIXME: setupFrameBuffer の呼び出し側でやるべき
+                if (pass.type === PassType.FinalImage) {
+                    return;
+                }
+
+                let width = pass.uniforms.iResolution.value[0];
+                let height = pass.uniforms.iResolution.value[1];
+                let type = gl.FLOAT;
+                let format = gl.RGBA32F;
+                let filter = gl.LINEAR;
+
+                if (pass.type === PassType.Sound) {
+                    width = SOUND_WIDTH;
+                    height = SOUND_HEIGHT;
+                    type = gl.UNSIGNED_BYTE;
+                    format = gl.RGBA;
+                    filter = gl.NEAREST;
+                }
+
+                // フレームバッファの生成
+                pass.frameBuffer = gl.createFramebuffer();
+
+                // フレームバッファをWebGLにバインド
+                gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+
+                // フレームバッファ用テクスチャの生成
+                pass.texture = gl.createTexture();
+
+                // フレームバッファ用のテクスチャをバインド
+                gl.bindTexture(gl.TEXTURE_2D, pass.texture);
+
+                // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
+                gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
+
+                // テクスチャパラメータ
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+                // フレームバッファにテクスチャを関連付ける
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
+
+                // 各種オブジェクトのバインドを解除
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            }
+
+            const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
+                setupVAO(program);
+                const pass = new Pass();
+                pass.type = type;
+                pass.index = index;
+                pass.scale = scale;
+                pass.program = program;
+
+                pass.uniforms = {
+                    iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
+                    iTime: { type: "f", value: 0.0 },
+                    iPrevPass: { type: "t", value: Math.max(pass.index - 1, 0) },
+                    iBeforeBloom: { type: "t", value: Math.max(bloomPassBeginIndex - 1, 0) },
+                    iBlockOffset: { type: "f", value: 0.0 },
+                    iSampleRate: { type: "f", value: audio.sampleRate },
+                };
+
+                if (type === PassType.BloomUpsample) {
+                    const bloomDonwsampleEndIndex = bloomPassBeginIndex + bloomDonwsampleIterations;
+                    const upCount = index - bloomDonwsampleEndIndex;
+                    pass.uniforms.iPairBloomDown = { type: "t", value: index - upCount * 2 };
+                }
+
+                if (GLOBAL_UNIFORMS) {
+                    this.globalUniforms.forEach(unifrom => {
+                        pass.uniforms[unifrom.key] = { type: "f", value: unifrom.initValue };
+                    })
+                }
+
+                pass.locations = createLocations(pass);
+
+                setupFrameBuffer(pass);
+                return pass;
+            };
+
+            const renderPass = (pass: Pass) => {
+                gl.useProgram(pass.program);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                for (const [key, uniform] of Object.entries(pass.uniforms)) {
+                    const methods: { [index: string]: any } = {
+                        f: gl.uniform1f,
+                        // v2: gl.uniform2fv,
+                        v3: gl.uniform3fv,
+                        // v4: gl.uniform4fv,
+                        // t: gl.uniform1i,
+                    }
+
+                    const textureUnitIds: { [index: string]: number } = {
+                        iPrevPass: 0,
+                        iBeforeBloom: 1,
+                        iPairBloomDown: 2,
+                    }
+
+                    if (uniform.type === "t") {
+                        gl.activeTexture(gl.TEXTURE0 + textureUnitIds[key]);
+                        gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
+                        // methods[uniform.type].call(gl, pass.locations[key], textureUnitIds[key]);
+                        gl.uniform1i(pass.locations[key], textureUnitIds[key]);
+                    } else {
+                        methods[uniform.type].call(gl, pass.locations[key], uniform.value);
+                    }
+                }
+
+                // draw the buffer with VAO
+                // NOTE: binding vert and index buffer is not required
+                gl.bindVertexArray(vertexArray);
+                const indexOffset = 0 * index[0].length;
+                gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, indexOffset);
+                const error = gl.getError();
+                if (error !== gl.NO_ERROR) console.log(error);
+                gl.bindVertexArray(null);
+                gl.useProgram(null);
+            };
+
+            if (!PRODUCTION) {
+                this.setSize = (width: number, height: number) => {
+                    const canvas = gl.canvas;
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    gl.viewport(0, 0, width, height);
+
+                    imagePasses.forEach(pass => {
+                        gl.deleteFramebuffer(pass.frameBuffer);
+                        gl.deleteTexture(pass.texture);
+                        pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
+                        setupFrameBuffer(pass);
+                    });
+                }
             }
 
             if (GLOBAL_UNIFORMS) {
-                this.globalUniforms.forEach(unifrom => {
-                    pass.uniforms[unifrom.key] = { type: "f", value: unifrom.initValue };
-                })
-            }
+                getDebugUniforms(imageCommonHeaderShader);
 
-            pass.locations = createLocations(pass);
-
-            setupFrameBuffer(pass);
-            return pass;
-        };
-
-        const renderPass = (pass: Pass) => {
-            gl.useProgram(pass.program);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-            for (const [key, uniform] of Object.entries(pass.uniforms)) {
-                const methods: { [index: string]: any } = {
-                    f: gl.uniform1f,
-                    // v2: gl.uniform2fv,
-                    v3: gl.uniform3fv,
-                    // v4: gl.uniform4fv,
-                    // t: gl.uniform1i,
-                }
-
-                const textureUnitIds: { [index: string]: number } = {
-                    iPrevPass: 0,
-                    iBeforeBloom: 1,
-                    iPairBloomDown: 2,
-                }
-
-                if (uniform.type === "t") {
-                    gl.activeTexture(gl.TEXTURE0 + textureUnitIds[key]);
-                    gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
-                    // methods[uniform.type].call(gl, pass.locations[key], textureUnitIds[key]);
-                    gl.uniform1i(pass.locations[key], textureUnitIds[key]);
-                } else {
-                    methods[uniform.type].call(gl, pass.locations[key], uniform.value);
-                }
-            }
-
-            // draw the buffer with VAO
-            // NOTE: binding vert and index buffer is not required
-            gl.bindVertexArray(vertexArray);
-            const indexOffset = 0 * index[0].length;
-            gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, indexOffset);
-            const error = gl.getError();
-            if (error !== gl.NO_ERROR) console.log(error);
-            gl.bindVertexArray(null);
-            gl.useProgram(null);
-        };
-
-        if (!PRODUCTION) {
-            this.setSize = (width: number, height: number) => {
-                const canvas = gl.canvas;
-                canvas.width = width;
-                canvas.height = height;
-
-                gl.viewport(0, 0, width, height);
-
-                imagePasses.forEach(pass => {
-                    gl.deleteFramebuffer(pass.frameBuffer);
-                    gl.deleteTexture(pass.texture);
-                    pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
-                    setupFrameBuffer(pass);
+                imageShaders.forEach(shader => {
+                    getDebugUniforms(shader);
                 });
+
+                getDebugUniforms(bloomPrefilterShader);
+                getDebugUniforms(bloomDownsampleShader);
+                getDebugUniforms(bloomUpsampleShader);
+                getDebugUniforms(bloomFinalShader);
             }
-        }
 
-        if (GLOBAL_UNIFORMS) {
-            getDebugUniforms(imageCommonHeaderShader);
-
-            imageShaders.forEach(shader => {
-                getDebugUniforms(shader);
-            });
-
-            getDebugUniforms(bloomPrefilterShader);
-            getDebugUniforms(bloomDownsampleShader);
-            getDebugUniforms(bloomUpsampleShader);
-            getDebugUniforms(bloomFinalShader);
-        }
-
-        const imagePasses: Pass[] = [];
-        let passIndex = 0;
-        imageShaders.forEach((shader, i, ary) => {
-            if (i === bloomPassBeginIndex) {
-                imagePasses.push(initPass(
-                    loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
-                    passIndex,
-                    PassType.Bloom,
-                    1
-                ));
-                passIndex++;
-
-                let scale = 1;
-                for (let j = 0; j < bloomDonwsampleIterations; j++) {
-                    scale *= 0.5;
+            const imagePasses: Pass[] = [];
+            let passIndex = 0;
+            imageShaders.forEach((shader, i, ary) => {
+                if (i === bloomPassBeginIndex) {
                     imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
+                        loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                         passIndex,
                         PassType.Bloom,
-                        scale,
+                        1
                     ));
                     passIndex++;
-                }
 
-                for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
-                    scale *= 2;
+                    let scale = 1;
+                    for (let j = 0; j < bloomDonwsampleIterations; j++) {
+                        scale *= 0.5;
+                        imagePasses.push(initPass(
+                            loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
+                            passIndex,
+                            PassType.Bloom,
+                            scale,
+                        ));
+                        passIndex++;
+                    }
+
+                    for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
+                        scale *= 2;
+                        imagePasses.push(initPass(
+                            loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
+                            passIndex,
+                            PassType.BloomUpsample,
+                            scale,
+                        ));
+                        passIndex++;
+                    }
+
                     imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
+                        loadProgram(imageCommonHeaderShader + bloomFinalShader),
                         passIndex,
                         PassType.BloomUpsample,
-                        scale,
+                        1,
                     ));
                     passIndex++;
                 }
 
                 imagePasses.push(initPass(
-                    loadProgram(imageCommonHeaderShader + bloomFinalShader),
+                    loadProgram(imageCommonHeaderShader + shader),
                     passIndex,
-                    PassType.BloomUpsample,
-                    1,
+                    i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
+                    1
                 ));
+
                 passIndex++;
-            }
-
-            imagePasses.push(initPass(
-                loadProgram(imageCommonHeaderShader + shader),
-                passIndex,
-                i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
-                1
-            ));
-
-            passIndex++;
-        })
-
-        // Sound
-        const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
-        const samples = SOUND_WIDTH * SOUND_HEIGHT;
-        const numBlocks = (audio.sampleRate * timeLength) / samples;
-        const soundProgram = loadProgram(soundShader);
-        const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
-        for (let i = 0; i < numBlocks; i++) {
-            // Update uniform & Render
-            soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
-            renderPass(soundPass);
-
-            // Read pixels
-            const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
-            gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-            // Convert pixels to samples
-            const outputDataL = audioBuffer.getChannelData(0);
-            const outputDataR = audioBuffer.getChannelData(1);
-            for (let j = 0; j < samples; j++) {
-                outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
-                outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
-            }
-        }
-
-        this.audioSource = audio.createBufferSource();
-
-        if (PLAY_SOUND_FILE) {
-            fetch(PLAY_SOUND_FILE).then(response => {
-                return response.arrayBuffer();
-            }).then(arrayBuffer => {
-                audio.decodeAudioData(arrayBuffer, buffer => {
-                    this.audioSource.buffer = buffer;
-                });
             })
-        } else {
-            this.audioSource.buffer = audioBuffer;
-        }
 
-        this.audioSource.loop = true;
-        this.audioSource.connect(audio.destination);
+            // Sound
+            const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
+            const samples = SOUND_WIDTH * SOUND_HEIGHT;
+            const numBlocks = (audio.sampleRate * timeLength) / samples;
+            const soundProgram = loadProgram(soundShader);
+            const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
+            for (let i = 0; i < numBlocks; i++) {
+                // Update uniform & Render
+                soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+                renderPass(soundPass);
 
-        this.render = () => {
-            imagePasses.forEach((pass) => {
-                pass.uniforms.iTime.value = this.time;
-                if (GLOBAL_UNIFORMS) {
-                    for (const [key, value] of Object.entries(this.globalUniformValues)) {
-                        pass.uniforms[key].value = value;
+                // Read pixels
+                const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
+                gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+                // Convert pixels to samples
+                const outputDataL = audioBuffer.getChannelData(0);
+                const outputDataR = audioBuffer.getChannelData(1);
+                for (let j = 0; j < samples; j++) {
+                    outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
+                    outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+                }
+            }
+
+            this.audioSource = audio.createBufferSource();
+
+            if (PLAY_SOUND_FILE) {
+                fetch(PLAY_SOUND_FILE).then(response => {
+                    return response.arrayBuffer();
+                }).then(arrayBuffer => {
+                    audio.decodeAudioData(arrayBuffer, buffer => {
+                        this.audioSource.buffer = buffer;
+                    });
+                })
+            } else {
+                this.audioSource.buffer = audioBuffer;
+            }
+
+            this.audioSource.loop = true;
+            this.audioSource.connect(audio.destination);
+
+            this.render = () => {
+                imagePasses.forEach((pass) => {
+                    pass.uniforms.iTime.value = this.time;
+                    if (GLOBAL_UNIFORMS) {
+                        for (const [key, value] of Object.entries(this.globalUniformValues)) {
+                            pass.uniforms[key].value = value;
+                        }
+                    }
+                    renderPass(pass);
+                });
+            }
+
+            // Start Rendering
+            let lastTimestamp = 0;
+            const update = (timestamp: number) => {
+                requestAnimationFrame(update);
+                const timeDelta = (timestamp - lastTimestamp) * 0.001;
+
+                if (!PRODUCTION) {
+                    if (this.onUpdate != null) {
+                        this.onUpdate();
                     }
                 }
-                renderPass(pass);
-            });
+
+                if (this.isPlaying || this.needsUpdate) {
+                    if (this.onRender != null) {
+                        this.onRender(this.time, timeDelta);
+                    }
+
+                    this.render();
+
+                    if (this.isPlaying) {
+                        this.time += timeDelta;
+                    }
+                }
+
+                this.needsUpdate = false;
+                lastTimestamp = timestamp;
+            };
+
+            update(0);
         }
-
-        // Start Rendering
-        let lastTimestamp = 0;
-        const update = (timestamp: number) => {
-            requestAnimationFrame(update);
-            const timeDelta = (timestamp - lastTimestamp) * 0.001;
-
-            if (!PRODUCTION) {
-                if (this.onUpdate != null) {
-                    this.onUpdate();
-                }
-            }
-
-            if (this.isPlaying || this.needsUpdate) {
-                if (this.onRender != null) {
-                    this.onRender(this.time, timeDelta);
-                }
-
-                this.render();
-
-                if (this.isPlaying) {
-                    this.time += timeDelta;
-                }
-            }
-
-            this.needsUpdate = false;
-            lastTimestamp = timestamp;
-        };
-        update(0);
     }
 
     stopSound() {

@@ -40,20 +40,53 @@ window.addEventListener("load", ev => {
             const config = { debugCamera: false };
 
             const animateUniforms = (time: number) => {
-                chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
+                const bpm = 140;
+                const beat = time * bpm / 60;
 
-                if (!config.debugCamera) {
+                let camera = new Vector3(0, 0, 10);
+                let target = new Vector3(0, 0, 0);
+
+                if (beat < 8) {
+                    const b = beat;
+                    camera = new Vector3(0, 0.2, -13.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
+                    target = new Vector3(0, 0, 0);
+
+                    chromatic.globalUniformValues.gMandelboxScale = 1.8;
+                    chromatic.globalUniformValues.gCameraLightIntensity = 0.7;
+                    chromatic.globalUniformValues.gEmissiveIntensity = 0;
+                } else if (beat < 16) {
+                    const b = beat - 8;
+                    camera = new Vector3(0, 0.2, -17.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
+                    target = new Vector3(0, 0, 0);
+
+                    chromatic.globalUniformValues.gMandelboxScale = 1.8;
+                    chromatic.globalUniformValues.gCameraLightIntensity = 1.2;
+                    chromatic.globalUniformValues.gEmissiveIntensity = 0;
+                } else if (beat < 32) {
+                    const b = beat - 16;
                     const camera1 = new Vector3(0, 2.8, -8);
                     const camera2 = new Vector3(0, 0, -32);
 
-                    const camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
+                    camera = Vector3.mix(camera1, camera2, saturate(0.1 * b));
+                    target = new Vector3(0, 0, 0);
+
+                    chromatic.globalUniformValues.gMandelboxScale = 1.0 + 0.02 * b;
+                    chromatic.globalUniformValues.gEmissiveIntensity = 6;
+                } else {
+                    const b = beat - 32.0;
+                    camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(b).scale(0.01));
+                    target = new Vector3(0, 0, 0);
+                    chromatic.globalUniformValues.gMandelboxScale = 1.0;
+                    chromatic.globalUniformValues.gEmissiveIntensity = 6;
+                }
+
+                if (!config.debugCamera) {
                     chromatic.globalUniformValues.gCameraEyeX = camera.x;
                     chromatic.globalUniformValues.gCameraEyeY = camera.y;
                     chromatic.globalUniformValues.gCameraEyeZ = camera.z;
-
-                    chromatic.globalUniformValues.gCameraTargetX = 0;
-                    chromatic.globalUniformValues.gCameraTargetY = 2.75;
-                    chromatic.globalUniformValues.gCameraTargetZ = 0;
+                    chromatic.globalUniformValues.gCameraTargetX = target.x;
+                    chromatic.globalUniformValues.gCameraTargetY = target.y;
+                    chromatic.globalUniformValues.gCameraTargetZ = target.z;
                 }
             }
 

@@ -44,18 +44,37 @@ window.addEventListener("load", ev => {
         let target = new Vector3(0, 0, 0);
 
         if (beat < 8) {
-            const camera1 = new Vector3(0, 2.8, -8);
-            const camera2 = new Vector3(0, 0, -32);
-
-            camera = Vector3.mix(camera1, camera2, saturate(0.1 * time));
-            target = new Vector3(0, 2.75, 0);
-
-            chromatic.globalUniformValues.gMandelboxScale = mix(1.0, 3.0, saturate(0.1 * time));
-        } else if (beat < 16) {
-            camera = new Vector3(0, 0.2, -17.3);
+            const b = beat;
+            camera = new Vector3(0, 0.2, -13.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
             target = new Vector3(0, 0, 0);
 
             chromatic.globalUniformValues.gMandelboxScale = 1.8;
+            chromatic.globalUniformValues.gCameraLightIntensity = 0.7;
+            chromatic.globalUniformValues.gEmissiveIntensity = 0;
+        } else if (beat < 16) {
+            const b = beat - 8;
+            camera = new Vector3(0, 0.2, -17.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
+            target = new Vector3(0, 0, 0);
+
+            chromatic.globalUniformValues.gMandelboxScale = 1.8;
+            chromatic.globalUniformValues.gCameraLightIntensity = 1.2;
+            chromatic.globalUniformValues.gEmissiveIntensity = 0;
+        } else if (beat < 32) {
+            const b = beat - 16;
+            const camera1 = new Vector3(0, 2.8, -8);
+            const camera2 = new Vector3(0, 0, -32);
+
+            camera = Vector3.mix(camera1, camera2, saturate(0.1 * b));
+            target = new Vector3(0, 0, 0);
+
+            chromatic.globalUniformValues.gMandelboxScale = 1.0 + 0.02 * b;
+            chromatic.globalUniformValues.gEmissiveIntensity = 6;
+        } else {
+            const b = beat - 32.0;
+            camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(b).scale(0.01));
+            target = new Vector3(0, 0, 0);
+            chromatic.globalUniformValues.gMandelboxScale = 1.0;
+            chromatic.globalUniformValues.gEmissiveIntensity = 6;
         }
 
         if (!config.debugCamera) {
@@ -71,12 +90,21 @@ window.addEventListener("load", ev => {
     const gui = new dat.GUI({ width: 1000, });
 
     const config = {
-        debugCamera: true,
+        debugCamera: false,
         debugParams: false,
         resolution: "1920x1080",
     }
 
     gui.add(config, "debugCamera").onChange(value => {
+        if (value) {
+            camera.position.x = chromatic.globalUniformValues.gCameraEyeX;
+            camera.position.y = chromatic.globalUniformValues.gCameraEyeY;
+            camera.position.z = chromatic.globalUniformValues.gCameraEyeZ;
+            controls.target.x = chromatic.globalUniformValues.gCameraTargetX;
+            controls.target.y = chromatic.globalUniformValues.gCameraTargetY;
+            controls.target.z = chromatic.globalUniformValues.gCameraTargetZ;
+        }
+
         chromatic.needsUpdate = true;
     });
     gui.add(config, "debugParams").onChange(value => {
@@ -104,10 +132,6 @@ window.addEventListener("load", ev => {
             const fps = 60;
             let frame = 0;
             const update = (timestamp: number) => {
-                if (frame < fps * chromatic.timeLength) {
-                    requestAnimationFrame(update);
-                }
-
                 const time = frame / fps;
                 timeBar.valueAsNumber = time;
                 timeInput.valueAsNumber = time;
@@ -119,6 +143,10 @@ window.addEventListener("load", ev => {
                 const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
                 chromatic.canvas.toBlob(blob => {
                     saveAs(blob, filename);
+
+                    if (frame < fps * timeLengthInput.valueAsNumber) {
+                        requestAnimationFrame(update);
+                    }
                 });
 
                 frame++;
@@ -311,7 +339,6 @@ window.addEventListener("load", ev => {
                 chromatic.globalUniformValues.gCameraEyeX = camera.position.x;
                 chromatic.globalUniformValues.gCameraEyeY = camera.position.y;
                 chromatic.globalUniformValues.gCameraEyeZ = camera.position.z;
-
                 chromatic.globalUniformValues.gCameraTargetX = controls.target.x;
                 chromatic.globalUniformValues.gCameraTargetY = controls.target.y;
                 chromatic.globalUniformValues.gCameraTargetZ = controls.target.z;

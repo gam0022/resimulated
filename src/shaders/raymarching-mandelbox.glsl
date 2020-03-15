@@ -12,14 +12,15 @@ uniform float gCameraTargetX;  // 0 -100 100
 uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 
-uniform float gMandelboxScale;   // 2.7 1 5
-uniform float gMandelboxRepeat;  // 10 1 100
-uniform float gSceneEps;         // 0.001 0.00001 0.001
-uniform float gEdgeEps;          // 0.0005 0.0001 0.01
-uniform float gEdgePower;        // 1 0.1 10
-uniform float gBaseColor;        // 0.5
-uniform float gRoughness;        // 0.1
-uniform float gMetallic;         // 0.4
+uniform float gMandelboxScale;     // 2.7 1 5
+uniform float gMandelboxRepeat;    // 10 1 100
+uniform float gSceneEps;           // 0.001 0.00001 0.001
+uniform float gEdgeEps;            // 0.0005 0.0001 0.01
+uniform float gEdgePower;          // 1 0.1 10
+uniform float gBaseColor;          // 0.5
+uniform float gRoughness;          // 0.1
+uniform float gMetallic;           // 0.4
+uniform float gEmissiveIntensity;  // 6.0 0 20
 
 // consts
 const float INF = 1e+10;
@@ -205,8 +206,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = 6.0 * vec3(0.5, 2.5, 0.5) * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
-
+            intersection.emission = gEmissiveIntensity * vec3(0.5, 2.5, 0.5) * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
             intersection.transparent = false;
             intersection.reflectance = 0.0;
         }
@@ -283,14 +283,16 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
     return (diffuse + specular) * radiance * max(0.0, dot(l, n));
 }
 
+uniform float gCameraLightIntensity;  // 1 0 10
+
 void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
     intersection.hit = false;
     intersectScene(intersection, ray);
 
     if (intersection.hit) {
         intersection.color = intersection.emission;
-        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), vec3(80.0, 80.0, 100.0));
-        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
+        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
+        // intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), vec3(2.0, 1.0, 1.0));
 
         // fog
@@ -304,25 +306,6 @@ void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    // no debug
-    /*
-    gCameraEyeX = 0.0;// 0 -100 100
-    gCameraEyeY = 2.8;// 2.8 -100 100
-    gCameraEyeZ = -8.0;// -8 -100 100
-
-    gCameraTargetX = 0.0;// 0 -100 100
-    gCameraTargetY = 2.75;// 2.75 -100 100
-    gCameraTargetZ = 0.0;// 0 -100 100
-
-    gMandelboxScale = 2.7;// 2.7 1 5
-    gMandelboxRepeat = 10.0;// 10 1 100
-    gSceneEps = 0.001;// 0.001 0.00001 0.001
-    gEdgeEps = 0.0005;// 0.0005 0.0001 0.01
-    gBaseColor = 0.5;// 0.5
-    gRoughness = 0.1;// 0.1
-    gMetallic = 0.4;// 0.4
-    */
-
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 
     // camera and ray

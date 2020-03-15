@@ -33,22 +33,22 @@ class Timeline {
     begin: number;
     done: boolean;
 
-    constructor(public inputTime: number) {
+    constructor(public input: number) {
         this.begin = 0;
         this.done = false;
     }
 
-    then(length: number, event: (time: number) => void) {
-        if (this.done || this.inputTime < this.begin) {
+    then(length: number, event: (offset: number) => void) {
+        if (this.done || this.input < this.begin) {
             return this;
         }
 
-        if (this.inputTime > this.begin + length) {
+        if (this.input > this.begin + length) {
             this.begin += length;
             return this;
         }
 
-        event(this.inputTime - this.begin);
+        event(this.input - this.begin);
         this.done = true;
         return this;
     }
@@ -61,31 +61,31 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
     let camera = new Vector3(0, 0, 10);
     let target = new Vector3(0, 0, 0);
 
-    new Timeline(beat).then(8, b => {
-        camera = new Vector3(0, 0.2, -13.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
+    new Timeline(beat).then(8, t => {
+        camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
         chromatic.globalUniformValues.gMandelboxScale = 1.8;
         chromatic.globalUniformValues.gCameraLightIntensity = 0.7;
         chromatic.globalUniformValues.gEmissiveIntensity = 0;
-    }).then(8, b => {
-        camera = new Vector3(0, 0.2, -17.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
+    }).then(8, t => {
+        camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
         chromatic.globalUniformValues.gMandelboxScale = 1.8;
         chromatic.globalUniformValues.gCameraLightIntensity = 1.2;
         chromatic.globalUniformValues.gEmissiveIntensity = 0;
-    }).then(16, b => {
+    }).then(16, t => {
         const camera1 = new Vector3(0, 2.8, -8);
         const camera2 = new Vector3(0, 0, -32);
 
-        camera = Vector3.mix(camera1, camera2, saturate(0.1 * b));
+        camera = Vector3.mix(camera1, camera2, saturate(0.1 * t));
         target = new Vector3(0, 0, 0);
 
-        chromatic.globalUniformValues.gMandelboxScale = 1.0 + 0.02 * b;
+        chromatic.globalUniformValues.gMandelboxScale = 1.0 + 0.02 * t;
         chromatic.globalUniformValues.gEmissiveIntensity = 6;
-    }).then(1600, b => {
-        camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(b).scale(0.01));
+    }).then(1600, t => {
+        camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         chromatic.globalUniformValues.gMandelboxScale = 1.0;
         chromatic.globalUniformValues.gEmissiveIntensity = 6;

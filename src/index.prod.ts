@@ -1,6 +1,9 @@
 import { Chromatic } from "./chromatic"
 import { mix, clamp, saturate, Vector3 } from "./math"
 
+// for Webpack DefinePlugin
+declare var PRODUCTION: boolean;
+
 window.addEventListener("load", ev => {
     const style = document.createElement("style");
     style.innerText = require("../dist/style.prod.min.css").default;
@@ -36,7 +39,6 @@ window.addEventListener("load", ev => {
                 require("./shaders/sound-template.glsl").default,
             );
 
-            // FIXME: 削減可能
             const config = { debugCamera: false };
 
             const animateUniforms = (time: number) => {
@@ -80,14 +82,16 @@ window.addEventListener("load", ev => {
                     chromatic.globalUniformValues.gEmissiveIntensity = 6;
                 }
 
-                if (!config.debugCamera) {
-                    chromatic.globalUniformValues.gCameraEyeX = camera.x;
-                    chromatic.globalUniformValues.gCameraEyeY = camera.y;
-                    chromatic.globalUniformValues.gCameraEyeZ = camera.z;
-                    chromatic.globalUniformValues.gCameraTargetX = target.x;
-                    chromatic.globalUniformValues.gCameraTargetY = target.y;
-                    chromatic.globalUniformValues.gCameraTargetZ = target.z;
+                if (!PRODUCTION && config.debugCamera) {
+                    return;
                 }
+
+                chromatic.globalUniformValues.gCameraEyeX = camera.x;
+                chromatic.globalUniformValues.gCameraEyeY = camera.y;
+                chromatic.globalUniformValues.gCameraEyeZ = camera.z;
+                chromatic.globalUniformValues.gCameraTargetX = target.x;
+                chromatic.globalUniformValues.gCameraTargetY = target.y;
+                chromatic.globalUniformValues.gCameraTargetZ = target.z;
             }
 
             chromatic.onRender = (time, timeDelta) => {

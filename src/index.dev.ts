@@ -10,6 +10,9 @@ import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/Or
 import { saveAs } from 'file-saver';
 import { bufferToWave } from "./buffer-to-wave";
 
+// for Webpack DefinePlugin
+declare var PRODUCTION: boolean;
+
 window.addEventListener("load", ev => {
     const chromatic = new Chromatic(
         48,// デモの長さ（秒）
@@ -77,14 +80,16 @@ window.addEventListener("load", ev => {
             chromatic.globalUniformValues.gEmissiveIntensity = 6;
         }
 
-        if (!config.debugCamera) {
-            chromatic.globalUniformValues.gCameraEyeX = camera.x;
-            chromatic.globalUniformValues.gCameraEyeY = camera.y;
-            chromatic.globalUniformValues.gCameraEyeZ = camera.z;
-            chromatic.globalUniformValues.gCameraTargetX = target.x;
-            chromatic.globalUniformValues.gCameraTargetY = target.y;
-            chromatic.globalUniformValues.gCameraTargetZ = target.z;
+        if (!PRODUCTION && config.debugCamera) {
+            return;
         }
+
+        chromatic.globalUniformValues.gCameraEyeX = camera.x;
+        chromatic.globalUniformValues.gCameraEyeY = camera.y;
+        chromatic.globalUniformValues.gCameraEyeZ = camera.z;
+        chromatic.globalUniformValues.gCameraTargetX = target.x;
+        chromatic.globalUniformValues.gCameraTargetY = target.y;
+        chromatic.globalUniformValues.gCameraTargetZ = target.z;
     }
 
     const gui = new dat.GUI({ width: 1000, });

@@ -68,8 +68,6 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.globalUniformValues.gMandelboxScale = 1.8;
         chromatic.globalUniformValues.gCameraLightIntensity = 0.7;
         chromatic.globalUniformValues.gEmissiveIntensity = 0;
-
-        console.log("A: " + beat);
     }).then(8, b => {
         camera = new Vector3(0, 0.2, -17.0 - b * 0.1).add(Vector3.fbm(b).scale(0.01));
         target = new Vector3(0, 0, 0);
@@ -77,8 +75,6 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.globalUniformValues.gMandelboxScale = 1.8;
         chromatic.globalUniformValues.gCameraLightIntensity = 1.2;
         chromatic.globalUniformValues.gEmissiveIntensity = 0;
-
-        console.log("B: " + beat);
     }).then(16, b => {
         const camera1 = new Vector3(0, 2.8, -8);
         const camera2 = new Vector3(0, 0, -32);
@@ -88,15 +84,11 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
 
         chromatic.globalUniformValues.gMandelboxScale = 1.0 + 0.02 * b;
         chromatic.globalUniformValues.gEmissiveIntensity = 6;
-
-        console.log("C: " + beat);
     }).then(1600, b => {
         camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(b).scale(0.01));
         target = new Vector3(0, 0, 0);
         chromatic.globalUniformValues.gMandelboxScale = 1.0;
         chromatic.globalUniformValues.gEmissiveIntensity = 6;
-
-        console.log("D: " + beat);
     });
 
     if (!PRODUCTION && debugCamera) {

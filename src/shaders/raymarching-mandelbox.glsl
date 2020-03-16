@@ -179,7 +179,7 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
-uniform vec3 gEmissiveColor;  // 0.5 1.0 0.5
+uniform vec3 gEmissiveColor;  // 48 255 48
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;

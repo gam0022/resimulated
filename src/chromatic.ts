@@ -181,7 +181,7 @@ export class Chromatic {
                 while ((result = reg.exec(fragmentShader)) !== null) {
                     let uniform: any;
 
-                    if (result[1] == "float") {
+                    if (result[1] === "float") {
                         uniform = {
                             key: result[2],
                             initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
@@ -191,10 +191,10 @@ export class Chromatic {
                     } else {
                         uniform = {
                             key: result[2],
-                            // NOTE: for dat.GUI addColor
-                            initValue: [parseFloat(result[4]) * 255, parseFloat(result[6]) * 255, parseFloat(result[7]) * 255],
+                            initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
                         };
                     }
+
                     this.globalUniforms.push(uniform);
                     this.globalUniformValues[uniform.key] = uniform.initValue;
                 }

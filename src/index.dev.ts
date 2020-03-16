@@ -88,7 +88,7 @@ window.addEventListener("load", ev => {
     gui.add(saevFunctions, "saveSound");
 
     chromatic.globalUniforms.forEach(unifrom => {
-        if (unifrom.type == "float") {
+        if (typeof unifrom.initValue === "number") {
             gui.add(chromatic.globalUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
                 if (config.debugCamera) {
                     switch (unifrom.key) {

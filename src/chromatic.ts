@@ -51,7 +51,7 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    globalUniforms: { key: string, type: string, initValue: any, min: number, max: number }[]
+    globalUniforms: { key: string, initValue: any, min: number, max: number }[];
     globalUniformValues: { [key: string]: any };
 
     play: () => void;
@@ -195,7 +195,6 @@ export class Chromatic {
                             initValue: [parseFloat(result[4]) * 255, parseFloat(result[6]) * 255, parseFloat(result[7]) * 255],
                         };
                     }
-                    uniform.type = result[1];
                     this.globalUniforms.push(uniform);
                     this.globalUniformValues[uniform.key] = uniform.initValue;
                 }

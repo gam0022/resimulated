@@ -51,8 +51,8 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    globalUniforms: { key: string, initValue: number, min: number, max: number }[];
-    globalUniformValues: { [key: string]: number; };
+    globalUniforms: { key: string, initValue: number, min: number, max: number }[] | { key: string, initValue: number[] }[];
+    globalUniformValues: { [key: string]: number | number[]; };
 
     play: () => void;
     render: () => void;
@@ -176,15 +176,24 @@ export class Chromatic {
 
             const getDebugUniforms = (fragmentShader: string) => {
                 // for Debug dat.GUI
-                let reg = /uniform float (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
+                let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
                 let result: RegExpExecArray;
                 while ((result = reg.exec(fragmentShader)) !== null) {
-                    const uniform = {
-                        key: result[1],
-                        initValue: result[3] !== undefined ? parseFloat(result[3]) : 0,
-                        min: result[5] !== undefined ? parseFloat(result[5]) : 0,
-                        max: result[6] !== undefined ? parseFloat(result[6]) : 1,
-                    };
+                    let uniform: any;
+
+                    if (result[1] == "float") {
+                        uniform = {
+                            key: result[2],
+                            initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
+                            min: result[6] !== undefined ? parseFloat(result[6]) : 0,
+                            max: result[7] !== undefined ? parseFloat(result[7]) : 1,
+                        };
+                    } else {
+                        uniform = {
+                            key: result[2],
+                            initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
+                        };
+                    }
                     this.globalUniforms.push(uniform);
                     this.globalUniformValues[uniform.key] = uniform.initValue;
                 }
@@ -286,7 +295,7 @@ export class Chromatic {
                 }
 
                 if (GLOBAL_UNIFORMS) {
-                    this.globalUniforms.forEach(unifrom => {
+                    this.globalUniforms.forEach((unifrom: { key: string | number; initValue: number | number[]; }) => {
                         pass.uniforms[unifrom.key] = { type: "f", value: unifrom.initValue };
                     })
                 }

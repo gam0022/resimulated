@@ -88,32 +88,38 @@ window.addEventListener("load", ev => {
     gui.add(saevFunctions, "saveSound");
 
     chromatic.globalUniforms.forEach(unifrom => {
-        gui.add(chromatic.globalUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
-            if (config.debugCamera) {
-                switch (unifrom.key) {
-                    case "gCameraEyeX":
-                        camera.position.x = value;
-                        break;
-                    case "gCameraEyeY":
-                        camera.position.y = value;
-                        break;
-                    case "gCameraEyeZ":
-                        camera.position.z = value;
-                        break;
-                    case "gCameraTargetX":
-                        controls.target.x = value;
-                        break;
-                    case "gCameraTargetY":
-                        controls.target.y = value;
-                        break;
-                    case "gCameraTargetZ":
-                        controls.target.z = value;
-                        break;
+        if (unifrom.type == "float") {
+            gui.add(chromatic.globalUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+                if (config.debugCamera) {
+                    switch (unifrom.key) {
+                        case "gCameraEyeX":
+                            camera.position.x = value;
+                            break;
+                        case "gCameraEyeY":
+                            camera.position.y = value;
+                            break;
+                        case "gCameraEyeZ":
+                            camera.position.z = value;
+                            break;
+                        case "gCameraTargetX":
+                            controls.target.x = value;
+                            break;
+                        case "gCameraTargetY":
+                            controls.target.y = value;
+                            break;
+                        case "gCameraTargetZ":
+                            controls.target.z = value;
+                            break;
+                    }
                 }
-            }
 
-            chromatic.needsUpdate = true;
-        });
+                chromatic.needsUpdate = true;
+            });
+        } else {
+            gui.addColor(chromatic.globalUniformValues, unifrom.key).onChange(value => {
+                chromatic.needsUpdate = true;
+            });
+        }
     })
 
     // THREE.OrbitControls

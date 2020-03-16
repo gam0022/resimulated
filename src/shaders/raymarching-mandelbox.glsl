@@ -179,6 +179,8 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
+uniform vec3 gEmissiveColor;  // 0.5 1.0 0.5
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -206,7 +208,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = gEmissiveIntensity * vec3(0.5, 2.5, 0.5) * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
+            intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
             intersection.transparent = false;
             intersection.reflectance = 0.0;
         }

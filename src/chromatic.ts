@@ -51,8 +51,8 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    globalUniforms: { key: string, initValue: number, min: number, max: number }[] | { key: string, initValue: number[] }[];
-    globalUniformValues: { [key: string]: number | number[]; };
+    globalUniforms: { key: string, type: string, initValue: any, min: number, max: number }[]
+    globalUniformValues: { [key: string]: any };
 
     play: () => void;
     render: () => void;
@@ -191,9 +191,11 @@ export class Chromatic {
                     } else {
                         uniform = {
                             key: result[2],
-                            initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
+                            // NOTE: for dat.GUI addColor
+                            initValue: [parseFloat(result[4]) * 255, parseFloat(result[6]) * 255, parseFloat(result[7]) * 255],
                         };
                     }
+                    uniform.type = result[1];
                     this.globalUniforms.push(uniform);
                     this.globalUniformValues[uniform.key] = uniform.initValue;
                 }
@@ -295,8 +297,8 @@ export class Chromatic {
                 }
 
                 if (GLOBAL_UNIFORMS) {
-                    this.globalUniforms.forEach((unifrom: { key: string | number; initValue: number | number[]; }) => {
-                        pass.uniforms[unifrom.key] = { type: "f", value: unifrom.initValue };
+                    this.globalUniforms.forEach((unifrom: { key: string; initValue: number | number[] }) => {
+                        pass.uniforms[unifrom.key] = { type: typeof unifrom.initValue == "number" ? "f" : "v3", value: unifrom.initValue };
                     })
                 }
 
@@ -493,7 +495,12 @@ export class Chromatic {
                     pass.uniforms.iTime.value = this.time;
                     if (GLOBAL_UNIFORMS) {
                         for (const [key, value] of Object.entries(this.globalUniformValues)) {
-                            pass.uniforms[key].value = value;
+                            if (typeof value === "number") {
+                                pass.uniforms[key].value = value;
+                            } else {
+                                // NOTE: for dat.GUI addColor
+                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                            }
                         }
                     }
                     renderPass(pass);

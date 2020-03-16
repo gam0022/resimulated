@@ -296,8 +296,8 @@ export class Chromatic {
                 }
 
                 if (GLOBAL_UNIFORMS) {
-                    this.globalUniforms.forEach((unifrom: { key: string; initValue: number | number[] }) => {
-                        pass.uniforms[unifrom.key] = { type: typeof unifrom.initValue == "number" ? "f" : "v3", value: unifrom.initValue };
+                    this.globalUniforms.forEach((unifrom) => {
+                        pass.uniforms[unifrom.key] = { type: typeof unifrom.initValue === "number" ? "f" : "v3", value: unifrom.initValue };
                     })
                 }
 

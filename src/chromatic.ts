@@ -51,8 +51,8 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    globalUniforms: { key: string, initValue: any, min: number, max: number }[];
-    globalUniformValues: { [key: string]: any };
+    uniformArray: { key: string, initValue: any, min: number, max: number }[];
+    uniforms: { [key: string]: any };
 
     play: () => void;
     render: () => void;
@@ -83,8 +83,8 @@ export class Chromatic {
 
             // debug uniforms
             if (GLOBAL_UNIFORMS) {
-                this.globalUniforms = [];
-                this.globalUniformValues = {};
+                this.uniformArray = [];
+                this.uniforms = {};
             }
 
             // setup WebAudio
@@ -195,8 +195,8 @@ export class Chromatic {
                         };
                     }
 
-                    this.globalUniforms.push(uniform);
-                    this.globalUniformValues[uniform.key] = uniform.initValue;
+                    this.uniformArray.push(uniform);
+                    this.uniforms[uniform.key] = uniform.initValue;
                 }
             };
 
@@ -296,7 +296,7 @@ export class Chromatic {
                 }
 
                 if (GLOBAL_UNIFORMS) {
-                    this.globalUniforms.forEach(unifrom => {
+                    this.uniformArray.forEach(unifrom => {
                         pass.uniforms[unifrom.key] = { type: typeof unifrom.initValue === "number" ? "f" : "v3", value: unifrom.initValue };
                     })
                 }
@@ -493,7 +493,7 @@ export class Chromatic {
                 imagePasses.forEach((pass) => {
                     pass.uniforms.iTime.value = this.time;
                     if (GLOBAL_UNIFORMS) {
-                        for (const [key, value] of Object.entries(this.globalUniformValues)) {
+                        for (const [key, value] of Object.entries(this.uniforms)) {
                             if (typeof value === "number") {
                                 pass.uniforms[key].value = value;
                             } else {

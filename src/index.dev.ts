@@ -21,12 +21,12 @@ window.addEventListener("load", ev => {
 
     gui.add(config, "debugCamera").onChange(value => {
         if (value) {
-            camera.position.x = chromatic.globalUniformValues.gCameraEyeX;
-            camera.position.y = chromatic.globalUniformValues.gCameraEyeY;
-            camera.position.z = chromatic.globalUniformValues.gCameraEyeZ;
-            controls.target.x = chromatic.globalUniformValues.gCameraTargetX;
-            controls.target.y = chromatic.globalUniformValues.gCameraTargetY;
-            controls.target.z = chromatic.globalUniformValues.gCameraTargetZ;
+            camera.position.x = chromatic.uniforms.gCameraEyeX;
+            camera.position.y = chromatic.uniforms.gCameraEyeY;
+            camera.position.z = chromatic.uniforms.gCameraEyeZ;
+            controls.target.x = chromatic.uniforms.gCameraTargetX;
+            controls.target.y = chromatic.uniforms.gCameraTargetY;
+            controls.target.z = chromatic.uniforms.gCameraTargetZ;
         }
 
         chromatic.needsUpdate = true;
@@ -87,9 +87,9 @@ window.addEventListener("load", ev => {
     gui.add(saevFunctions, "saveImageSequence");
     gui.add(saevFunctions, "saveSound");
 
-    chromatic.globalUniforms.forEach(unifrom => {
+    chromatic.uniformArray.forEach(unifrom => {
         if (typeof unifrom.initValue === "number") {
-            gui.add(chromatic.globalUniformValues, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+            gui.add(chromatic.uniforms, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
                 if (config.debugCamera) {
                     switch (unifrom.key) {
                         case "gCameraEyeX":
@@ -116,7 +116,7 @@ window.addEventListener("load", ev => {
                 chromatic.needsUpdate = true;
             });
         } else {
-            gui.addColor(chromatic.globalUniformValues, unifrom.key).onChange(value => {
+            gui.addColor(chromatic.uniforms, unifrom.key).onChange(value => {
                 chromatic.needsUpdate = true;
             });
         }
@@ -126,12 +126,12 @@ window.addEventListener("load", ev => {
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
 
     if (config.debugCamera) {
-        camera.position.set(chromatic.globalUniformValues.gCameraEyeX, chromatic.globalUniformValues.gCameraEyeY, chromatic.globalUniformValues.gCameraEyeZ);
-        camera.lookAt(chromatic.globalUniformValues.gCameraTargetX, chromatic.globalUniformValues.gCameraTargetY, chromatic.globalUniformValues.gCameraTargetZ);
+        camera.position.set(chromatic.uniforms.gCameraEyeX, chromatic.uniforms.gCameraEyeY, chromatic.uniforms.gCameraEyeZ);
+        camera.lookAt(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
     }
 
     const controls = new THREE.OrbitControls(camera, chromatic.canvas);
-    controls.target = new three.Vector3(chromatic.globalUniformValues.gCameraTargetX, chromatic.globalUniformValues.gCameraTargetY, chromatic.globalUniformValues.gCameraTargetZ);
+    controls.target = new three.Vector3(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
     controls.zoomSpeed = 3.0;
     controls.screenSpacePanning = true;
     controls.mouseButtons = {
@@ -266,12 +266,12 @@ window.addEventListener("load", ev => {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {
-                chromatic.globalUniformValues.gCameraEyeX = camera.position.x;
-                chromatic.globalUniformValues.gCameraEyeY = camera.position.y;
-                chromatic.globalUniformValues.gCameraEyeZ = camera.position.z;
-                chromatic.globalUniformValues.gCameraTargetX = controls.target.x;
-                chromatic.globalUniformValues.gCameraTargetY = controls.target.y;
-                chromatic.globalUniformValues.gCameraTargetZ = controls.target.z;
+                chromatic.uniforms.gCameraEyeX = camera.position.x;
+                chromatic.uniforms.gCameraEyeY = camera.position.y;
+                chromatic.uniforms.gCameraEyeZ = camera.position.z;
+                chromatic.uniforms.gCameraTargetX = controls.target.x;
+                chromatic.uniforms.gCameraTargetY = controls.target.y;
+                chromatic.uniforms.gCameraTargetZ = controls.target.z;
 
                 gui.updateDisplay();
                 chromatic.needsUpdate = true;

@@ -155,7 +155,6 @@ export class Chromatic {
 
             const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
 
-            // shader loader
             const loadShader = (src: string, type: number) => {
                 const shader = gl.createShader(type);
                 gl.shaderSource(shader, src);

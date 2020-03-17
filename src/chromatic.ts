@@ -174,7 +174,7 @@ export class Chromatic {
                 return shader;
             };
 
-            const getDebugUniforms = (fragmentShader: string) => {
+            const getGlobalUniforms = (fragmentShader: string) => {
                 // for Debug dat.GUI
                 let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
                 let result: RegExpExecArray;
@@ -382,16 +382,16 @@ export class Chromatic {
             }
 
             if (GLOBAL_UNIFORMS) {
-                getDebugUniforms(imageCommonHeaderShader);
+                getGlobalUniforms(imageCommonHeaderShader);
 
                 imageShaders.forEach(shader => {
-                    getDebugUniforms(shader);
+                    getGlobalUniforms(shader);
                 });
 
-                getDebugUniforms(bloomPrefilterShader);
-                getDebugUniforms(bloomDownsampleShader);
-                getDebugUniforms(bloomUpsampleShader);
-                getDebugUniforms(bloomFinalShader);
+                getGlobalUniforms(bloomPrefilterShader);
+                getGlobalUniforms(bloomDownsampleShader);
+                getGlobalUniforms(bloomUpsampleShader);
+                getGlobalUniforms(bloomFinalShader);
             }
 
             const imagePasses: Pass[] = [];
@@ -448,46 +448,48 @@ export class Chromatic {
                 passIndex++;
             })
 
-            // Sound
-            const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
-            const samples = SOUND_WIDTH * SOUND_HEIGHT;
-            const numBlocks = (audio.sampleRate * timeLength) / samples;
-            const soundProgram = loadProgram(soundShader);
-            const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
-            for (let i = 0; i < numBlocks; i++) {
-                // Update uniform & Render
-                soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
-                renderPass(soundPass);
+            const initSound = () => {
+                // Sound
+                const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
+                const samples = SOUND_WIDTH * SOUND_HEIGHT;
+                const numBlocks = (audio.sampleRate * timeLength) / samples;
+                const soundProgram = loadProgram(soundShader);
+                const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
+                for (let i = 0; i < numBlocks; i++) {
+                    // Update uniform & Render
+                    soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+                    renderPass(soundPass);
 
-                // Read pixels
-                const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
-                gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                    // Read pixels
+                    const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
+                    gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-                // Convert pixels to samples
-                const outputDataL = audioBuffer.getChannelData(0);
-                const outputDataR = audioBuffer.getChannelData(1);
-                for (let j = 0; j < samples; j++) {
-                    outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
-                    outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+                    // Convert pixels to samples
+                    const outputDataL = audioBuffer.getChannelData(0);
+                    const outputDataR = audioBuffer.getChannelData(1);
+                    for (let j = 0; j < samples; j++) {
+                        outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
+                        outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+                    }
                 }
+
+                this.audioSource = audio.createBufferSource();
+
+                if (PLAY_SOUND_FILE) {
+                    fetch(PLAY_SOUND_FILE).then(response => {
+                        return response.arrayBuffer();
+                    }).then(arrayBuffer => {
+                        audio.decodeAudioData(arrayBuffer, buffer => {
+                            this.audioSource.buffer = buffer;
+                        });
+                    })
+                } else {
+                    this.audioSource.buffer = audioBuffer;
+                }
+
+                this.audioSource.loop = true;
+                this.audioSource.connect(audio.destination);
             }
-
-            this.audioSource = audio.createBufferSource();
-
-            if (PLAY_SOUND_FILE) {
-                fetch(PLAY_SOUND_FILE).then(response => {
-                    return response.arrayBuffer();
-                }).then(arrayBuffer => {
-                    audio.decodeAudioData(arrayBuffer, buffer => {
-                        this.audioSource.buffer = buffer;
-                    });
-                })
-            } else {
-                this.audioSource.buffer = audioBuffer;
-            }
-
-            this.audioSource.loop = true;
-            this.audioSource.connect(audio.destination);
 
             this.render = () => {
                 imagePasses.forEach((pass) => {
@@ -534,6 +536,7 @@ export class Chromatic {
                 lastTimestamp = timestamp;
             };
 
+            initSound();
             update(0);
         }
     }

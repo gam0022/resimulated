@@ -93,9 +93,13 @@
         <input id="stop-button" type="button" value="&#xf04d;" class="fas">
         <input id="play-pause-button" type="button" value="&#xf04c;" class="fas">
         <input id="time-input" type="number" min="0" value="0" step="0.5">
-        <input id="time-bar" type="range" min="0" max="60" step="any" list="tickmarks">
+        <input id="beat-input" type="number" min="0" value="0" step="1">
+        <input id="time-bar" type="range" min="0" max="60" step="any" list="time-tickmarks">
+        <input id="beat-bar" type="range" min="0" max="60" step="any" list="beat-tickmarks">
         <input id="time-length-input" type="number" min="0" value="60" step="0.5">
-        <datalist id="tickmarks"></datalist>
+        <input id="beat-length-input" type="number" min="0" value="60" step="1">
+        <datalist id="time-tickmarks"></datalist>
+        <datalist id="beat-tickmarks"></datalist>
     </div>
 </body>
 

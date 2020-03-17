@@ -17,6 +17,8 @@ window.addEventListener("load", ev => {
         debugCamera: false,
         debugParams: false,
         resolution: "1920x1080",
+        timeMode: "beat",
+        bpm: 140,
     }
 
     gui.add(config, "debugCamera").onChange(value => {
@@ -36,6 +38,13 @@ window.addEventListener("load", ev => {
     });
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
+    });
+    gui.add(config, "timeMode", ["time", "beat"]).onChange(value => {
+        onTimeModeChange();
+    });
+    gui.add(config, "bpm", 50, 300).onChange(value => {
+        beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
+        onBeatLengthUpdate();
     });
 
     const saevFunctions = {
@@ -154,9 +163,23 @@ window.addEventListener("load", ev => {
     const stopButton = <HTMLInputElement>document.getElementById("stop-button");
     const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
     const timeInput = <HTMLInputElement>document.getElementById("time-input");
+    const beatInput = <HTMLInputElement>document.getElementById("beat-input");
     const timeBar = <HTMLInputElement>document.getElementById("time-bar");
+    const beatBar = <HTMLInputElement>document.getElementById("beat-bar");
     const timeLengthInput = <HTMLInputElement>document.getElementById("time-length-input");
-    const tickmarks = <HTMLDataListElement>document.getElementById("tickmarks");
+    const beatLengthInput = <HTMLInputElement>document.getElementById("beat-length-input");
+    const timeTickmarks = <HTMLDataListElement>document.getElementById("time-tickmarks");
+    const beatTickmarks = <HTMLDataListElement>document.getElementById("beat-tickmarks");
+
+
+    // Common Functions
+    const timeToBeat = (time: number) => {
+        return time * config.bpm / 60;
+    }
+
+    const beatToTime = (beat: number) => {
+        return beat / config.bpm * 60;
+    }
 
 
     // Common Callbacks
@@ -174,12 +197,28 @@ window.addEventListener("load", ev => {
         chromatic.needsUpdate = true;
     }
 
+    const onTimeModeChange = () => {
+        const isTimeMode = config.timeMode === "time";
+
+        const timeDisplay = isTimeMode ? "block" : "none";
+        timeInput.style.display = timeDisplay;
+        timeLengthInput.style.display = timeDisplay;
+        timeBar.style.display = timeDisplay;
+
+        const beatDisplay = isTimeMode ? "none" : "block";
+        beatInput.style.display = beatDisplay;
+        beatLengthInput.style.display = beatDisplay;
+        beatBar.style.display = beatDisplay;
+    }
+
+    onTimeModeChange();
+
     const onTimeLengthUpdate = () => {
         timeBar.max = timeLengthInput.value;
 
         // tickmarksの子要素を全て削除します
-        for (let i = tickmarks.childNodes.length - 1; i >= 0; i--) {
-            tickmarks.removeChild(tickmarks.childNodes[i]);
+        for (let i = timeTickmarks.childNodes.length - 1; i >= 0; i--) {
+            timeTickmarks.removeChild(timeTickmarks.childNodes[i]);
         }
 
         // 1秒刻みにラベルを置きます
@@ -187,7 +226,24 @@ window.addEventListener("load", ev => {
             const option = document.createElement("option");
             option.value = i.toString();
             option.label = i.toString();
-            tickmarks.appendChild(option);
+            timeTickmarks.appendChild(option);
+        }
+    }
+
+    const onBeatLengthUpdate = () => {
+        beatBar.max = beatLengthInput.value;
+
+        // tickmarksの子要素を全て削除します
+        for (let i = beatTickmarks.childNodes.length - 1; i >= 0; i--) {
+            beatTickmarks.removeChild(beatTickmarks.childNodes[i]);
+        }
+
+        // 4ビート刻みにラベルを置きます
+        for (let i = 0; i < beatLengthInput.valueAsNumber; i += 4) {
+            const option = document.createElement("option");
+            option.value = i.toString();
+            option.label = i.toString();
+            beatTickmarks.appendChild(option);
         }
     }
 
@@ -196,6 +252,8 @@ window.addEventListener("load", ev => {
     const saveToSessionStorage = () => {
         sessionStorage.setItem("debugCamera", config.debugCamera.toString());
         sessionStorage.setItem("resolution", config.resolution);
+        sessionStorage.setItem("timeMode", config.timeMode);
+        sessionStorage.setItem("bpm", config.bpm.toString());
 
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
@@ -217,6 +275,16 @@ window.addEventListener("load", ev => {
             config.debugCamera = parseBool(cameraDebugStr);
         }
 
+        const timeModeStr = sessionStorage.getItem("timeMode");
+        if (timeModeStr) {
+            config.timeMode = timeModeStr;
+        }
+
+        const bpmStr = sessionStorage.getItem("bpm");
+        if (bpmStr) {
+            config.bpm = parseFloat(bpmStr);
+        }
+
         const timeStr = sessionStorage.getItem("time")
         if (timeStr) {
             chromatic.time = parseFloat(timeStr);
@@ -230,12 +298,14 @@ window.addEventListener("load", ev => {
 
         const timeLengthStr = sessionStorage.getItem("timeLength");
         if (timeLengthStr) {
-            timeLengthInput.value = timeLengthStr;
+            timeLengthInput.valueAsNumber = parseFloat(timeLengthStr);
         } else {
             timeLengthInput.valueAsNumber = chromatic.timeLength;
         }
 
+        beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onTimeLengthUpdate();
+        onBeatLengthUpdate();
     }
 
     loadFromSessionStorage();
@@ -248,8 +318,10 @@ window.addEventListener("load", ev => {
 
     // Player
     chromatic.onRender = (time, timeDelta) => {
-        timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
+        beatInput.valueAsNumber = timeToBeat(time);
+        timeBar.valueAsNumber = time;
+        beatBar.valueAsNumber = timeToBeat(time);
 
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
@@ -299,7 +371,7 @@ window.addEventListener("load", ev => {
         chromatic.needsUpdate = true;
         chromatic.time = 0;
         playPauseButton.value = playChar;
-    })
+    });
 
     playPauseButton.addEventListener("click", ev => {
         chromatic.isPlaying = !chromatic.isPlaying;
@@ -310,7 +382,7 @@ window.addEventListener("load", ev => {
         } else {
             chromatic.stopSound();
         }
-    })
+    });
 
     timeInput.addEventListener("input", ev => {
         if (chromatic.isPlaying) {
@@ -321,7 +393,18 @@ window.addEventListener("load", ev => {
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
         chromatic.needsUpdate = true;
-    })
+    });
+
+    beatInput.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
+        chromatic.time = beatToTime(beatInput.valueAsNumber);
+        playPauseButton.value = playChar;
+        chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
+    });
 
     timeBar.addEventListener("input", ev => {
         if (chromatic.isPlaying) {
@@ -332,9 +415,28 @@ window.addEventListener("load", ev => {
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
         chromatic.needsUpdate = true;
-    })
+    });
+
+    beatBar.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
+        chromatic.time = beatToTime(beatBar.valueAsNumber);
+        playPauseButton.value = playChar;
+        chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
+    });
 
     timeLengthInput.addEventListener("input", ev => {
+        beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onTimeLengthUpdate();
-    })
+        onBeatLengthUpdate();
+    });
+
+    beatLengthInput.addEventListener("input", ev => {
+        timeLengthInput.valueAsNumber = beatToTime(beatLengthInput.valueAsNumber);
+        onTimeLengthUpdate();
+        onBeatLengthUpdate();
+    });
 }, false);

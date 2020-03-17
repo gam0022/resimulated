@@ -441,33 +441,6 @@ export class Chromatic {
                 });
             }
 
-            let lastTimestamp = 0;
-            const update = (timestamp: number) => {
-                requestAnimationFrame(update);
-                const timeDelta = (timestamp - lastTimestamp) * 0.001;
-
-                if (!PRODUCTION) {
-                    if (this.onUpdate != null) {
-                        this.onUpdate();
-                    }
-                }
-
-                if (this.isPlaying || this.needsUpdate) {
-                    if (this.onRender != null) {
-                        this.onRender(this.time, timeDelta);
-                    }
-
-                    this.render();
-
-                    if (this.isPlaying) {
-                        this.time += timeDelta;
-                    }
-                }
-
-                this.needsUpdate = false;
-                lastTimestamp = timestamp;
-            };
-
             if (GLOBAL_UNIFORMS) {
                 getGlobalUniforms(imageCommonHeaderShader);
 
@@ -536,6 +509,33 @@ export class Chromatic {
             })
 
             initSound();
+
+            let lastTimestamp = 0;
+            const update = (timestamp: number) => {
+                requestAnimationFrame(update);
+                const timeDelta = (timestamp - lastTimestamp) * 0.001;
+
+                if (!PRODUCTION) {
+                    if (this.onUpdate != null) {
+                        this.onUpdate();
+                    }
+                }
+
+                if (this.isPlaying || this.needsUpdate) {
+                    if (this.onRender != null) {
+                        this.onRender(this.time, timeDelta);
+                    }
+
+                    this.render();
+
+                    if (this.isPlaying) {
+                        this.time += timeDelta;
+                    }
+                }
+
+                this.needsUpdate = false;
+                lastTimestamp = timestamp;
+            };
             update(0);
         }
     }

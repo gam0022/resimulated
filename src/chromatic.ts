@@ -518,13 +518,13 @@ export class Chromatic {
                 const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
                 if (!PRODUCTION) {
-                    if (this.onUpdate != null) {
+                    if (this.onUpdate !== null) {
                         this.onUpdate();
                     }
                 }
 
                 if (this.isPlaying || this.needsUpdate) {
-                    if (this.onRender != null) {
+                    if (this.onRender !== null) {
                         this.onRender(this.time, timeDelta);
                     }
 

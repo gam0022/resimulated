@@ -275,10 +275,10 @@ export class Chromatic {
             const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
                 setupVAO(program);
                 const pass = new Pass();
-                pass.type = type;
-                pass.index = index;
-                pass.scale = scale;
                 pass.program = program;
+                pass.index = index;
+                pass.type = type;
+                pass.scale = scale;
 
                 pass.uniforms = {
                     iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },

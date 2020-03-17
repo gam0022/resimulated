@@ -81,7 +81,6 @@ export class Chromatic {
             this.needsUpdate = false;
             this.time = 0;
 
-            // debug uniforms
             if (GLOBAL_UNIFORMS) {
                 this.uniformArray = [];
                 this.uniforms = {};

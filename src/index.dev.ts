@@ -252,6 +252,8 @@ window.addEventListener("load", ev => {
     const saveToSessionStorage = () => {
         sessionStorage.setItem("debugCamera", config.debugCamera.toString());
         sessionStorage.setItem("resolution", config.resolution);
+        sessionStorage.setItem("timeMode", config.timeMode);
+        sessionStorage.setItem("bpm", config.bpm.toString());
 
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
@@ -273,6 +275,16 @@ window.addEventListener("load", ev => {
             config.debugCamera = parseBool(cameraDebugStr);
         }
 
+        const timeModeStr = sessionStorage.getItem("timeMode");
+        if (timeModeStr) {
+            config.timeMode = timeModeStr;
+        }
+
+        const bpmStr = sessionStorage.getItem("bpm");
+        if (bpmStr) {
+            config.bpm = parseFloat(bpmStr);
+        }
+
         const timeStr = sessionStorage.getItem("time")
         if (timeStr) {
             chromatic.time = parseFloat(timeStr);
@@ -286,7 +298,7 @@ window.addEventListener("load", ev => {
 
         const timeLengthStr = sessionStorage.getItem("timeLength");
         if (timeLengthStr) {
-            timeLengthInput.value = timeLengthStr;
+            timeLengthInput.valueAsNumber = parseFloat(timeLengthStr);
         } else {
             timeLengthInput.valueAsNumber = chromatic.timeLength;
         }

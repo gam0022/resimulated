@@ -17,6 +17,7 @@ window.addEventListener("load", ev => {
         debugCamera: false,
         debugParams: false,
         resolution: "1920x1080",
+        bpm: 140,
     }
 
     gui.add(config, "debugCamera").onChange(value => {
@@ -37,6 +38,7 @@ window.addEventListener("load", ev => {
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
+    gui.add(config, "bpm", 50, 300);
 
     const saevFunctions = {
         saveImage: () => {
@@ -154,9 +156,21 @@ window.addEventListener("load", ev => {
     const stopButton = <HTMLInputElement>document.getElementById("stop-button");
     const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
     const timeInput = <HTMLInputElement>document.getElementById("time-input");
+    const beatInput = <HTMLInputElement>document.getElementById("beat-input");
     const timeBar = <HTMLInputElement>document.getElementById("time-bar");
     const timeLengthInput = <HTMLInputElement>document.getElementById("time-length-input");
+    const beatLengthInput = <HTMLInputElement>document.getElementById("beat-length-input");
     const tickmarks = <HTMLDataListElement>document.getElementById("tickmarks");
+
+
+    // Common Functions
+    const timeToBeat = (time: number) => {
+        return time * config.bpm / 60;
+    }
+
+    const beatToTime = (beat: number) => {
+        return beat / config.bpm * 60;
+    }
 
 
     // Common Callbacks
@@ -175,6 +189,7 @@ window.addEventListener("load", ev => {
     }
 
     const onTimeLengthUpdate = () => {
+        beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         timeBar.max = timeLengthInput.value;
 
         // tickmarksの子要素を全て削除します
@@ -250,6 +265,7 @@ window.addEventListener("load", ev => {
     chromatic.onRender = (time, timeDelta) => {
         timeBar.valueAsNumber = time;
         timeInput.valueAsNumber = time;
+        beatInput.valueAsNumber = timeToBeat(time);
 
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
@@ -318,6 +334,17 @@ window.addEventListener("load", ev => {
         }
 
         chromatic.time = timeInput.valueAsNumber;
+        playPauseButton.value = playChar;
+        chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
+    })
+
+    beatInput.addEventListener("input", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
+        chromatic.time = beatToTime(beatInput.valueAsNumber);
         playPauseButton.value = playChar;
         chromatic.isPlaying = false;
         chromatic.needsUpdate = true;

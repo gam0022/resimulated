@@ -381,6 +381,93 @@ export class Chromatic {
                 }
             }
 
+            const initSound = () => {
+                // Sound
+                const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
+                const samples = SOUND_WIDTH * SOUND_HEIGHT;
+                const numBlocks = (audio.sampleRate * timeLength) / samples;
+                const soundProgram = loadProgram(soundShader);
+                const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
+                for (let i = 0; i < numBlocks; i++) {
+                    // Update uniform & Render
+                    soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+                    renderPass(soundPass);
+
+                    // Read pixels
+                    const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
+                    gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+                    // Convert pixels to samples
+                    const outputDataL = audioBuffer.getChannelData(0);
+                    const outputDataR = audioBuffer.getChannelData(1);
+                    for (let j = 0; j < samples; j++) {
+                        outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
+                        outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+                    }
+                }
+
+                this.audioSource = audio.createBufferSource();
+
+                if (PLAY_SOUND_FILE) {
+                    fetch(PLAY_SOUND_FILE).then(response => {
+                        return response.arrayBuffer();
+                    }).then(arrayBuffer => {
+                        audio.decodeAudioData(arrayBuffer, buffer => {
+                            this.audioSource.buffer = buffer;
+                        });
+                    })
+                } else {
+                    this.audioSource.buffer = audioBuffer;
+                }
+
+                this.audioSource.loop = true;
+                this.audioSource.connect(audio.destination);
+            }
+
+            this.render = () => {
+                imagePasses.forEach((pass) => {
+                    pass.uniforms.iTime.value = this.time;
+                    if (GLOBAL_UNIFORMS) {
+                        for (const [key, value] of Object.entries(this.uniforms)) {
+                            if (typeof value === "number") {
+                                pass.uniforms[key].value = value;
+                            } else {
+                                // NOTE: for dat.GUI addColor
+                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                            }
+                        }
+                    }
+                    renderPass(pass);
+                });
+            }
+
+            let lastTimestamp = 0;
+            const update = (timestamp: number) => {
+                requestAnimationFrame(update);
+                const timeDelta = (timestamp - lastTimestamp) * 0.001;
+
+                if (!PRODUCTION) {
+                    if (this.onUpdate != null) {
+                        this.onUpdate();
+                    }
+                }
+
+                if (this.isPlaying || this.needsUpdate) {
+                    if (this.onRender != null) {
+                        this.onRender(this.time, timeDelta);
+                    }
+
+                    this.render();
+
+                    if (this.isPlaying) {
+                        this.time += timeDelta;
+                    }
+                }
+
+                this.needsUpdate = false;
+                lastTimestamp = timestamp;
+            };
+
             if (GLOBAL_UNIFORMS) {
                 getGlobalUniforms(imageCommonHeaderShader);
 
@@ -447,94 +534,6 @@ export class Chromatic {
 
                 passIndex++;
             })
-
-            const initSound = () => {
-                // Sound
-                const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
-                const samples = SOUND_WIDTH * SOUND_HEIGHT;
-                const numBlocks = (audio.sampleRate * timeLength) / samples;
-                const soundProgram = loadProgram(soundShader);
-                const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
-                for (let i = 0; i < numBlocks; i++) {
-                    // Update uniform & Render
-                    soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
-                    renderPass(soundPass);
-
-                    // Read pixels
-                    const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
-                    gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-                    // Convert pixels to samples
-                    const outputDataL = audioBuffer.getChannelData(0);
-                    const outputDataR = audioBuffer.getChannelData(1);
-                    for (let j = 0; j < samples; j++) {
-                        outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
-                        outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
-                    }
-                }
-
-                this.audioSource = audio.createBufferSource();
-
-                if (PLAY_SOUND_FILE) {
-                    fetch(PLAY_SOUND_FILE).then(response => {
-                        return response.arrayBuffer();
-                    }).then(arrayBuffer => {
-                        audio.decodeAudioData(arrayBuffer, buffer => {
-                            this.audioSource.buffer = buffer;
-                        });
-                    })
-                } else {
-                    this.audioSource.buffer = audioBuffer;
-                }
-
-                this.audioSource.loop = true;
-                this.audioSource.connect(audio.destination);
-            }
-
-            this.render = () => {
-                imagePasses.forEach((pass) => {
-                    pass.uniforms.iTime.value = this.time;
-                    if (GLOBAL_UNIFORMS) {
-                        for (const [key, value] of Object.entries(this.uniforms)) {
-                            if (typeof value === "number") {
-                                pass.uniforms[key].value = value;
-                            } else {
-                                // NOTE: for dat.GUI addColor
-                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
-                            }
-                        }
-                    }
-                    renderPass(pass);
-                });
-            }
-
-            // Start Rendering
-            let lastTimestamp = 0;
-            const update = (timestamp: number) => {
-                requestAnimationFrame(update);
-                const timeDelta = (timestamp - lastTimestamp) * 0.001;
-
-                if (!PRODUCTION) {
-                    if (this.onUpdate != null) {
-                        this.onUpdate();
-                    }
-                }
-
-                if (this.isPlaying || this.needsUpdate) {
-                    if (this.onRender != null) {
-                        this.onRender(this.time, timeDelta);
-                    }
-
-                    this.render();
-
-                    if (this.isPlaying) {
-                        this.time += timeDelta;
-                    }
-                }
-
-                this.needsUpdate = false;
-                lastTimestamp = timestamp;
-            };
 
             initSound();
             update(0);

@@ -173,32 +173,6 @@ export class Chromatic {
                 return shader;
             };
 
-            const getGlobalUniforms = (fragmentShader: string) => {
-                // for Debug dat.GUI
-                let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
-                let result: RegExpExecArray;
-                while ((result = reg.exec(fragmentShader)) !== null) {
-                    let uniform: any;
-
-                    if (result[1] === "float") {
-                        uniform = {
-                            key: result[2],
-                            initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
-                            min: result[6] !== undefined ? parseFloat(result[6]) : 0,
-                            max: result[7] !== undefined ? parseFloat(result[7]) : 1,
-                        };
-                    } else {
-                        uniform = {
-                            key: result[2],
-                            initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
-                        };
-                    }
-
-                    this.uniformArray.push(uniform);
-                    this.uniforms[uniform.key] = uniform.initValue;
-                }
-            };
-
             const loadProgram = (fragmentShader: string) => {
                 const shaders = [
                     loadShader(vertexShader, gl.VERTEX_SHADER),
@@ -442,6 +416,32 @@ export class Chromatic {
 
             // Get global uniforms
             if (GLOBAL_UNIFORMS) {
+                const getGlobalUniforms = (fragmentShader: string) => {
+                    // for Debug dat.GUI
+                    let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
+                    let result: RegExpExecArray;
+                    while ((result = reg.exec(fragmentShader)) !== null) {
+                        let uniform: any;
+
+                        if (result[1] === "float") {
+                            uniform = {
+                                key: result[2],
+                                initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
+                                min: result[6] !== undefined ? parseFloat(result[6]) : 0,
+                                max: result[7] !== undefined ? parseFloat(result[7]) : 1,
+                            };
+                        } else {
+                            uniform = {
+                                key: result[2],
+                                initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
+                            };
+                        }
+
+                        this.uniformArray.push(uniform);
+                        this.uniforms[uniform.key] = uniform.initValue;
+                    }
+                };
+
                 getGlobalUniforms(imageCommonHeaderShader);
 
                 imageShaders.forEach(shader => {

@@ -441,6 +441,7 @@ export class Chromatic {
                 });
             }
 
+            // Get global uniforms
             if (GLOBAL_UNIFORMS) {
                 getGlobalUniforms(imageCommonHeaderShader);
 
@@ -454,6 +455,7 @@ export class Chromatic {
                 getGlobalUniforms(bloomFinalShader);
             }
 
+            // Create Rendering Pipeline
             const imagePasses: Pass[] = [];
             let passIndex = 0;
             imageShaders.forEach((shader, i, ary) => {
@@ -508,8 +510,10 @@ export class Chromatic {
                 passIndex++;
             })
 
+            // Init Sound
             initSound();
 
+            // Rendering Loop
             let lastTimestamp = 0;
             const update = (timestamp: number) => {
                 requestAnimationFrame(update);

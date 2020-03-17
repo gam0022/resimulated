@@ -65,16 +65,16 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
-        chromatic.globalUniformValues.gMandelboxScale = 1.8;
-        chromatic.globalUniformValues.gCameraLightIntensity = 0.7;
-        chromatic.globalUniformValues.gEmissiveIntensity = 0;
+        chromatic.uniforms.gMandelboxScale = 1.8;
+        chromatic.uniforms.gCameraLightIntensity = 0.7;
+        chromatic.uniforms.gEmissiveIntensity = 0;
     }).then(8, t => {
         camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
-        chromatic.globalUniformValues.gMandelboxScale = 1.8;
-        chromatic.globalUniformValues.gCameraLightIntensity = 1.2;
-        chromatic.globalUniformValues.gEmissiveIntensity = 0;
+        chromatic.uniforms.gMandelboxScale = 1.8;
+        chromatic.uniforms.gCameraLightIntensity = 1.2;
+        chromatic.uniforms.gEmissiveIntensity = 0;
     }).then(16, t => {
         const camera1 = new Vector3(0, 2.8, -8);
         const camera2 = new Vector3(0, 0, -32);
@@ -82,23 +82,23 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         camera = Vector3.mix(camera1, camera2, saturate(0.1 * t));
         target = new Vector3(0, 0, 0);
 
-        chromatic.globalUniformValues.gMandelboxScale = 1.0 + 0.02 * t;
-        chromatic.globalUniformValues.gEmissiveIntensity = 6;
+        chromatic.uniforms.gMandelboxScale = 1.0 + 0.02 * t;
+        chromatic.uniforms.gEmissiveIntensity = 6;
     }).then(1600, t => {
         camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
-        chromatic.globalUniformValues.gMandelboxScale = 1.0;
-        chromatic.globalUniformValues.gEmissiveIntensity = 6;
+        chromatic.uniforms.gMandelboxScale = 1.0;
+        chromatic.uniforms.gEmissiveIntensity = 6;
     });
 
     if (!PRODUCTION && debugCamera) {
         return;
     }
 
-    chromatic.globalUniformValues.gCameraEyeX = camera.x;
-    chromatic.globalUniformValues.gCameraEyeY = camera.y;
-    chromatic.globalUniformValues.gCameraEyeZ = camera.z;
-    chromatic.globalUniformValues.gCameraTargetX = target.x;
-    chromatic.globalUniformValues.gCameraTargetY = target.y;
-    chromatic.globalUniformValues.gCameraTargetZ = target.z;
+    chromatic.uniforms.gCameraEyeX = camera.x;
+    chromatic.uniforms.gCameraEyeY = camera.y;
+    chromatic.uniforms.gCameraEyeZ = camera.z;
+    chromatic.uniforms.gCameraTargetX = target.x;
+    chromatic.uniforms.gCameraTargetY = target.y;
+    chromatic.uniforms.gCameraTargetZ = target.z;
 }

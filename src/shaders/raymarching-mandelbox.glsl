@@ -14,7 +14,7 @@ uniform float gCameraTargetZ;  // 0 -100 100
 
 uniform float gMandelboxScale;     // 2.7 1 5
 uniform float gMandelboxRepeat;    // 10 1 100
-uniform float gSceneEps;           // 0.001 0.00001 0.005
+uniform float gSceneEps;           // 0.001 0.00001 0.01
 uniform float gEdgeEps;            // 0.0005 0.0001 0.01
 uniform float gEdgePower;          // 1 0.1 10
 uniform float gBaseColor;          // 0.5
@@ -207,7 +207,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map);
 
-        if (abs(dFlying(p)) < EPS) {
+        if (abs(dFlying(p)) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;

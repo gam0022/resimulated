@@ -11,6 +11,8 @@ import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/Or
 window.addEventListener("load", ev => {
     chromatic.play();
 
+
+    // dat.GUI
     const gui = new dat.GUI({ width: 1000, });
 
     const config = {
@@ -197,8 +199,6 @@ window.addEventListener("load", ev => {
         beatBar.style.display = beatDisplay;
     }
 
-    onTimeModeChange();
-
     const onTimeLengthUpdate = () => {
         timeBar.max = timeLengthInput.value;
 
@@ -260,6 +260,7 @@ window.addEventListener("load", ev => {
         if (resolutionStr) {
             config.resolution = resolutionStr;
         }
+        onResolutionCange();
 
         const debugCameraStr = sessionStorage.getItem("debugCamera");
         if (debugCameraStr) {
@@ -275,6 +276,7 @@ window.addEventListener("load", ev => {
         if (timeModeStr) {
             config.timeMode = timeModeStr;
         }
+        onTimeModeChange();
 
         const bpmStr = sessionStorage.getItem("bpm");
         if (bpmStr) {
@@ -318,7 +320,6 @@ window.addEventListener("load", ev => {
     }
 
     loadFromSessionStorage();
-    onResolutionCange();
 
     window.addEventListener("beforeunload", ev => {
         saveToSessionStorage();

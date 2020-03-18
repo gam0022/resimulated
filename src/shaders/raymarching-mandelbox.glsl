@@ -14,7 +14,7 @@ uniform float gCameraTargetZ;  // 0 -100 100
 
 uniform float gMandelboxScale;     // 2.7 1 5
 uniform float gMandelboxRepeat;    // 10 1 100
-uniform float gSceneEps;           // 0.001 0.00001 0.001
+uniform float gSceneEps;           // 0.001 0.00001 0.005
 uniform float gEdgeEps;            // 0.0005 0.0001 0.01
 uniform float gEdgePower;          // 1 0.1 10
 uniform float gBaseColor;          // 0.5
@@ -133,10 +133,15 @@ vec2 foldRotate(vec2 p, float s) {
     return p;
 }
 
+float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
+
+float dFlying(vec3 p) { return dSphere(p - vec3(0, -10, 0), 0.1); }
+
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
-    float d = dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
+    float d = dStage(p);
+    d = min(d, dFlying(p));
     return d;
 }
 
@@ -201,14 +206,22 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.hit = true;
         intersection.position = p;
         intersection.normal = calcNormal(p, map);
-        // if (abs(map(p)) < EPS) {
-        {
+
+        if (abs(dFlying(p)) < EPS) {
+            intersection.baseColor = vec3(0.0);
+            intersection.roughness = 0.0;
+            intersection.metallic = 0.8;
+            intersection.emission = vec3(0.0);
+            intersection.transparent = false;
+            intersection.reflectance = 1.0;
+        } else {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
             intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
+
             intersection.transparent = false;
             intersection.reflectance = 0.0;
         }

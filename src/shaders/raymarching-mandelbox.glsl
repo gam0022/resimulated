@@ -268,7 +268,7 @@ float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughnes
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
-    vec3 ref = mix(vec3(0.004), i.baseColor, i.metallic);
+    vec3 ref = mix(vec3(0.04), i.baseColor, i.metallic);
 
     vec3 l = lp - p;
     float len = length(l);
@@ -286,7 +286,7 @@ vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
 vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
-    vec3 ref = mix(vec3(0.004), i.baseColor, i.metallic);
+    vec3 ref = mix(vec3(0.04), i.baseColor, i.metallic);
 
     vec3 l = lightDir;
     vec3 h = normalize(l + v);

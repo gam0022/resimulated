@@ -131,47 +131,6 @@ window.addEventListener("load", ev => {
         }
     })
 
-    // THREE.OrbitControls
-    const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
-
-    if (config.debugCamera) {
-        camera.position.set(chromatic.uniforms.gCameraEyeX, chromatic.uniforms.gCameraEyeY, chromatic.uniforms.gCameraEyeZ);
-        camera.lookAt(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
-    }
-
-    const controls = new THREE.OrbitControls(camera, chromatic.canvas);
-    controls.target = new three.Vector3(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
-    controls.zoomSpeed = 3.0;
-    controls.screenSpacePanning = true;
-    controls.mouseButtons = {
-        LEFT: THREE.MOUSE.ROTATE,
-        MIDDLE: THREE.MOUSE.PAN,
-        RIGHT: THREE.MOUSE.DOLLY,
-    };
-
-    const prevCameraPosotion = camera.position.clone();
-    const prevCameraTarget: three.Vector3 = controls.target.clone();
-
-
-    // consts
-    const pauseChar = "\uf04c";
-    const playChar = "\uf04b";
-
-
-    // HTMLElements
-    const fpsSpan = document.getElementById("fps-span");
-    const stopButton = <HTMLInputElement>document.getElementById("stop-button");
-    const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
-    const timeInput = <HTMLInputElement>document.getElementById("time-input");
-    const beatInput = <HTMLInputElement>document.getElementById("beat-input");
-    const timeBar = <HTMLInputElement>document.getElementById("time-bar");
-    const beatBar = <HTMLInputElement>document.getElementById("beat-bar");
-    const timeLengthInput = <HTMLInputElement>document.getElementById("time-length-input");
-    const beatLengthInput = <HTMLInputElement>document.getElementById("beat-length-input");
-    const timeTickmarks = <HTMLDataListElement>document.getElementById("time-tickmarks");
-    const beatTickmarks = <HTMLDataListElement>document.getElementById("beat-tickmarks");
-
-
     // Common Functions
     const timeToBeat = (time: number) => {
         return time * config.bpm / 60;
@@ -197,6 +156,24 @@ window.addEventListener("load", ev => {
         chromatic.needsUpdate = true;
     }
 
+    // consts
+    const pauseChar = "\uf04c";
+    const playChar = "\uf04b";
+
+    // HTMLElements
+    const fpsSpan = document.getElementById("fps-span");
+    const stopButton = <HTMLInputElement>document.getElementById("stop-button");
+    const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
+    const timeInput = <HTMLInputElement>document.getElementById("time-input");
+    const beatInput = <HTMLInputElement>document.getElementById("beat-input");
+    const timeBar = <HTMLInputElement>document.getElementById("time-bar");
+    const beatBar = <HTMLInputElement>document.getElementById("beat-bar");
+    const timeLengthInput = <HTMLInputElement>document.getElementById("time-length-input");
+    const beatLengthInput = <HTMLInputElement>document.getElementById("beat-length-input");
+    const timeTickmarks = <HTMLDataListElement>document.getElementById("time-tickmarks");
+    const beatTickmarks = <HTMLDataListElement>document.getElementById("beat-tickmarks");
+
+    // OnUpdates
     const onTimeModeChange = () => {
         const isTimeMode = config.timeMode === "time";
 
@@ -337,6 +314,28 @@ window.addEventListener("load", ev => {
     window.addEventListener("beforeunload", ev => {
         saveToSessionStorage();
     })
+
+
+    // THREE.OrbitControls
+    const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
+
+    if (config.debugCamera) {
+        camera.position.set(chromatic.uniforms.gCameraEyeX, chromatic.uniforms.gCameraEyeY, chromatic.uniforms.gCameraEyeZ);
+        camera.lookAt(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+    }
+
+    const controls = new THREE.OrbitControls(camera, chromatic.canvas);
+    controls.target = new three.Vector3(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+    controls.zoomSpeed = 3.0;
+    controls.screenSpacePanning = true;
+    controls.mouseButtons = {
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.PAN,
+        RIGHT: THREE.MOUSE.DOLLY,
+    };
+
+    const prevCameraPosotion = camera.position.clone();
+    const prevCameraTarget: three.Vector3 = controls.target.clone();
 
 
     // Player

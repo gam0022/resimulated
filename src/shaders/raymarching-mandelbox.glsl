@@ -135,7 +135,7 @@ vec2 foldRotate(vec2 p, float s) {
 
 float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
 
-float dFlying(vec3 p) { return dSphere(p - vec3(0, -10, 0), 0.1); }
+float dFlying(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1); }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 

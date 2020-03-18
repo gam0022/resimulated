@@ -81,7 +81,6 @@ export class Chromatic {
             this.needsUpdate = false;
             this.time = 0;
 
-            // debug uniforms
             if (GLOBAL_UNIFORMS) {
                 this.uniformArray = [];
                 this.uniforms = {};
@@ -155,7 +154,6 @@ export class Chromatic {
 
             const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
 
-            // shader loader
             const loadShader = (src: string, type: number) => {
                 const shader = gl.createShader(type);
                 gl.shaderSource(shader, src);
@@ -172,32 +170,6 @@ export class Chromatic {
                     console.log(src, log);
                 }
                 return shader;
-            };
-
-            const getDebugUniforms = (fragmentShader: string) => {
-                // for Debug dat.GUI
-                let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
-                let result: RegExpExecArray;
-                while ((result = reg.exec(fragmentShader)) !== null) {
-                    let uniform: any;
-
-                    if (result[1] === "float") {
-                        uniform = {
-                            key: result[2],
-                            initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
-                            min: result[6] !== undefined ? parseFloat(result[6]) : 0,
-                            max: result[7] !== undefined ? parseFloat(result[7]) : 1,
-                        };
-                    } else {
-                        uniform = {
-                            key: result[2],
-                            initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
-                        };
-                    }
-
-                    this.uniformArray.push(uniform);
-                    this.uniforms[uniform.key] = uniform.initValue;
-                }
             };
 
             const loadProgram = (fragmentShader: string) => {
@@ -275,10 +247,10 @@ export class Chromatic {
             const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
                 setupVAO(program);
                 const pass = new Pass();
-                pass.type = type;
-                pass.index = index;
-                pass.scale = scale;
                 pass.program = program;
+                pass.index = index;
+                pass.type = type;
+                pass.scale = scale;
 
                 pass.uniforms = {
                     iResolution: { type: "v3", value: [canvas.width * pass.scale, canvas.height * pass.scale, 0] },
@@ -381,19 +353,107 @@ export class Chromatic {
                 }
             }
 
-            if (GLOBAL_UNIFORMS) {
-                getDebugUniforms(imageCommonHeaderShader);
+            const initSound = () => {
+                // Sound
+                const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
+                const samples = SOUND_WIDTH * SOUND_HEIGHT;
+                const numBlocks = (audio.sampleRate * timeLength) / samples;
+                const soundProgram = loadProgram(soundShader);
+                const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
+                for (let i = 0; i < numBlocks; i++) {
+                    // Update uniform & Render
+                    soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
+                    renderPass(soundPass);
 
-                imageShaders.forEach(shader => {
-                    getDebugUniforms(shader);
-                });
+                    // Read pixels
+                    const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
+                    gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-                getDebugUniforms(bloomPrefilterShader);
-                getDebugUniforms(bloomDownsampleShader);
-                getDebugUniforms(bloomUpsampleShader);
-                getDebugUniforms(bloomFinalShader);
+                    // Convert pixels to samples
+                    const outputDataL = audioBuffer.getChannelData(0);
+                    const outputDataR = audioBuffer.getChannelData(1);
+                    for (let j = 0; j < samples; j++) {
+                        outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
+                        outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
+                    }
+                }
+
+                this.audioSource = audio.createBufferSource();
+
+                if (PLAY_SOUND_FILE) {
+                    fetch(PLAY_SOUND_FILE).then(response => {
+                        return response.arrayBuffer();
+                    }).then(arrayBuffer => {
+                        audio.decodeAudioData(arrayBuffer, buffer => {
+                            this.audioSource.buffer = buffer;
+                        });
+                    })
+                } else {
+                    this.audioSource.buffer = audioBuffer;
+                }
+
+                this.audioSource.loop = true;
+                this.audioSource.connect(audio.destination);
             }
 
+            this.render = () => {
+                imagePasses.forEach((pass) => {
+                    pass.uniforms.iTime.value = this.time;
+                    if (GLOBAL_UNIFORMS) {
+                        for (const [key, value] of Object.entries(this.uniforms)) {
+                            if (typeof value === "number") {
+                                pass.uniforms[key].value = value;
+                            } else {
+                                // NOTE: for dat.GUI addColor
+                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                            }
+                        }
+                    }
+                    renderPass(pass);
+                });
+            }
+
+            // Get global uniforms
+            if (GLOBAL_UNIFORMS) {
+                const getGlobalUniforms = (fragmentShader: string) => {
+                    // for Debug dat.GUI
+                    let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?/g;
+                    let result: RegExpExecArray;
+                    while ((result = reg.exec(fragmentShader)) !== null) {
+                        let uniform: any;
+
+                        if (result[1] === "float") {
+                            uniform = {
+                                key: result[2],
+                                initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
+                                min: result[6] !== undefined ? parseFloat(result[6]) : 0,
+                                max: result[7] !== undefined ? parseFloat(result[7]) : 1,
+                            };
+                        } else {
+                            uniform = {
+                                key: result[2],
+                                initValue: [parseFloat(result[4]), parseFloat(result[6]), parseFloat(result[7])],
+                            };
+                        }
+
+                        this.uniformArray.push(uniform);
+                        this.uniforms[uniform.key] = uniform.initValue;
+                    }
+                };
+
+                getGlobalUniforms(imageCommonHeaderShader);
+
+                imageShaders.forEach(shader => {
+                    getGlobalUniforms(shader);
+                });
+
+                getGlobalUniforms(bloomPrefilterShader);
+                getGlobalUniforms(bloomDownsampleShader);
+                getGlobalUniforms(bloomUpsampleShader);
+                getGlobalUniforms(bloomFinalShader);
+            }
+
+            // Create Rendering Pipeline
             const imagePasses: Pass[] = [];
             let passIndex = 0;
             imageShaders.forEach((shader, i, ary) => {
@@ -448,65 +508,10 @@ export class Chromatic {
                 passIndex++;
             })
 
-            // Sound
-            const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
-            const samples = SOUND_WIDTH * SOUND_HEIGHT;
-            const numBlocks = (audio.sampleRate * timeLength) / samples;
-            const soundProgram = loadProgram(soundShader);
-            const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
-            for (let i = 0; i < numBlocks; i++) {
-                // Update uniform & Render
-                soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
-                renderPass(soundPass);
+            // Init Sound
+            initSound();
 
-                // Read pixels
-                const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
-                gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-                // Convert pixels to samples
-                const outputDataL = audioBuffer.getChannelData(0);
-                const outputDataR = audioBuffer.getChannelData(1);
-                for (let j = 0; j < samples; j++) {
-                    outputDataL[i * samples + j] = (pixels[j * 4 + 0] + 256 * pixels[j * 4 + 1]) / 65535 * 2 - 1;
-                    outputDataR[i * samples + j] = (pixels[j * 4 + 2] + 256 * pixels[j * 4 + 3]) / 65535 * 2 - 1;
-                }
-            }
-
-            this.audioSource = audio.createBufferSource();
-
-            if (PLAY_SOUND_FILE) {
-                fetch(PLAY_SOUND_FILE).then(response => {
-                    return response.arrayBuffer();
-                }).then(arrayBuffer => {
-                    audio.decodeAudioData(arrayBuffer, buffer => {
-                        this.audioSource.buffer = buffer;
-                    });
-                })
-            } else {
-                this.audioSource.buffer = audioBuffer;
-            }
-
-            this.audioSource.loop = true;
-            this.audioSource.connect(audio.destination);
-
-            this.render = () => {
-                imagePasses.forEach((pass) => {
-                    pass.uniforms.iTime.value = this.time;
-                    if (GLOBAL_UNIFORMS) {
-                        for (const [key, value] of Object.entries(this.uniforms)) {
-                            if (typeof value === "number") {
-                                pass.uniforms[key].value = value;
-                            } else {
-                                // NOTE: for dat.GUI addColor
-                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
-                            }
-                        }
-                    }
-                    renderPass(pass);
-                });
-            }
-
-            // Start Rendering
+            // Rendering Loop
             let lastTimestamp = 0;
             const update = (timestamp: number) => {
                 requestAnimationFrame(update);
@@ -533,7 +538,6 @@ export class Chromatic {
                 this.needsUpdate = false;
                 lastTimestamp = timestamp;
             };
-
             update(0);
         }
     }

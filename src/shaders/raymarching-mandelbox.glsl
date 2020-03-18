@@ -287,7 +287,7 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
 
 uniform float gCameraLightIntensity;  // 1 0 10
 
-void calcRadiance(inout Intersection intersection, inout Ray ray, int bounce) {
+void calcRadiance(inout Intersection intersection, inout Ray ray) {
     intersection.hit = false;
     intersectScene(intersection, ray);
 
@@ -323,7 +323,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     Intersection intersection;
 
     for (int bounce = 0; bounce < BOUNCE_LIMIT; bounce++) {
-        calcRadiance(intersection, ray, bounce);
+        calcRadiance(intersection, ray);
         color += reflection * intersection.color;
         if (!intersection.hit) break;
         reflection *= intersection.reflectance;

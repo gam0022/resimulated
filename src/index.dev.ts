@@ -141,24 +141,10 @@ window.addEventListener("load", ev => {
     }
 
 
-    // Common Callbacks
-    const onResolutionCange = () => {
-        const ret = config.resolution.match(/(\d+)x(\d+)/);
-        if (ret) {
-            // Fixed Resolution
-            chromatic.setSize(parseInt(ret[1]), parseInt(ret[2]));
-        } else {
-            // Scaled Resolution
-            const resolutionScale = parseFloat(config.resolution);
-            chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
-        }
-
-        chromatic.needsUpdate = true;
-    }
-
     // consts
     const pauseChar = "\uf04c";
     const playChar = "\uf04b";
+
 
     // HTMLElements
     const fpsSpan = document.getElementById("fps-span");
@@ -173,7 +159,22 @@ window.addEventListener("load", ev => {
     const timeTickmarks = <HTMLDataListElement>document.getElementById("time-tickmarks");
     const beatTickmarks = <HTMLDataListElement>document.getElementById("beat-tickmarks");
 
+
     // OnUpdates
+    const onResolutionCange = () => {
+        const ret = config.resolution.match(/(\d+)x(\d+)/);
+        if (ret) {
+            // Fixed Resolution
+            chromatic.setSize(parseInt(ret[1]), parseInt(ret[2]));
+        } else {
+            // Scaled Resolution
+            const resolutionScale = parseFloat(config.resolution);
+            chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+        }
+
+        chromatic.needsUpdate = true;
+    }
+
     const onTimeModeChange = () => {
         const isTimeMode = config.timeMode === "time";
 

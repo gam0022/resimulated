@@ -11,7 +11,7 @@ uniform float gCameraEyeZ;     // -8 -100 100
 uniform float gCameraTargetX;  // 0 -100 100
 uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
-uniform float gCameraFov;      // 30 0 180
+uniform float gCameraFov;      // 13 0 180
 
 uniform float gMandelboxScale;     // 2.7 1 5
 uniform float gMandelboxRepeat;    // 10 1 100

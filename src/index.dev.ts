@@ -19,6 +19,11 @@ window.addEventListener("load", ev => {
         resolution: "1920x1080",
         timeMode: "beat",
         bpm: 140,
+        resetUniforms: () => {
+            chromatic.uniformArray.forEach(uniform => {
+                chromatic.uniforms[uniform.key] = uniform.initValue;
+            })
+        }
     }
 
     gui.add(config, "debugCamera").onChange(value => {
@@ -46,6 +51,9 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
     });
+    gui.add(config, "resetUniforms").onChange(value => {
+        chromatic.needsUpdate = true;
+    })
 
     const saevFunctions = {
         saveImage: () => {

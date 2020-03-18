@@ -11,6 +11,7 @@ uniform float gCameraEyeZ;     // -8 -100 100
 uniform float gCameraTargetX;  // 0 -100 100
 uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
+uniform float gCameraZoom;     // 9 0 100
 
 uniform float gMandelboxScale;     // 2.7 1 5
 uniform float gMandelboxRepeat;    // 10 1 100
@@ -328,7 +329,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
     camera.up = vec3(0.0, 1.0, 0.0);  // y-up
-    camera.zoom = 9.0;
+    camera.zoom = gCameraZoom;
     Ray ray = cameraShootRay(camera, uv);
 
     vec3 color = vec3(0.0);

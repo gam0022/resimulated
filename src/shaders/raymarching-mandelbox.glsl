@@ -11,7 +11,7 @@ uniform float gCameraEyeZ;     // -8 -100 100
 uniform float gCameraTargetX;  // 0 -100 100
 uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
-uniform float gCameraZoom;     // 9 0 100
+uniform float gCameraFov;      // 30 0 180
 
 uniform float gMandelboxScale;     // 2.7 1 5
 uniform float gMandelboxRepeat;    // 10 1 100
@@ -39,7 +39,6 @@ struct Ray {
 struct Camera {
     vec3 eye, target;
     vec3 forward, right, up;
-    float zoom;
 };
 
 Ray cameraShootRay(Camera c, vec2 uv) {
@@ -49,7 +48,7 @@ Ray cameraShootRay(Camera c, vec2 uv) {
 
     Ray r;
     r.origin = c.eye;
-    r.direction = normalize(uv.x * c.right + uv.y * c.up + c.zoom * c.forward);
+    r.direction = normalize(uv.x * c.right + uv.y * c.up + c.forward / tan(gCameraFov / 360.0 * PI));
 
     return r;
 }
@@ -329,7 +328,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
     camera.up = vec3(0.0, 1.0, 0.0);  // y-up
-    camera.zoom = gCameraZoom;
     Ray ray = cameraShootRay(camera, uv);
 
     vec3 color = vec3(0.0);

@@ -251,6 +251,7 @@ window.addEventListener("load", ev => {
     // SessionStorage
     const saveToSessionStorage = () => {
         sessionStorage.setItem("debugCamera", config.debugCamera.toString());
+        sessionStorage.setItem("debugParams", config.debugParams.toString());
         sessionStorage.setItem("resolution", config.resolution);
         sessionStorage.setItem("timeMode", config.timeMode);
         sessionStorage.setItem("bpm", config.bpm.toString());
@@ -258,6 +259,10 @@ window.addEventListener("load", ev => {
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
+
+        for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
+            sessionStorage.setItem(key, uniform.toString());
+        }
     }
 
     const loadFromSessionStorage = () => {
@@ -270,9 +275,14 @@ window.addEventListener("load", ev => {
             config.resolution = resolutionStr;
         }
 
-        const cameraDebugStr = sessionStorage.getItem("debugCamera");
-        if (cameraDebugStr) {
-            config.debugCamera = parseBool(cameraDebugStr);
+        const debugCameraStr = sessionStorage.getItem("debugCamera");
+        if (debugCameraStr) {
+            config.debugCamera = parseBool(debugCameraStr);
+        }
+
+        const debugParamsStr = sessionStorage.getItem("debugParams");
+        if (debugParamsStr) {
+            config.debugParams = parseBool(debugParamsStr);
         }
 
         const timeModeStr = sessionStorage.getItem("timeMode");
@@ -306,6 +316,19 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onTimeLengthUpdate();
         onBeatLengthUpdate();
+
+        for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
+            const unifromStr = sessionStorage.getItem(key);
+            if (unifromStr) {
+                const ary = unifromStr.split(",");
+                if (ary.length === 3) {
+                    chromatic.uniforms[key] = ary.map(s => parseFloat(s));
+                }
+                else if (ary.length === 1) {
+                    chromatic.uniforms[key] = parseFloat(unifromStr);
+                }
+            }
+        }
     }
 
     loadFromSessionStorage();

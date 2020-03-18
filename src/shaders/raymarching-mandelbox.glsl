@@ -64,7 +64,7 @@ struct Intersection {
 
     vec3 baseColor;
     float roughness;
-    float reflectance;  // vec3 ?
+    float reflectance;
     float metallic;
     vec3 emission;
 
@@ -210,7 +210,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         if (abs(dFlying(p)) < EPS) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
-            intersection.metallic = 0.8;
+            intersection.metallic = 1.0;
             intersection.emission = vec3(0.0);
             intersection.transparent = false;
             intersection.reflectance = 1.0;
@@ -268,7 +268,7 @@ float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughnes
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
-    vec3 ref = mix(vec3(i.reflectance), i.baseColor, i.metallic);
+    vec3 ref = mix(vec3(0.004), i.baseColor, i.metallic);
 
     vec3 l = lp - p;
     float len = length(l);
@@ -286,7 +286,7 @@ vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
 vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
-    vec3 ref = mix(vec3(i.reflectance), i.baseColor, i.metallic);
+    vec3 ref = mix(vec3(0.004), i.baseColor, i.metallic);
 
     vec3 l = lightDir;
     vec3 h = normalize(l + v);

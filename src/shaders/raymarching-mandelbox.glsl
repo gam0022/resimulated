@@ -11,10 +11,11 @@ uniform float gCameraEyeZ;     // -8 -100 100
 uniform float gCameraTargetX;  // 0 -100 100
 uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
+uniform float gCameraFov;      // 13 0 180
 
 uniform float gMandelboxScale;     // 2.7 1 5
 uniform float gMandelboxRepeat;    // 10 1 100
-uniform float gSceneEps;           // 0.001 0.00001 0.001
+uniform float gSceneEps;           // 0.001 0.00001 0.01
 uniform float gEdgeEps;            // 0.0005 0.0001 0.01
 uniform float gEdgePower;          // 1 0.1 10
 uniform float gBaseColor;          // 0.5
@@ -38,7 +39,6 @@ struct Ray {
 struct Camera {
     vec3 eye, target;
     vec3 forward, right, up;
-    float zoom;
 };
 
 Ray cameraShootRay(Camera c, vec2 uv) {
@@ -48,7 +48,7 @@ Ray cameraShootRay(Camera c, vec2 uv) {
 
     Ray r;
     r.origin = c.eye;
-    r.direction = normalize(uv.x * c.right + uv.y * c.up + c.zoom * c.forward);
+    r.direction = normalize(uv.x * c.right + uv.y * c.up + c.forward / tan(gCameraFov / 360.0 * PI));
 
     return r;
 }
@@ -64,7 +64,7 @@ struct Intersection {
 
     vec3 baseColor;
     float roughness;
-    float reflectance;  // vec3 ?
+    float reflectance;
     float metallic;
     vec3 emission;
 
@@ -133,10 +133,15 @@ vec2 foldRotate(vec2 p, float s) {
     return p;
 }
 
+float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
+
+float dFlying(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1); }
+
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
-    float d = dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
+    float d = dStage(p);
+    d = min(d, dFlying(p));
     return d;
 }
 
@@ -201,14 +206,22 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.hit = true;
         intersection.position = p;
         intersection.normal = calcNormal(p, map);
-        // if (abs(map(p)) < EPS) {
-        {
+
+        if (abs(dFlying(p)) < eps) {
+            intersection.baseColor = vec3(0.0);
+            intersection.roughness = 0.0;
+            intersection.metallic = 1.0;
+            intersection.emission = vec3(0.0);
+            intersection.transparent = false;
+            intersection.reflectance = 1.0;
+        } else {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
             intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
+
             intersection.transparent = false;
             intersection.reflectance = 0.0;
         }
@@ -255,7 +268,7 @@ float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughnes
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
-    vec3 ref = mix(vec3(i.reflectance), i.baseColor, i.metallic);
+    vec3 ref = mix(vec3(0.04), i.baseColor, i.metallic);
 
     vec3 l = lp - p;
     float len = length(l);
@@ -273,7 +286,7 @@ vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
 vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
-    vec3 ref = mix(vec3(i.reflectance), i.baseColor, i.metallic);
+    vec3 ref = mix(vec3(0.04), i.baseColor, i.metallic);
 
     vec3 l = lightDir;
     vec3 h = normalize(l + v);
@@ -315,7 +328,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
     camera.up = vec3(0.0, 1.0, 0.0);  // y-up
-    camera.zoom = 9.0;
     Ray ray = cameraShootRay(camera, uv);
 
     vec3 color = vec3(0.0);

@@ -61,6 +61,8 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
     let camera = new Vector3(0, 0, 10);
     let target = new Vector3(0, 0, 0);
 
+    chromatic.uniforms.gSceneEps = 0.001;
+
     new Timeline(beat).then(8, t => {
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
@@ -68,6 +70,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gMandelboxScale = 1.8;
         chromatic.uniforms.gCameraLightIntensity = 0.7;
         chromatic.uniforms.gEmissiveIntensity = 0;
+        chromatic.uniforms.gSceneEps = 0.003;
     }).then(8, t => {
         camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);

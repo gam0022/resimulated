@@ -70,9 +70,9 @@ struct Intersection {
 
 // util
 
-#define calcNormal(p, dFunc)                                                                                                                                               \
-    normalize(vec2(gSceneEps, -gSceneEps).xyy *dFunc(p + vec2(gSceneEps, -gSceneEps).xyy) + vec2(gSceneEps, -gSceneEps).yyx * dFunc(p + vec2(gSceneEps, -gSceneEps).yyx) + \
-              vec2(gSceneEps, -gSceneEps).yxy * dFunc(p + vec2(gSceneEps, -gSceneEps).yxy) + vec2(gSceneEps, -gSceneEps).xxx * dFunc(p + vec2(gSceneEps, -gSceneEps).xxx))
+#define calcNormal(p, dFunc, eps)                                                                                                                                                 \
+    normalize(vec2(eps, -eps).xyy *dFunc(p + vec2(eps, -eps).xyy) + vec2(eps, -eps).yyx * dFunc(p + vec2(eps, -eps).yyx) + vec2(eps, -eps).yxy * dFunc(p + vec2(eps, -eps).yxy) + \
+              vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
 
 // Distance Functions
 float sdBox(vec3 p, vec3 b) {
@@ -129,7 +129,9 @@ vec2 foldRotate(vec2 p, float s) {
 
 float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
 
-float dBall(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1); }
+uniform float gDistortion;      // 0.01 0 0.1
+uniform float gDistortionFreq;  // 30 0 100
+float dBall(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1) - gDistortion * sin(gDistortionFreq * p.x + beat) * sin(gDistortionFreq * p.y + beat) * sin(gDistortionFreq * p.z + beat); }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
@@ -192,14 +194,14 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
         eps = gSceneEps * distance;
-        if (d < eps) break;
+        if (abs(d) < eps) break;
     }
 
     if (distance < intersection.distance) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;
-        intersection.normal = calcNormal(p, map);
+        intersection.normal = calcNormal(p, map, gSceneEps);
 
         if (abs(dBall(p)) < eps) {
             intersection.baseColor = vec3(0.0);
@@ -207,6 +209,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 1.0;
             intersection.emission = vec3(0.0);
             intersection.transparent = false;
+            intersection.refractiveIndex = 1.2;
             intersection.reflectance = 1.0;
         } else {
             intersection.baseColor = vec3(gBaseColor);
@@ -348,6 +351,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             ray.origin = intersection.position - orientingNormal * OFFSET;
             ray.direction = refract(ray.direction, orientingNormal, nnt);
             isTotalReflection = (ray.direction == vec3(0.0));
+            bounce = 0;
         }
 
         if (isTotalReflection || !intersection.transparent) {

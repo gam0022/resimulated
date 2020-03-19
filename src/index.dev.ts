@@ -24,7 +24,7 @@ window.addEventListener("load", ev => {
         resetUniforms: () => {
             chromatic.uniformArray.forEach(uniform => {
                 chromatic.uniforms[uniform.key] = uniform.initValue;
-            })
+            });
         }
     }
 

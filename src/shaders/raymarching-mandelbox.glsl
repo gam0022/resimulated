@@ -1,9 +1,3 @@
-#ifdef DEBUG_AO
-#define BOUNCE_LIMIT (1)
-#else
-#define BOUNCE_LIMIT (2)
-#endif
-
 // debug uniforms
 uniform float gCameraEyeX;     // 0 -100 100
 uniform float gCameraEyeY;     // 2.8 -100 100
@@ -339,7 +333,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec3 reflection = vec3(1.0);
     Intersection intersection;
 
-    for (int bounce = 0; bounce < BOUNCE_LIMIT; bounce++) {
+    for (int bounce = 0; bounce < 2; bounce++) {
         calcRadiance(intersection, ray);
         color += reflection * intersection.color;
         if (!intersection.hit) break;

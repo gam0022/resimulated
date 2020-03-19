@@ -11,6 +11,8 @@ import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/Or
 window.addEventListener("load", ev => {
     chromatic.play();
 
+
+    // dat.GUI
     const gui = new dat.GUI({ width: 1000, });
 
     const config = {
@@ -19,6 +21,11 @@ window.addEventListener("load", ev => {
         resolution: "1920x1080",
         timeMode: "beat",
         bpm: 140,
+        resetUniforms: () => {
+            chromatic.uniformArray.forEach(uniform => {
+                chromatic.uniforms[uniform.key] = uniform.initValue;
+            })
+        }
     }
 
     gui.add(config, "debugCamera").onChange(value => {
@@ -46,6 +53,9 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
     });
+    gui.add(config, "resetUniforms").onChange(value => {
+        chromatic.needsUpdate = true;
+    })
 
     const saevFunctions = {
         saveImage: () => {
@@ -131,26 +141,14 @@ window.addEventListener("load", ev => {
         }
     })
 
-    // THREE.OrbitControls
-    const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
-
-    if (config.debugCamera) {
-        camera.position.set(chromatic.uniforms.gCameraEyeX, chromatic.uniforms.gCameraEyeY, chromatic.uniforms.gCameraEyeZ);
-        camera.lookAt(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+    // Common Functions
+    const timeToBeat = (time: number) => {
+        return time * config.bpm / 60;
     }
 
-    const controls = new THREE.OrbitControls(camera, chromatic.canvas);
-    controls.target = new three.Vector3(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
-    controls.zoomSpeed = 3.0;
-    controls.screenSpacePanning = true;
-    controls.mouseButtons = {
-        LEFT: THREE.MOUSE.ROTATE,
-        MIDDLE: THREE.MOUSE.PAN,
-        RIGHT: THREE.MOUSE.DOLLY,
-    };
-
-    const prevCameraPosotion = camera.position.clone();
-    const prevCameraTarget: three.Vector3 = controls.target.clone();
+    const beatToTime = (beat: number) => {
+        return beat / config.bpm * 60;
+    }
 
 
     // consts
@@ -172,17 +170,7 @@ window.addEventListener("load", ev => {
     const beatTickmarks = <HTMLDataListElement>document.getElementById("beat-tickmarks");
 
 
-    // Common Functions
-    const timeToBeat = (time: number) => {
-        return time * config.bpm / 60;
-    }
-
-    const beatToTime = (beat: number) => {
-        return beat / config.bpm * 60;
-    }
-
-
-    // Common Callbacks
+    // OnUpdates
     const onResolutionCange = () => {
         const ret = config.resolution.match(/(\d+)x(\d+)/);
         if (ret) {
@@ -210,8 +198,6 @@ window.addEventListener("load", ev => {
         beatLengthInput.style.display = beatDisplay;
         beatBar.style.display = beatDisplay;
     }
-
-    onTimeModeChange();
 
     const onTimeLengthUpdate = () => {
         timeBar.max = timeLengthInput.value;
@@ -251,6 +237,7 @@ window.addEventListener("load", ev => {
     // SessionStorage
     const saveToSessionStorage = () => {
         sessionStorage.setItem("debugCamera", config.debugCamera.toString());
+        sessionStorage.setItem("debugParams", config.debugParams.toString());
         sessionStorage.setItem("resolution", config.resolution);
         sessionStorage.setItem("timeMode", config.timeMode);
         sessionStorage.setItem("bpm", config.bpm.toString());
@@ -258,6 +245,10 @@ window.addEventListener("load", ev => {
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
+
+        for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
+            sessionStorage.setItem(key, uniform.toString());
+        }
     }
 
     const loadFromSessionStorage = () => {
@@ -269,16 +260,23 @@ window.addEventListener("load", ev => {
         if (resolutionStr) {
             config.resolution = resolutionStr;
         }
+        onResolutionCange();
 
-        const cameraDebugStr = sessionStorage.getItem("debugCamera");
-        if (cameraDebugStr) {
-            config.debugCamera = parseBool(cameraDebugStr);
+        const debugCameraStr = sessionStorage.getItem("debugCamera");
+        if (debugCameraStr) {
+            config.debugCamera = parseBool(debugCameraStr);
+        }
+
+        const debugParamsStr = sessionStorage.getItem("debugParams");
+        if (debugParamsStr) {
+            config.debugParams = parseBool(debugParamsStr);
         }
 
         const timeModeStr = sessionStorage.getItem("timeMode");
         if (timeModeStr) {
             config.timeMode = timeModeStr;
         }
+        onTimeModeChange();
 
         const bpmStr = sessionStorage.getItem("bpm");
         if (bpmStr) {
@@ -306,14 +304,48 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onTimeLengthUpdate();
         onBeatLengthUpdate();
+
+        for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
+            const unifromStr = sessionStorage.getItem(key);
+            if (unifromStr) {
+                const ary = unifromStr.split(",");
+                if (ary.length === 3) {
+                    chromatic.uniforms[key] = ary.map(s => parseFloat(s));
+                }
+                else if (ary.length === 1) {
+                    chromatic.uniforms[key] = parseFloat(unifromStr);
+                }
+            }
+        }
     }
 
     loadFromSessionStorage();
-    onResolutionCange();
 
     window.addEventListener("beforeunload", ev => {
         saveToSessionStorage();
     })
+
+
+    // THREE.OrbitControls
+    const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
+
+    if (config.debugCamera) {
+        camera.position.set(chromatic.uniforms.gCameraEyeX, chromatic.uniforms.gCameraEyeY, chromatic.uniforms.gCameraEyeZ);
+        camera.lookAt(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+    }
+
+    const controls = new THREE.OrbitControls(camera, chromatic.canvas);
+    controls.target = new three.Vector3(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+    controls.zoomSpeed = 3.0;
+    controls.screenSpacePanning = true;
+    controls.mouseButtons = {
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.PAN,
+        RIGHT: THREE.MOUSE.DOLLY,
+    };
+
+    const prevCameraPosotion = camera.position.clone();
+    const prevCameraTarget: three.Vector3 = controls.target.clone();
 
 
     // Player

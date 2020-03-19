@@ -265,6 +265,9 @@ float calcShadow(in vec3 p, in vec3 rd) {
 
 float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughness * roughness)) - 2.0, FLT_EPS, 1.0 / FLT_EPS); }
 
+uniform float gF0;  // 0.95 0 1
+float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
+
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 n = i.normal;
     vec3 p = i.position;
@@ -277,6 +280,7 @@ vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 h = normalize(l + v);
 
     vec3 diffuse = mix(1.0 - ref, vec3(0.0), i.metallic) * i.baseColor / PI;
+    // ref *= fresnelSchlick(gF0, dot(l, h));
 
     float m = roughnessToExponent(i.roughness);
     vec3 specular = ref * pow(max(0.0, dot(n, h)), m) * (m + 2.0) / (8.0 * PI);
@@ -292,6 +296,7 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
     vec3 h = normalize(l + v);
 
     vec3 diffuse = mix(1.0 - ref, vec3(0.0), i.metallic) * i.baseColor / PI;
+    // ref *= fresnelSchlick(gF0, dot(l, h));
 
     float m = roughnessToExponent(i.roughness);
     vec3 specular = ref * pow(max(0.0, dot(n, h)), m) * (m + 2.0) / (8.0 * PI);
@@ -353,7 +358,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
         if (isTotalReflection || !intersection.transparent) {
             ray.origin = intersection.position + orientingNormal * OFFSET;
-            ray.direction = reflect(ray.direction, orientingNormal);
+            vec3 l = reflect(ray.direction, orientingNormal);
+            reflection *= fresnelSchlick(gF0, dot(l, orientingNormal));
+            ray.direction = l;
         }
     }
 

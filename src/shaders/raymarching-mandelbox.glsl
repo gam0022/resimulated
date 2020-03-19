@@ -135,13 +135,13 @@ vec2 foldRotate(vec2 p, float s) {
 
 float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
 
-float dFlying(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1); }
+float dBall(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1); }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
     float d = dStage(p);
-    d = min(d, dFlying(p));
+    d = min(d, dBall(p));
     return d;
 }
 
@@ -207,7 +207,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map);
 
-        if (abs(dFlying(p)) < eps) {
+        if (abs(dBall(p)) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;

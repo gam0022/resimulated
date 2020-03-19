@@ -5,7 +5,7 @@ import { mix, clamp, saturate, Vector3 } from "./math"
 declare var PRODUCTION: boolean;
 
 export const chromatic = new Chromatic(
-    82,// デモの長さ（秒）
+    82.28571428571429,// デモの長さ（秒）
     require("./shaders/vertex.glsl").default,
     require("./shaders/common-header.glsl").default,
     [
@@ -84,7 +84,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
     }).then(16, t => {
         camera = new Vector3(-0.08503080276580499, 1.3346599987007965, -15.01732922836809).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0.784904810273659, 3.3444920877098543, 7.36034431847018);
-        chromatic.uniforms.gCameraFov = 2 + 0.1 * t;
+        chromatic.uniforms.gCameraFov = (t < 8 ? 2 : 5) + 0.05 * t;
 
         chromatic.uniforms.gMandelboxScale = 2.5010184112784057;
         chromatic.uniforms.gCameraLightIntensity = 1.4;

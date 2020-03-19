@@ -5,7 +5,7 @@ import { mix, clamp, saturate, Vector3 } from "./math"
 declare var PRODUCTION: boolean;
 
 export const chromatic = new Chromatic(
-    48,// デモの長さ（秒）
+    82,// デモの長さ（秒）
     require("./shaders/vertex.glsl").default,
     require("./shaders/common-header.glsl").default,
     [

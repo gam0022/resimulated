@@ -89,15 +89,18 @@ vec2 arp(float note, float time) {
 // 1ビートを最大何分割するか。16分音符に対応するなら4
 #define NOTE_DIV 4
 
-#define F(a) a, a, a, a
-#define E(a, b) a, a, b, b
-#define S(a, b, c, d) a, b, c, d
+#define F(a) a | 4 << 8, a | 4 << 8, a | 4 << 8, a | 4 << 8
+#define E(a, b) a | 8 << 8, a | 8 << 8, b | 8 << 8, b | 8 << 8
+#define S(a, b, c, d) a | 16 << 8, b | 16 << 8, c | 16 << 8, d | 16 << 8
 
 vec2 arp1(float beat, float time) {
     // 1ループのビート数
 #define ARP1_NUM_BEAT 8
 
-    // ノート番号。16分音符基準なので、4分音符だと同じデータが4つ連続する
+    // ノート番号
+    // F: 4分音符
+    // R: 8分音符
+    // S: 16分音符
     int[ARP1_NUM_BEAT * NOTE_DIV] arp1Notes = int[](
         // 1
         F(69),
@@ -176,7 +179,7 @@ vec2 arp1(float beat, float time) {
     // index は beat の4倍で進む。16分音符を基準とした時間
     float indexFloat = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
     int index = int(indexFloat);
-    float arp1Note = float(arp1Notes[index]);
+    float arp1Note = float(arp1Notes[index] & 255);
     float arp1Time = beatToTime((indexFloat - float(arp1Indexes[index])) / float(arp1Divs[index]) * float(NOTE_DIV));
     return vec2(arp(arp1Note, arp1Time));
 }

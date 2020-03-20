@@ -126,36 +126,10 @@ vec2 arp1(float beat, float time) {
         // 8
         E(69, 70));
 
-    // 何分音符(4 or 8 or 16)
-    int[ARP1_NUM_BEAT * NOTE_DIV] arp1Divs = int[](
-        // 1
-        4, 4, 4, 4,
-
-        // 2
-        8, 8, 8, 8,
-
-        // 3
-        16, 16, 16, 16,
-
-        // 4
-        4, 4, 4, 4,
-
-        // 5
-        8, 8, 8, 8,
-
-        // 6
-        8, 8, 8, 8,
-
-        // 7
-        8, 8, 8, 8,
-
-        // 8
-        8, 8, 8, 8);
-
     int[ARP1_NUM_BEAT * NOTE_DIV] arp1Indexes;
     int currentIndex = 0;
     for (int i = 0; i < ARP1_NUM_BEAT * NOTE_DIV;) {
-        int div = arp1Divs[i];
+        int div = arp1Notes[i] >> 8;
         if (div == 4) {
             arp1Indexes[i + 0] = currentIndex;
             arp1Indexes[i + 1] = currentIndex;
@@ -170,7 +144,7 @@ vec2 arp1(float beat, float time) {
             arp1Indexes[i + 0] = currentIndex;
             i += 1;
         } else {
-            // arp1Divs の値がおかしい
+            // invalid data
         }
 
         currentIndex += 16 / div;
@@ -180,7 +154,7 @@ vec2 arp1(float beat, float time) {
     float indexFloat = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
     int index = int(indexFloat);
     float arp1Note = float(arp1Notes[index] & 255);
-    float arp1Time = beatToTime((indexFloat - float(arp1Indexes[index])) / float(arp1Divs[index]) * float(NOTE_DIV));
+    float arp1Time = beatToTime((indexFloat - float(arp1Indexes[index])) / float(arp1Notes[index] >> 8) * float(NOTE_DIV));
     return vec2(arp(arp1Note, arp1Time));
 }
 

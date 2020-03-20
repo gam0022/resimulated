@@ -94,86 +94,86 @@ vec2 arp1(float beat, float time) {
 #define ARP1_NUM_BEAT 8
 
     // ノート番号。16分音符基準なので、4分音符だと同じデータが4つ連続する
-    float[ARP1_NUM_BEAT * NOTE_DIV] arp1Notes = float[](
+    int[ARP1_NUM_BEAT * NOTE_DIV] arp1Notes = int[](
         // 1
-        69.0, 69.0, 69.0, 69.0,
+        69, 69, 69, 69,
 
         // 2
-        69.0, 69.0, 70.0, 70.0,
+        69, 69, 70, 70,
 
         // 3
-        69.0, 70.0, 69.0, 72.0,
+        69, 70, 69, 72,
 
         // 4
-        69.0, 69.0, 69.0, 69.0,
+        69, 69, 69, 69,
 
         // 5
-        69.0, 69.0, 70.0, 70.0,
+        69, 69, 70, 70,
 
         // 6
-        69.0, 69.0, 70.0, 70.0,
+        69, 69, 70, 70,
 
         // 7
-        69.0, 69.0, 70.0, 70.0,
+        69, 69, 70, 70,
 
         // 8
-        69.0, 69.0, 70.0, 70.0);
+        69, 69, 70, 70);
 
     // 何分音符(4 or 8 or 16)
-    float[ARP1_NUM_BEAT * NOTE_DIV] arp1Divs = float[](
+    int[ARP1_NUM_BEAT * NOTE_DIV] arp1Divs = int[](
         // 1
-        4.0, 4.0, 4.0, 4.0,
+        4, 4, 4, 4,
 
         // 2
-        8.0, 8.0, 8.0, 8.0,
+        8, 8, 8, 8,
 
         // 3
-        16.0, 16.0, 16.0, 16.0,
+        16, 16, 16, 16,
 
         // 4
-        4.0, 4.0, 4.0, 4.0,
+        4, 4, 4, 4,
 
         // 5
-        8.0, 8.0, 8.0, 8.0,
+        8, 8, 8, 8,
 
         // 6
-        8.0, 8.0, 8.0, 8.0,
+        8, 8, 8, 8,
 
         // 7
-        8.0, 8.0, 8.0, 8.0,
+        8, 8, 8, 8,
 
         // 8
-        8.0, 8.0, 8.0, 8.0);
+        8, 8, 8, 8);
 
-    float[ARP1_NUM_BEAT * NOTE_DIV] arp1Indexes;
-    float currentIndex = 0.0;
+    int[ARP1_NUM_BEAT * NOTE_DIV] arp1Indexes;
+    int currentIndex = 0;
     for (int i = 0; i < ARP1_NUM_BEAT * NOTE_DIV;) {
-        float div = arp1Divs[i];
-        if (div == 4.0) {
+        int div = arp1Divs[i];
+        if (div == 4) {
             arp1Indexes[i + 0] = currentIndex;
             arp1Indexes[i + 1] = currentIndex;
             arp1Indexes[i + 2] = currentIndex;
             arp1Indexes[i + 3] = currentIndex;
             i += 4;
-        } else if (div == 8.0) {
+        } else if (div == 8) {
             arp1Indexes[i + 0] = currentIndex;
             arp1Indexes[i + 1] = currentIndex;
             i += 2;
-        } else if (div == 16.0) {
+        } else if (div == 16) {
             arp1Indexes[i + 0] = currentIndex;
             i += 1;
         } else {
             // arp1Divs の値がおかしい
         }
 
-        currentIndex += 16.0 / div;
+        currentIndex += 16 / div;
     }
 
     // index は beat の4倍で進む。16分音符を基準とした時間
     float indexFloat = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
     int index = int(indexFloat);
-    float arp1Note = arp1Notes[index];
-    float arp1Time = beatToTime((indexFloat - arp1Indexes[index]) / arp1Divs[index] * float(NOTE_DIV));
+    float arp1Note = float(arp1Notes[index]);
+    float arp1Time = beatToTime((indexFloat - float(arp1Indexes[index])) / float(arp1Divs[index]) * float(NOTE_DIV));
     return vec2(arp(arp1Note, arp1Time));
 }
 

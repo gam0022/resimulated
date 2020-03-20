@@ -139,7 +139,7 @@ vec2 arp1(float beat, float time) {
 
     // ノート番号
     // F: 4分音符
-    // R: 8分音符
+    // E: 8分音符
     // S: 16分音符
     // ノート番号0は休符
     int[ARP1_BEAT_LEN * NOTE_DIV * ARP1_DEV_PAT] notes = int[](
@@ -217,7 +217,7 @@ vec2 arp2(float beat, float time) {
 
     // ノート番号
     // F: 4分音符
-    // R: 8分音符
+    // E: 8分音符
     // S: 16分音符
     // ノート番号0は休符
     int[ARP2_BEAT_LEN * NOTE_DIV * ARP2_DEV_PAT] notes = int[](

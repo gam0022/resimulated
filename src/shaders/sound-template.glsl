@@ -86,9 +86,12 @@ vec2 arp(float note, float time) {
     return amp * vec2(sine(freq * 0.99 * time + fm), sine(freq * 1.01 * time + fm));
 }
 
-vec2 arp1(float beat, float time) {
-#define ARP1_NUM_BEAT 8
+// 1ビートを最大何分割するか。16分音符に対応するなら4
 #define NOTE_DIV 4
+
+vec2 arp1(float beat, float time) {
+    // 1ループのビート数
+#define ARP1_NUM_BEAT 8
 
     // ノート番号。16分音符基準なので、4分音符だと同じデータが4つ連続する
     float[ARP1_NUM_BEAT * NOTE_DIV] arp1Notes = float[](

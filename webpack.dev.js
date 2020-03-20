@@ -14,7 +14,7 @@ module.exports = merge(common, {
     plugins: [new webpack.DefinePlugin({
         PRODUCTION: JSON.stringify(false),
         GLOBAL_UNIFORMS: JSON.stringify(true),
-        PLAY_SOUND_FILE: JSON.stringify('200319_bgm_sketch.wav'),
+        PLAY_SOUND_FILE: JSON.stringify('200319_bgm_sketch.aac'),
         // PLAY_SOUND_FILE: JSON.stringify(false),
     })],
 });

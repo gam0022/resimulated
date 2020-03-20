@@ -32,7 +32,7 @@ float beatToTime(float b) { return b / BPM * 60.0; }
 
 float noteToFreq(float n) { return 440.0 * pow(2.0, (n - 69.0) / 12.0); }
 
-float chord(float n) { return n < 1.0 ? 55.0 : n < 2.0 ? 58.0 : n < 3.0 ? 62.0 : 65.0; }
+float chord(float n) { return (n < 1.0 ? 55.0 : n < 2.0 ? 58.0 : n < 3.0 ? 62.0 : 65.0); }
 
 // https://www.shadertoy.com/view/4djSRW
 vec4 noise(float p) {
@@ -122,8 +122,20 @@ vec2 mainSound(float time) {
     // arp
 
     float arpTime = beatToTime(mod(beat, 0.25));
-    float[8] arpNotes = float[](69.0, 70.0, 71.0, 72.0, 69.0, 70.0, 69.0, 72.0);
-    float arpNote = arpNotes[int(mod(beat, 8.0))];
+
+    // ノート番号を指定していします
+    float[16] arpNotes = float[](
+        // 展開1
+        69.0, 70.0, 71.0, 72.0, 69.0, 70.0, 69.0, 72.0,
+
+        // 展開2
+        50.0, 51.0, 52.0, 53.0, 50.0, 51.0, 52.0, 53.0);
+
+    // 展開 0 -> 1 -> 0
+    int[3] offsets = int[](0, 1, 0);
+
+    // ノート番号を決定します
+    float arpNote = arpNotes[offsets[int(mod(beat / 8.0, 3.0))] * 8 + int(mod(beat, 8.0))];
 
     ret += sidechain * 0.5 * vec2(arp(arpNote, arpTime));
 

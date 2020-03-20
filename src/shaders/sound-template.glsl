@@ -139,6 +139,7 @@ vec2 arp1(float beat, float time) {
     // F: 4分音符
     // R: 8分音符
     // S: 16分音符
+    // ノート番号0は休符
     int[ARP1_BEAT_LEN * NOTE_DIV * ARP1_DEV_PAT] notes = int[](
         //
         // 展開1
@@ -202,6 +203,84 @@ vec2 arp1(float beat, float time) {
     SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
 }
 
+vec2 arp2(float beat, float time) {
+// 1つの展開のビート数
+#define ARP2_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define ARP2_DEV_PAT 2
+
+// 展開の長さ
+#define ARP2_DEV_LEN 4
+
+    // ノート番号
+    // F: 4分音符
+    // R: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[ARP2_BEAT_LEN * NOTE_DIV * ARP2_DEV_PAT] notes = int[](
+        //
+        // 展開1
+        //
+
+        // 1
+        S(50, 51, 52, 53),
+
+        // 2
+        S(50, 51, 52, 53),
+
+        // 3
+        S(50, 51, 52, 53),
+
+        // 4
+        S(50, 51, 52, 53),
+
+        // 5
+        S(50, 51, 52, 53),
+
+        // 6
+        S(50, 51, 52, 53),
+
+        // 7
+        S(50, 51, 52, 53),
+
+        // 8
+        S(50, 51, 52, 53),
+
+        //
+        // 展開2
+        //
+
+        // 1
+        E(50, 51),
+
+        // 2
+        E(50, 51),
+
+        // 3
+        E(50, 51),
+
+        // 4
+        E(50, 51),
+
+        // 5
+        E(50, 51),
+
+        // 6
+        E(50, 51),
+
+        // 7
+        E(50, 51),
+
+        // 8
+        E(50, 51));
+
+    // 展開
+    int[ARP2_DEV_LEN] development = int[](0, 0, 1, 0);
+
+    SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, arp)
+}
+
 // ------
 // main
 
@@ -237,27 +316,12 @@ vec2 mainSound(float time) {
     // ---
     // arp
 
-    /*float arpTime = beatToTime(mod(beat, 0.25));
-
-    // ノート番号を指定していします
-    float[8 * 2] arpNotes = float[](
-        // 展開1
-        69.0, 70.0, 71.0, 72.0, 69.0, 70.0, 69.0, 72.0,
-
-        // 展開2
-        50.0, 51.0, 52.0, 53.0, 50.0, 51.0, 52.0, 53.0);
-
-    // 展開 0 -> 1 -> 0
-    int[3] offsets = int[](0, 1, 0);
-
-    // ノート番号を決定します
-    float arpNote = arpNotes[offsets[int(mod(beat / 8.0, 3.0))] * 8 + int(mod(beat, 8.0))];
-
-    ret += sidechain * 0.5 * vec2(arp(arpNote, arpTime));*/
-
-    // ---
-
     ret += arp1(beat, time);
+
+    // 8ビート以降から apr2 を鳴らす
+    if (beat > 8.0) {
+        ret += sidechain * 0.5 * arp2(beat, time);
+    }
 
     return clamp(ret, -1.0, 1.0);
 }

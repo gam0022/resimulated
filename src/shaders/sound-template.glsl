@@ -93,7 +93,7 @@ vec2 arp(float note, float time) {
 #define E(a, b) a | 8 << 8, a | 8 << 8, b | 8 << 8, b | 8 << 8
 #define S(a, b, c, d) a | 16 << 8, b | 16 << 8, c | 16 << 8, d | 16 << 8
 
-#define SEQUENCER(beat, time, beatLen, devNum, devLen, notes, development, toneFunc)                                               \
+#define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                                               \
     int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_DIV;                            \
                                                                                                                                    \
     int[beatLen * NOTE_DIV] indexes;                                                                                               \
@@ -130,7 +130,7 @@ vec2 arp1(float beat, float time) {
 #define ARP1_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define ARP1_DEV_NUM 2
+#define ARP1_DEV_PAT 2
 
 // 展開の長さ
 #define ARP1_DEV_LEN 4
@@ -139,7 +139,7 @@ vec2 arp1(float beat, float time) {
     // F: 4分音符
     // R: 8分音符
     // S: 16分音符
-    int[ARP1_BEAT_LEN * NOTE_DIV * ARP1_DEV_NUM] notes = int[](
+    int[ARP1_BEAT_LEN * NOTE_DIV * ARP1_DEV_PAT] notes = int[](
         //
         // 展開1
         //
@@ -199,7 +199,7 @@ vec2 arp1(float beat, float time) {
     // 展開
     int[ARP1_DEV_LEN] development = int[](0, 1, 0, 0);
 
-    SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_NUM, ARP1_DEV_LEN, notes, development, arp)
+    SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
 }
 
 // ------

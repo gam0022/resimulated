@@ -322,7 +322,9 @@ vec2 mainSound(float time) {
 
     // 8ビート以降から apr2 を鳴らす
     if (beat > 8.0) {
-        ret += sidechain * 0.5 * arp2(beat, time);
+        // 左 170%、右 30%
+        vec2 pan = vec2(1.7, 0.3);
+        ret += sidechain * pan * 0.5 * arp2(beat, time);
     }
 
     return clamp(ret, -1.0, 1.0);

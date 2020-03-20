@@ -118,10 +118,10 @@ vec2 arp1(float beat, float time) {
         E(69, 70),
 
         // 6
-        E(69, 70),
+        E(69, 0),
 
         // 7
-        E(69, 70),
+        S(69, 0, 69, 0),
 
         // 8
         E(69, 70));
@@ -153,9 +153,10 @@ vec2 arp1(float beat, float time) {
     // index は beat の4倍で進む。16分音符を基準とした時間
     float indexFloat = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
     int index = int(indexFloat);
-    float arp1Note = float(arp1Notes[index] & 255);
+    int arp1Note = arp1Notes[index] & 255;
     float arp1Time = beatToTime((indexFloat - float(arp1Indexes[index])) / float(arp1Notes[index] >> 8) * float(NOTE_DIV));
-    return vec2(arp(arp1Note, arp1Time));
+    float amp = (arp1Note == 0) ? 0.0 : 1.0;
+    return vec2(arp(float(arp1Note), arp1Time) * amp);
 }
 
 // ------

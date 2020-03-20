@@ -121,10 +121,10 @@ vec2 mainSound(float time) {
     // ---
     // arp
 
-    float arpTime = beatToTime(mod(beat, 0.25));
+    /*float arpTime = beatToTime(mod(beat, 0.25));
 
     // ノート番号を指定していします
-    float[16] arpNotes = float[](
+    float[8 * 2] arpNotes = float[](
         // 展開1
         69.0, 70.0, 71.0, 72.0, 69.0, 70.0, 69.0, 72.0,
 
@@ -137,7 +137,97 @@ vec2 mainSound(float time) {
     // ノート番号を決定します
     float arpNote = arpNotes[offsets[int(mod(beat / 8.0, 3.0))] * 8 + int(mod(beat, 8.0))];
 
-    ret += sidechain * 0.5 * vec2(arp(arpNote, arpTime));
+    ret += sidechain * 0.5 * vec2(arp(arpNote, arpTime));*/
+
+    //
+    // ARP1
+    //
+
+// ARP1のビート数
+#define ARP1_NUM_BEAT 8
+#define NOTE_DIV 4
+
+    // ノート番号。16分音符基準なので、4分音符だと同じデータが4つ連続する
+    float[ARP1_NUM_BEAT * NOTE_DIV] arp1Notes = float[](
+        // 1
+        69.0, 69.0, 69.0, 69.0,
+
+        // 2
+        69.0, 70.0, 71.0, 72.0,
+
+        // 3
+        69.0, 70.0, 69.0, 72.0,
+
+        // 4
+        69.0, 69.0, 70.0, 70.0,
+
+        // 5
+        69.0, 69.0, 69.0, 69.0,
+
+        // 6
+        69.0, 70.0, 71.0, 72.0,
+
+        // 7
+        69.0, 70.0, 69.0, 72.0,
+
+        // 8
+        69.0, 69.0, 70.0, 70.0);
+
+    // 何分音符(4 or 8 or 16)
+    float[ARP1_NUM_BEAT * NOTE_DIV] arp1Divs = float[](
+        // 1
+        4.0, 4.0, 4.0, 4.0,
+
+        // 2
+        16.0, 16.0, 16.0, 16.0,
+
+        // 3
+        16.0, 16.0, 16.0, 16.0,
+
+        // 4
+        8.0, 8.0, 8.0, 8.0,
+
+        // 5
+        4.0, 4.0, 4.0, 4.0,
+
+        // 6
+        8.0, 8.0, 8.0, 8.0,
+
+        // 7
+        16.0, 16.0, 16.0, 16.0,
+
+        // 8
+        8.0, 8.0, 8.0, 8.0);
+
+    float[ARP1_NUM_BEAT * NOTE_DIV] arp1TimeBegins;
+    float tmpTime = 0.0;
+    for (int i = 0; i < ARP1_NUM_BEAT * NOTE_DIV;) {
+        float div = arp1Divs[i];
+        if (div == 4.0) {
+            arp1TimeBegins[i + 0] = tmpTime;
+            arp1TimeBegins[i + 1] = tmpTime;
+            arp1TimeBegins[i + 2] = tmpTime;
+            arp1TimeBegins[i + 3] = tmpTime;
+            i += 4;
+        } else if (div == 8.0) {
+            arp1TimeBegins[i + 0] = tmpTime;
+            arp1TimeBegins[i + 1] = tmpTime;
+            i += 2;
+        } else if (div == 16.0) {
+            arp1TimeBegins[i + 0] = tmpTime;
+            i += 1;
+        } else {
+            // arp1Divs の値がおかしい
+        }
+
+        tmpTime += 16.0 / div;
+    }
+
+    float beatMod = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
+    int beatModInt = int(beatMod);
+    float arp1Note = arp1Notes[beatModInt];
+    float arp1Time = beatToTime(beatMod - arp1TimeBegins[beatModInt]) / arp1Divs[beatModInt] * 4.0;
+    ret += sidechain * 0.5 * vec2(arp(arp1Note, arp1Time));
 
     // ---
 

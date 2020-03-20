@@ -93,15 +93,57 @@ vec2 arp(float note, float time) {
 #define E(a, b) a | 8 << 8, a | 8 << 8, b | 8 << 8, b | 8 << 8
 #define S(a, b, c, d) a | 16 << 8, b | 16 << 8, c | 16 << 8, d | 16 << 8
 
+#define SEQUENCER(beat, time, beatLen, devNum, devLen, notes, development, toneFunc)                                               \
+    int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_DIV;                            \
+                                                                                                                                   \
+    int[beatLen * NOTE_DIV] indexes;                                                                                               \
+    int currentIndex = 0;                                                                                                          \
+    for (int i = 0; i < beatLen * NOTE_DIV;) {                                                                                     \
+        int div = notes[i + indexOffset] >> 8;                                                                                     \
+        if (div == 4) {                                                                                                            \
+            indexes[i + 0] = currentIndex;                                                                                         \
+            indexes[i + 1] = currentIndex;                                                                                         \
+            indexes[i + 2] = currentIndex;                                                                                         \
+            indexes[i + 3] = currentIndex;                                                                                         \
+            i += 4;                                                                                                                \
+        } else if (div == 8) {                                                                                                     \
+            indexes[i + 0] = currentIndex;                                                                                         \
+            indexes[i + 1] = currentIndex;                                                                                         \
+            i += 2;                                                                                                                \
+        } else if (div == 16) {                                                                                                    \
+            indexes[i + 0] = currentIndex;                                                                                         \
+            i += 1;                                                                                                                \
+        }                                                                                                                          \
+                                                                                                                                   \
+        currentIndex += 16 / div;                                                                                                  \
+    }                                                                                                                              \
+                                                                                                                                   \
+    float indexFloat = mod(beat * float(NOTE_DIV), float(beatLen * NOTE_DIV));                                                     \
+    int index = int(indexFloat);                                                                                                   \
+    int note = notes[index + indexOffset] & 255;                                                                                   \
+    float localTime = beatToTime((indexFloat - float(indexes[index])) / float(notes[index + indexOffset] >> 8) * float(NOTE_DIV)); \
+    float amp = (note == 0) ? 0.0 : 1.0;                                                                                           \
+    return vec2(toneFunc(float(note), localTime) * amp);
+
 vec2 arp1(float beat, float time) {
-    // 1ループのビート数
-#define ARP1_NUM_BEAT 8
+// 1つの展開のビート数
+#define ARP1_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define ARP1_DEV_NUM 2
+
+// 展開の長さ
+#define ARP1_DEV_LEN 4
 
     // ノート番号
     // F: 4分音符
     // R: 8分音符
     // S: 16分音符
-    int[ARP1_NUM_BEAT * NOTE_DIV] arp1Notes = int[](
+    int[ARP1_BEAT_LEN * NOTE_DIV * ARP1_DEV_NUM] notes = int[](
+        //
+        // 展開1
+        //
+
         // 1
         F(69),
 
@@ -124,39 +166,40 @@ vec2 arp1(float beat, float time) {
         S(69, 0, 69, 0),
 
         // 8
-        E(69, 70));
+        E(69, 70),
 
-    int[ARP1_NUM_BEAT * NOTE_DIV] arp1Indexes;
-    int currentIndex = 0;
-    for (int i = 0; i < ARP1_NUM_BEAT * NOTE_DIV;) {
-        int div = arp1Notes[i] >> 8;
-        if (div == 4) {
-            arp1Indexes[i + 0] = currentIndex;
-            arp1Indexes[i + 1] = currentIndex;
-            arp1Indexes[i + 2] = currentIndex;
-            arp1Indexes[i + 3] = currentIndex;
-            i += 4;
-        } else if (div == 8) {
-            arp1Indexes[i + 0] = currentIndex;
-            arp1Indexes[i + 1] = currentIndex;
-            i += 2;
-        } else if (div == 16) {
-            arp1Indexes[i + 0] = currentIndex;
-            i += 1;
-        } else {
-            // invalid data
-        }
+        //
+        // 展開2
+        //
 
-        currentIndex += 16 / div;
-    }
+        // 1
+        F(69),
 
-    // index は beat の4倍で進む。16分音符を基準とした時間
-    float indexFloat = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
-    int index = int(indexFloat);
-    int arp1Note = arp1Notes[index] & 255;
-    float arp1Time = beatToTime((indexFloat - float(arp1Indexes[index])) / float(arp1Notes[index] >> 8) * float(NOTE_DIV));
-    float amp = (arp1Note == 0) ? 0.0 : 1.0;
-    return vec2(arp(float(arp1Note), arp1Time) * amp);
+        // 2
+        F(69),
+
+        // 3
+        F(69),
+
+        // 4
+        F(69),
+
+        // 5
+        F(69),
+
+        // 6
+        F(69),
+
+        // 7
+        F(69),
+
+        // 8
+        F(69));
+
+    // 展開
+    int[ARP1_DEV_LEN] development = int[](0, 1, 0, 0);
+
+    SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_NUM, ARP1_DEV_LEN, notes, development, arp)
 }
 
 // ------

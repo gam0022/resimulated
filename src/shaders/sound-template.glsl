@@ -153,22 +153,22 @@ vec2 mainSound(float time) {
         69.0, 69.0, 69.0, 69.0,
 
         // 2
-        69.0, 70.0, 71.0, 72.0,
+        69.0, 69.0, 70.0, 70.0,
 
         // 3
         69.0, 70.0, 69.0, 72.0,
 
         // 4
-        69.0, 69.0, 70.0, 70.0,
-
-        // 5
         69.0, 69.0, 69.0, 69.0,
 
+        // 5
+        69.0, 69.0, 70.0, 70.0,
+
         // 6
-        69.0, 70.0, 71.0, 72.0,
+        69.0, 69.0, 70.0, 70.0,
 
         // 7
-        69.0, 70.0, 69.0, 72.0,
+        69.0, 69.0, 70.0, 70.0,
 
         // 8
         69.0, 69.0, 70.0, 70.0);
@@ -179,55 +179,56 @@ vec2 mainSound(float time) {
         4.0, 4.0, 4.0, 4.0,
 
         // 2
-        16.0, 16.0, 16.0, 16.0,
+        8.0, 8.0, 8.0, 8.0,
 
         // 3
         16.0, 16.0, 16.0, 16.0,
 
         // 4
-        8.0, 8.0, 8.0, 8.0,
+        4.0, 4.0, 4.0, 4.0,
 
         // 5
-        4.0, 4.0, 4.0, 4.0,
+        8.0, 8.0, 8.0, 8.0,
 
         // 6
         8.0, 8.0, 8.0, 8.0,
 
         // 7
-        16.0, 16.0, 16.0, 16.0,
+        8.0, 8.0, 8.0, 8.0,
 
         // 8
         8.0, 8.0, 8.0, 8.0);
 
-    float[ARP1_NUM_BEAT * NOTE_DIV] arp1TimeBegins;
-    float tmpTime = 0.0;
+    float[ARP1_NUM_BEAT * NOTE_DIV] arp1Indexes;
+    float currentIndex = 0.0;
     for (int i = 0; i < ARP1_NUM_BEAT * NOTE_DIV;) {
         float div = arp1Divs[i];
         if (div == 4.0) {
-            arp1TimeBegins[i + 0] = tmpTime;
-            arp1TimeBegins[i + 1] = tmpTime;
-            arp1TimeBegins[i + 2] = tmpTime;
-            arp1TimeBegins[i + 3] = tmpTime;
+            arp1Indexes[i + 0] = currentIndex;
+            arp1Indexes[i + 1] = currentIndex;
+            arp1Indexes[i + 2] = currentIndex;
+            arp1Indexes[i + 3] = currentIndex;
             i += 4;
         } else if (div == 8.0) {
-            arp1TimeBegins[i + 0] = tmpTime;
-            arp1TimeBegins[i + 1] = tmpTime;
+            arp1Indexes[i + 0] = currentIndex;
+            arp1Indexes[i + 1] = currentIndex;
             i += 2;
         } else if (div == 16.0) {
-            arp1TimeBegins[i + 0] = tmpTime;
+            arp1Indexes[i + 0] = currentIndex;
             i += 1;
         } else {
             // arp1Divs の値がおかしい
         }
 
-        tmpTime += 16.0 / div;
+        currentIndex += 16.0 / div;
     }
 
-    float beatMod = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
-    int beatModInt = int(beatMod);
-    float arp1Note = arp1Notes[beatModInt];
-    float arp1Time = beatToTime(beatMod - arp1TimeBegins[beatModInt]) / arp1Divs[beatModInt] * 4.0;
-    ret += sidechain * 0.5 * vec2(arp(arp1Note, arp1Time));
+    // index は beat の4倍で進む。16分音符を基準とした時間
+    float indexFloat = mod(beat * float(NOTE_DIV), float(ARP1_NUM_BEAT * NOTE_DIV));
+    int index = int(indexFloat);
+    float arp1Note = arp1Notes[index];
+    float arp1Time = beatToTime((indexFloat - arp1Indexes[index]) / arp1Divs[index] * float(NOTE_DIV));
+    ret += 0.5 * vec2(arp(arp1Note, arp1Time));
 
     // ---
 

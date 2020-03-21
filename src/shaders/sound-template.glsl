@@ -20,9 +20,10 @@ void main() {
 //--------------------
 
 #define BPM 140.0
-
 #define PI 3.141592654
 #define TAU 6.283185307
+
+float sidechain;
 
 // general functions
 float timeToBeat(float t) { return t / 60.0 * BPM; }
@@ -113,7 +114,7 @@ vec2 arp(float note, float time) {
     int note = notes[index + indexOffset] & 255;                                                                                   \
     float localTime = beatToTime((indexFloat - float(indexes[index])) / float(notes[index + indexOffset] >> 8) * float(NOTE_DIV)); \
     float amp = (note == 0) ? 0.0 : 1.0;                                                                                           \
-    return vec2(toneFunc(float(note), localTime) * amp);
+    vec2 ret = vec2(toneFunc(float(note), localTime) * amp);
 
 vec2 arp1(float beat, float time) {
 // 1つの展開のビート数
@@ -191,6 +192,7 @@ vec2 arp1(float beat, float time) {
     int[ARP1_DEV_LEN] development = int[](0, 0, 1, 1);
 
     SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
+    return ret;
 }
 
 vec2 arp2(float beat, float time) {
@@ -269,6 +271,7 @@ vec2 arp2(float beat, float time) {
     int[ARP2_DEV_LEN] development = int[](0, 0, 1, 1);
 
     SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, arp)
+    return ret;
 }
 
 vec2 kick1(float beat, float time) {
@@ -347,6 +350,9 @@ vec2 kick1(float beat, float time) {
     int[ARP2_DEV_LEN] development = int[](0, 0, 1, 1);
 
     SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, kick)
+
+    sidechain = smoothstep(0.0, 0.4, localTime);
+    return ret;
 }
 
 vec2 mainSound(float time) {
@@ -355,8 +361,6 @@ vec2 mainSound(float time) {
 
     // kick
     ret += kick1(beat, time);
-
-    float sidechain = 1.0;  // smoothstep(0.0, 0.4, kickTime);// TODO: 後で直す
 
     // hihat
     float hihatTime = beatToTime(mod(beat + 0.5, 1.0));

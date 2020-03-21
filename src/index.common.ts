@@ -63,6 +63,10 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
 
     // reset values
     chromatic.uniformArray.forEach(uniform => {
+        if (!PRODUCTION && debugCamera) {
+            return;
+        }
+
         chromatic.uniforms[uniform.key] = uniform.initValue;
     });
 

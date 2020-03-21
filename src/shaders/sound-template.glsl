@@ -276,20 +276,20 @@ vec2 arp2(float beat, float time) {
 
 vec2 kick1(float beat, float time) {
 // 1つの展開のビート数
-#define ARP2_BEAT_LEN 8
+#define KICK1_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define ARP2_DEV_PAT 2
+#define KICK1_DEV_PAT 2
 
 // 展開の長さ
-#define ARP2_DEV_LEN 4
+#define KICK1_DEV_LEN 4
 
     // ノート番号
     // F: 4分音符
     // E: 8分音符
     // S: 16分音符
     // ノート番号0は休符
-    int[ARP2_BEAT_LEN * NOTE_DIV * ARP2_DEV_PAT] notes = int[](
+    int[KICK1_BEAT_LEN * NOTE_DIV * KICK1_DEV_PAT] notes = int[](
         //
         // 展開0
         //
@@ -347,9 +347,9 @@ vec2 kick1(float beat, float time) {
         F(1));
 
     // 展開
-    int[ARP2_DEV_LEN] development = int[](0, 0, 1, 1);
+    int[KICK1_DEV_LEN] development = int[](0, 0, 1, 1);
 
-    SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, kick)
+    SEQUENCER(beat, time, KICK1_BEAT_LEN, KICK1_DEV_PAT, KICK1_DEV_LEN, notes, development, kick)
 
     sidechain = smoothstep(0.0, 0.4, localTime);
     return ret;

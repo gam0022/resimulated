@@ -159,20 +159,24 @@ export class Chromatic {
                 gl.shaderSource(shader, src);
                 gl.compileShader(shader);
                 if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                    if (src.includes("mainSound")) {
+                    if (PRODUCTION) {
                         const log = gl.getShaderInfoLog(shader);
                         console.log(src, log);
-                    }
-                    else {
-                        const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
-                            const line = parseInt(p2);
-                            if (line <= imageCommonHeaderShaderLineCount) {
-                                return `${p1}:${line} (common header)`;
-                            } else {
-                                return `${p1}:${line - imageCommonHeaderShaderLineCount}`;
-                            }
-                        });
-                        console.log(src, log);
+                    } else {
+                        if (src.includes("mainSound")) {
+                            const log = gl.getShaderInfoLog(shader);
+                            console.log(src, log);
+                        } else {
+                            const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
+                                const line = parseInt(p2);
+                                if (line <= imageCommonHeaderShaderLineCount) {
+                                    return `${p1}:${line} (common header)`;
+                                } else {
+                                    return `${p1}:${line - imageCommonHeaderShaderLineCount}`;
+                                }
+                            });
+                            console.log(src, log);
+                        }
                     }
                 }
                 return shader;

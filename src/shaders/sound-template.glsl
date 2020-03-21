@@ -53,7 +53,7 @@ float square(float phase) { return fract(phase) < 0.5 ? -1.0 : 1.0; }
 // ------
 // drums
 
-float kick(float time) {
+float kick(float note, float time) {
     float amp = exp(-5.0 * time);
     float phase = 50.0 * time - 10.0 * exp(-70.0 * time);
     return amp * sine(phase);
@@ -283,6 +283,84 @@ vec2 arp2(float beat, float time) {
     SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, arp)
 }
 
+vec2 kick1(float beat, float time) {
+// 1つの展開のビート数
+#define ARP2_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define ARP2_DEV_PAT 2
+
+// 展開の長さ
+#define ARP2_DEV_LEN 4
+
+    // ノート番号
+    // F: 4分音符
+    // E: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[ARP2_BEAT_LEN * NOTE_DIV * ARP2_DEV_PAT] notes = int[](
+        //
+        // 展開0
+        //
+
+        // 1
+        F(1),
+
+        // 2
+        F(0),
+
+        // 3
+        F(1),
+
+        // 4
+        F(1),
+
+        // 5
+        F(1),
+
+        // 6
+        F(0),
+
+        // 7
+        F(1),
+
+        // 8
+        F(1),
+
+        //
+        // 展開1（とりあえず今は展開0と同じ）
+        //
+
+        // 1
+        F(1),
+
+        // 2
+        F(0),
+
+        // 3
+        F(1),
+
+        // 4
+        F(1),
+
+        // 5
+        F(1),
+
+        // 6
+        F(0),
+
+        // 7
+        F(1),
+
+        // 8
+        F(1));
+
+    // 展開
+    int[ARP2_DEV_LEN] development = int[](0, 0, 1, 1);
+
+    SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, kick)
+}
+
 // ------
 // main
 
@@ -290,34 +368,23 @@ vec2 mainSound(float time) {
     float beat = timeToBeat(time);
     vec2 ret = vec2(0.0);
 
-    // ---
     // kick
+    ret += kick1(beat, time);
 
-    float kickTime = beatToTime(mod(beat, 1.0));
-    ret += 0.8 * kick(kickTime);
+    float sidechain = 1.0;  // smoothstep(0.0, 0.4, kickTime);// TODO: 後で直す
 
-    float sidechain = smoothstep(0.0, 0.4, kickTime);
-
-    // ---
     // hihat
-
     float hihatTime = beatToTime(mod(beat + 0.5, 1.0));
     ret += 0.5 * hihat(hihatTime);
 
-    // ---
     // bass
-
     float bassNote = chord(0.0) - 24.0;
     ret += sidechain * 0.6 * bass(bassNote, time);
 
-    // ---
     // chord
-
     ret += sidechain * 0.6 * vec2(pad(chord(0.0), time) + pad(chord(1.0), time) + pad(chord(2.0), time) + pad(chord(3.0), time)) / 4.0;
 
-    // ---
     // arp
-
     ret += vec2(0.7, 0.3) * arp1(beat, time);  // L70
     ret += vec2(0.3, 0.7) * arp2(beat, time);  // R70
 

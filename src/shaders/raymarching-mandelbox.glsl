@@ -339,7 +339,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     for (int bounce = 0; bounce < 2; bounce++) {
         calcRadiance(intersection, ray);
         color += reflection * intersection.color;
-        if (!intersection.hit) break;
+        if (!intersection.hit || intersection.reflectance == 0.0) break;
         reflection *= intersection.reflectance;
 
         bool isIncoming = dot(ray.direction, intersection.normal) < 0.0;

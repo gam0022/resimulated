@@ -69,10 +69,10 @@ vec2 pad(float note, float time) {
 
 vec2 arp(float note, float time) {
     float freq = noteToFreq(note);
-    float fmamp = 0.1 * exp(-50.0 * time);
-    float fm = fmamp * sine(time * freq * 7.0);
-    float amp = exp(-20.0 * time);
-    return amp * vec2(sine(freq * 0.99 * time + fm), sine(freq * 1.01 * time + fm));
+    float fmamp = 0.02 * exp(-70.0 * time);
+    float fm = fmamp * sine(time * freq * 1.0);
+    float amp = exp(-70.0 * time);
+    return amp * vec2(sine(freq * 0.999 * time + fm), sine(freq * 1.001 * time + fm));
 }
 
 // 1ビートを最大何分割するか。16分音符に対応するなら4

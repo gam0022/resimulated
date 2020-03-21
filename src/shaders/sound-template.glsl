@@ -24,14 +24,10 @@ void main() {
 #define PI 3.141592654
 #define TAU 6.283185307
 
-// ------
 // general functions
-
 float timeToBeat(float t) { return t / 60.0 * BPM; }
 float beatToTime(float b) { return b / BPM * 60.0; }
-
 float noteToFreq(float n) { return 440.0 * pow(2.0, (n - 69.0) / 12.0); }
-
 float chord(float n) { return (n < 1.0 ? 55.0 : n < 2.0 ? 58.0 : n < 3.0 ? 62.0 : 65.0); }
 
 // https://www.shadertoy.com/view/4djSRW
@@ -41,32 +37,24 @@ vec4 noise(float p) {
     return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 
-// ------
 // primitive oscillators
-
 float sine(float phase) { return sin(TAU * phase); }
-
 float saw(float phase) { return 2.0 * fract(phase) - 1.0; }
-
 float square(float phase) { return fract(phase) < 0.5 ? -1.0 : 1.0; }
 
-// ------
 // drums
-
 float kick(float note, float time) {
     float amp = exp(-5.0 * time);
     float phase = 50.0 * time - 10.0 * exp(-70.0 * time);
     return amp * sine(phase);
 }
 
-vec2 hihat(float time) {
+vec2 hihat(float note, float time) {
     float amp = exp(-50.0 * time);
     return amp * noise(time * 100.0).xy;
 }
 
-// ------
 // synths
-
 vec2 bass(float note, float time) {
     float freq = noteToFreq(note);
     return vec2(square(freq * time) + sine(freq * time)) / 2.0;
@@ -361,9 +349,6 @@ vec2 kick1(float beat, float time) {
     SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, kick)
 }
 
-// ------
-// main
-
 vec2 mainSound(float time) {
     float beat = timeToBeat(time);
     vec2 ret = vec2(0.0);
@@ -375,7 +360,7 @@ vec2 mainSound(float time) {
 
     // hihat
     float hihatTime = beatToTime(mod(beat + 0.5, 1.0));
-    ret += 0.5 * hihat(hihatTime);
+    ret += 0.5 * hihat(1.0, hihatTime);
 
     // bass
     float bassNote = chord(0.0) - 24.0;

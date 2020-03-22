@@ -125,17 +125,17 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gMandelboxScale = 1.0 + 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0;
-    }).then(8, t => {
+    }).then(16, t => {
         // Ballをズームするカット
         camera = new Vector3(0, 0, -9.9 + 0.01 * t * t);
         target = new Vector3(0, 0, -10);
 
-        chromatic.uniforms.gMandelboxScale = 1.30;
+        chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
     }).then(8, t => {
         // Ballをズームするカット
-        camera = new Vector3(0.2 + 0.2 * t, 0.2, -9.0 + 0.2 * t);
+        camera = new Vector3(0.2 + 0.05 * t, 0.2 + 0.05 * t, -9.0 + 0.05 * t);
         target = new Vector3(0, 0, -10);
 
         chromatic.uniforms.gMandelboxScale = 1.30;

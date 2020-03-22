@@ -129,15 +129,20 @@ vec2 foldRotate(vec2 p, float s) {
 
 float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
 
+uniform float gBallRadius;      // 0.1 0 0.2
 uniform float gDistortion;      // 0.01 0 0.1
 uniform float gDistortionFreq;  // 30 0 100
-float dBall(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1) - gDistortion * sin(gDistortionFreq * p.x + beat) * sin(gDistortionFreq * p.y + beat) * sin(gDistortionFreq * p.z + beat); }
+float dBall(vec3 p) { return dSphere(p - vec3(0, 0, -10), gBallRadius) - gDistortion * sin(gDistortionFreq * p.x + beat) * sin(gDistortionFreq * p.y + beat) * sin(gDistortionFreq * p.z + beat); }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
     float d = dStage(p);
-    d = min(d, dBall(p));
+
+    if (gBallRadius > 0.0) {
+        d = min(d, dBall(p));
+    }
+
     return d;
 }
 
@@ -203,7 +208,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
-        if (abs(dBall(p)) < eps) {
+        if (gBallRadius > 0.0 && abs(dBall(p)) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;

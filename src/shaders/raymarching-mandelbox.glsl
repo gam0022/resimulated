@@ -130,8 +130,8 @@ vec2 foldRotate(vec2 p, float s) {
 float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
 
 uniform float gBallRadius;          // 0.1 0 0.2
-uniform float gBallDistortion;      // 0.01 0 0.1
-uniform float gBallDistortionFreq;  // 30 0 100
+uniform float gBallDistortion;      // 0.0 0 0.1
+uniform float gBallDistortionFreq;  // 0 0 100
 float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, -10), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
 }

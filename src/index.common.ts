@@ -98,6 +98,24 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gSceneEps = 0.0002645177773046626;
         chromatic.uniforms.gBallRadius = 0;
     }).then(16, t => {
+        // tmp
+        camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
+        target = new Vector3(0, 0, 0);
+
+        chromatic.uniforms.gMandelboxScale = 1.8;
+        chromatic.uniforms.gCameraLightIntensity = 1.2;
+        chromatic.uniforms.gEmissiveIntensity = 0;
+        chromatic.uniforms.gBallRadius = 0;
+    }).then(16, t => {
+        // tmp
+        camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
+        target = new Vector3(0, 0, 0);
+
+        chromatic.uniforms.gMandelboxScale = 1.8;
+        chromatic.uniforms.gCameraLightIntensity = 1.2;
+        chromatic.uniforms.gEmissiveIntensity = 0;
+        chromatic.uniforms.gBallRadius = 0;
+    }).then(16, t => {
         const camera1 = new Vector3(0, 2.8, -8);
         const camera2 = new Vector3(0, 0, -32);
 
@@ -106,6 +124,23 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
 
         chromatic.uniforms.gMandelboxScale = 1.0 + 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0;
+    }).then(8, t => {
+        // Ballをズームするカット
+        camera = new Vector3(0, 0, -9.9 + 0.01 * t * t);
+        target = new Vector3(0, 0, -10);
+
+        chromatic.uniforms.gMandelboxScale = 1.30;
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+    }).then(8, t => {
+        // Ballをズームするカット
+        camera = new Vector3(0.2 + 0.2 * t, 0.2, -9.0 + 0.2 * t);
+        target = new Vector3(0, 0, -10);
+
+        chromatic.uniforms.gMandelboxScale = 1.30;
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
     }).then(1600, t => {
         camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);

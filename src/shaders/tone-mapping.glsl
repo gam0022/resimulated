@@ -1,3 +1,5 @@
+uniform float gTonemapExposure;  // 0.1 0.0 2
+
 vec3 acesFilm(const vec3 x) {
     const float a = 2.51;
     const float b = 0.03;
@@ -11,19 +13,18 @@ uniform float gVignetteIntensity;   // 1.34 0 3
 uniform float gVignetteSmoothness;  // 2 0 5
 uniform float gVignetteRoundness;   // 1 0 1
 
-uniform float gTonemapExposure;  // 0.1 0.0 2
-
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
-    vec3 col = texture(iPrevPass, uv).rgb;
-
-    // Vignette
+float vignette(vec2 uv) {
     vec2 d = abs(uv - 0.5) * gVignetteIntensity;
     float roundness = (1.0 - gVignetteRoundness) * 6.0 + gVignetteRoundness;
     d = pow(d, vec2(roundness));
     float vfactor = pow(saturate(1.0 - dot(d, d)), gVignetteSmoothness);
-    col *= mix(vec3(0.0), vec3(1.0), vfactor);
+    return vfactor;
+}
 
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    vec2 uv = fragCoord / iResolution.xy;
+    vec3 col = texture(iPrevPass, uv).rgb;
+    col *= vignette(uv);
     col = acesFilm(col * gTonemapExposure);
     col = pow(col, vec3(1.0 / 2.2));
 

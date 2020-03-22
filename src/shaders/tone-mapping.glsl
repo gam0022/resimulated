@@ -9,11 +9,12 @@ vec3 acesFilm(const vec3 x) {
     return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
-uniform float gChromaticAberrationIntensity;  // 0.003 0 0.05
-
 uniform float gVignetteIntensity;   // 1.34 0 3
 uniform float gVignetteSmoothness;  // 2 0 5
 uniform float gVignetteRoundness;   // 1 0 1
+
+uniform float gChromaticAberrationIntensity;  // 0.03 0 0.1
+uniform float gChromaticAberrationDistance;   // 0.45 0 1
 
 float vignette(vec2 uv) {
     vec2 d = abs(uv - 0.5) * gVignetteIntensity;
@@ -22,18 +23,24 @@ float vignette(vec2 uv) {
     return pow(saturate(1.0 - dot(d, d)), gVignetteSmoothness);
 }
 
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
-    vec3 col;
+vec3 chromaticAberration(vec2 uv) {
+    vec2 d = abs(uv - 0.5);
+    float f = mix(0.5, dot(d, d), gChromaticAberrationDistance);
+    f *= f * gChromaticAberrationIntensity;
+    d = vec2(f);
 
-    vec2 d = vec2(gChromaticAberrationIntensity);
+    vec3 col;
     col.r = texture(iPrevPass, uv + d).r;
     col.g = texture(iPrevPass, uv).g;
     col.b = texture(iPrevPass, uv - d).b;
+    return col;
+}
 
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    vec2 uv = fragCoord / iResolution.xy;
+    vec3 col = chromaticAberration(uv);
     col *= vignette(uv);
     col = acesFilm(col * gTonemapExposure);
     col = pow(col, vec3(1.0 / 2.2));
-
     fragColor = vec4(col, 1.0);
 }

@@ -75,9 +75,10 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         target = new Vector3(0, 0, 0);
 
         chromatic.uniforms.gMandelboxScale = 1.8;
-        chromatic.uniforms.gCameraLightIntensity = 0.7;
+        chromatic.uniforms.gCameraLightIntensity = 0.4;
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gSceneEps = 0.003;
+        chromatic.uniforms.gBallRadius = 0;
     }).then(8, t => {
         camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
@@ -85,6 +86,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gMandelboxScale = 1.8;
         chromatic.uniforms.gCameraLightIntensity = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 0;
+        chromatic.uniforms.gBallRadius = 0;
     }).then(16, t => {
         camera = new Vector3(-0.08503080276580499, 1.3346599987007965, -15.01732922836809).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0.784904810273659, 3.3444920877098543, 7.36034431847018);
@@ -94,6 +96,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gCameraLightIntensity = 1.4;
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gSceneEps = 0.0002645177773046626;
+        chromatic.uniforms.gBallRadius = 0;
     }).then(16, t => {
         const camera1 = new Vector3(0, 2.8, -8);
         const camera2 = new Vector3(0, 0, -32);

@@ -104,7 +104,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gCameraFov = 22.457765885219057;
 
         chromatic.uniforms.gMandelboxScale = 2.9815487838971206;
-        chromatic.uniforms.gCameraLightIntensity = 0;
+        chromatic.uniforms.gCameraLightIntensity = 0.01;
         chromatic.uniforms.gEmissiveIntensity = 1.8818642917049402;
         chromatic.uniforms.gEdgeEps = 0.0001;
         chromatic.uniforms.gEmissiveSpeed = 0.5;
@@ -116,7 +116,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gCameraFov = 23;
 
         chromatic.uniforms.gMandelboxScale = 2.9815487838971206;
-        chromatic.uniforms.gCameraLightIntensity = 0;
+        chromatic.uniforms.gCameraLightIntensity = 0.003;
         chromatic.uniforms.gEdgeEps = 0.0001;
         chromatic.uniforms.gEmissiveIntensity = 1.8818642917049402;
         chromatic.uniforms.gEmissiveSpeed = 0.5;

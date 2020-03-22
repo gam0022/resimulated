@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3 } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -128,6 +128,7 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
     }).then(16, t => {
         // Ballをズームするカット
         camera = new Vector3(0, 0, -9.8 + 0.003 * t * t);
+        // camera = new Vector3(0, 0, remap01(easeInOutCubic(t / 16), -9.8, -9));
         target = new Vector3(0, 0, -10);
 
         chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);

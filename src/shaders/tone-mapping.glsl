@@ -17,8 +17,7 @@ float vignette(vec2 uv) {
     vec2 d = abs(uv - 0.5) * gVignetteIntensity;
     float roundness = (1.0 - gVignetteRoundness) * 6.0 + gVignetteRoundness;
     d = pow(d, vec2(roundness));
-    float vfactor = pow(saturate(1.0 - dot(d, d)), gVignetteSmoothness);
-    return vfactor;
+    return pow(saturate(1.0 - dot(d, d)), gVignetteSmoothness);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

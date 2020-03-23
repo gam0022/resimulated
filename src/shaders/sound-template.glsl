@@ -83,6 +83,74 @@ vec2 arpsine(float note, float time) {
     return amp * vec2(sine(freq * 0.999 * time + fm), sine(freq * 1.001 * time + fm));
 }
 
+#define NSPC 256
+
+// hard clipping distortion
+float dist(float s, float d) { return clamp(s * d, -1.0, 1.0); }
+vec2 dist(vec2 s, float d) { return clamp(s * d, -1.0, 1.0); }
+
+// my resonant lowpass filter's frequency response
+float _filter(float h, float cut, float res) {
+    cut -= 20.0;
+    float df = max(h - cut, 0.0), df2 = abs(h - cut);
+    return exp(-0.005 * df * df) * 0.5 + exp(df2 * df2 * -0.1) * 2.2;
+}
+
+// tb303 core
+vec2 synth(float note, float t) {
+    vec2 v = vec2(0.0);
+
+    float tnote = fract(t);
+    float dr = 0.26;
+    float amp = smoothstep(0.05, 0.0, abs(tnote - dr - 0.05) - dr) * exp(tnote * -1.0);
+    float f = noteToFreq(note);
+
+    float sqr = 1.0;  // smoothstep(0.0, 0.01, abs(mod(t * 9.0, 64.0) - 20.0) - 20.0);
+
+    float base = f;                        // 50.0 + sin(sin(t * 0.1) * t) * 20.0;
+    float flt = exp(tnote * -1.5) * 50.0;  // + pow(cos(t * 1.0) * 0.5 + 0.5, 4.0) * 80.0 - 0.0;
+    for (int i = 0; i < NSPC; i++) {
+        float h = float(i + 1);
+        float inten = 1.0 / h;
+        // inten *= sin((pow(h, sin(t) * 0.5 + 0.5) + t * 0.5) * pi2) * 0.9 + 0.1;
+
+        inten = mix(inten, inten * mod(h, 2.0), sqr);
+
+        inten *= exp(-1.0 * max(2.0 - h, 0.0));  // + exp(abs(h - flt) * -2.0) * 8.0;
+
+        inten *= _filter(h, flt, 4.0);
+
+        v.x += inten * sin((TAU + 0.01) * (t * base * h));
+        v.y += inten * sin(TAU * (t * base * h));
+    }
+
+    float o = v.x * amp;  // exp(max(tnote - 0.3, 0.0) * -5.0);
+
+    // o = dist(o, 2.5);
+
+    return vec2(dist(v * amp, 2.0));
+}
+
+vec2 synth1_echo(float tb, float time) {
+    vec2 v;
+    v = synth(tb, time) * 0.5;  // + synth2(time) * 0.5;
+    float ec = 0.4, fb = 0.6, et = 2.0 / 9.0, tm = 2.0 / 9.0;
+    v += synth(tb, time - et) * ec * vec2(1.0, 0.5);
+    ec *= fb;
+    et += tm;
+    v += synth(tb, time - et).yx * ec * vec2(0.5, 1.0);
+    ec *= fb;
+    et += tm;
+    v += synth(tb, time - et) * ec * vec2(1.0, 0.5);
+    ec *= fb;
+    et += tm;
+    v += synth(tb, time - et).yx * ec * vec2(0.5, 1.0);
+    ec *= fb;
+    et += tm;
+
+    return v;
+}
+
 // 1ビートを最大何分割するか。16分音符に対応するなら4
 #define NOTE_DIV 4
 

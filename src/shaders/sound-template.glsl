@@ -90,7 +90,7 @@ float dist(float s, float d) { return clamp(s * d, -1.0, 1.0); }
 vec2 dist(vec2 s, float d) { return clamp(s * d, -1.0, 1.0); }
 
 // my resonant lowpass filter's frequency response
-float _filter(float h, float cut, float res) {
+float _filter(float h, float cut) {
     cut -= 20.0;
     float df = max(h - cut, 0.0), df2 = abs(h - cut);
     return exp(-0.005 * df * df) * 0.5 + exp(df2 * df2 * -0.1) * 2.2;
@@ -99,16 +99,13 @@ float _filter(float h, float cut, float res) {
 // tb303 core
 vec2 synth(float note, float t) {
     vec2 v = vec2(0.0);
-
-    float tnote = fract(t);
     float dr = 0.26;
-    float amp = smoothstep(0.05, 0.0, abs(tnote - dr - 0.05) - dr) * exp(tnote * -1.0);
+    float amp = smoothstep(0.05, 0.0, abs(t - dr - 0.05) - dr) * exp(t * -1.0);
     float f = noteToFreq(note);
-
     float sqr = 1.0;  // smoothstep(0.0, 0.01, abs(mod(t * 9.0, 64.0) - 20.0) - 20.0);
 
-    float base = f;                        // 50.0 + sin(sin(t * 0.1) * t) * 20.0;
-    float flt = exp(tnote * -1.5) * 50.0;  // + pow(cos(t * 1.0) * 0.5 + 0.5, 4.0) * 80.0 - 0.0;
+    float base = f;                    // 50.0 + sin(sin(t * 0.1) * t) * 20.0;
+    float flt = exp(t * -1.5) * 50.0;  // + pow(cos(t * 1.0) * 0.5 + 0.5, 4.0) * 80.0 - 0.0;
     for (int i = 0; i < NSPC; i++) {
         float h = float(i + 1);
         float inten = 1.0 / h;
@@ -118,7 +115,7 @@ vec2 synth(float note, float t) {
 
         inten *= exp(-1.0 * max(2.0 - h, 0.0));  // + exp(abs(h - flt) * -2.0) * 8.0;
 
-        inten *= _filter(h, flt, 4.0);
+        inten *= _filter(h, flt);
 
         v.x += inten * sin((TAU + 0.01) * (t * base * h));
         v.y += inten * sin(TAU * (t * base * h));

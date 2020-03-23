@@ -129,15 +129,22 @@ vec2 foldRotate(vec2 p, float s) {
 
 float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
 
-uniform float gDistortion;      // 0.01 0 0.1
-uniform float gDistortionFreq;  // 30 0 100
-float dBall(vec3 p) { return dSphere(p - vec3(0, 0, -10), 0.1) - gDistortion * sin(gDistortionFreq * p.x + beat) * sin(gDistortionFreq * p.y + beat) * sin(gDistortionFreq * p.z + beat); }
+uniform float gBallRadius;          // 0.1 0 0.2
+uniform float gBallDistortion;      // 0.0 0 0.1
+uniform float gBallDistortionFreq;  // 0 0 100
+float dBall(vec3 p) {
+    return dSphere(p - vec3(0, 0, -10), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
+}
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
     float d = dStage(p);
-    d = min(d, dBall(p));
+
+    if (gBallRadius > 0.0) {
+        d = min(d, dBall(p));
+    }
+
     return d;
 }
 
@@ -180,7 +187,8 @@ float calcEdge(vec3 p) {
     return edge;
 }
 
-uniform vec3 gEmissiveColor;  // 48 255 48
+uniform vec3 gEmissiveColor;   // 48 255 48
+uniform float gEmissiveSpeed;  // 1 0 2
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
@@ -203,7 +211,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
-        if (abs(dBall(p)) < eps) {
+        if (gBallRadius > 0.0 && abs(dBall(p)) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;
@@ -217,7 +225,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * TAU - mod(0.5 * intersection.position.z, TAU)));
+            intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;
@@ -339,7 +347,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     for (int bounce = 0; bounce < 2; bounce++) {
         calcRadiance(intersection, ray);
         color += reflection * intersection.color;
-        if (!intersection.hit) break;
+        if (!intersection.hit || intersection.reflectance == 0.0) break;
         reflection *= intersection.reflectance;
 
         bool isIncoming = dot(ray.direction, intersection.normal) < 0.0;

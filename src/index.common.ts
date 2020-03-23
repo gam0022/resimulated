@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3 } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -63,6 +63,10 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
 
     // reset values
     chromatic.uniformArray.forEach(uniform => {
+        if (!PRODUCTION && debugCamera) {
+            return;
+        }
+
         chromatic.uniforms[uniform.key] = uniform.initValue;
     });
 
@@ -71,9 +75,10 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         target = new Vector3(0, 0, 0);
 
         chromatic.uniforms.gMandelboxScale = 1.8;
-        chromatic.uniforms.gCameraLightIntensity = 0.7;
+        chromatic.uniforms.gCameraLightIntensity = 0.4;
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gSceneEps = 0.003;
+        chromatic.uniforms.gBallRadius = 0;
     }).then(8, t => {
         camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
@@ -81,8 +86,9 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gMandelboxScale = 1.8;
         chromatic.uniforms.gCameraLightIntensity = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 0;
+        chromatic.uniforms.gBallRadius = 0;
     }).then(16, t => {
-        camera = new Vector3(-0.08503080276580499, 1.3346599987007965, -15.01732922836809).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(-0.08503080276580499, 1.3346599987007965, -15.01732922836809).add(Vector3.fbm(t).scale(0.001));
         target = new Vector3(0.784904810273659, 3.3444920877098543, 7.36034431847018);
         chromatic.uniforms.gCameraFov = (t < 8 ? 2 : 5) + 0.05 * t;
 
@@ -90,7 +96,33 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
         chromatic.uniforms.gCameraLightIntensity = 1.4;
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gSceneEps = 0.0002645177773046626;
+        chromatic.uniforms.gBallRadius = 0;
     }).then(16, t => {
+        // ちょっとEmissive
+        camera = new Vector3(0.05336320223924196, 3.2510840695253322 + 0.01 * t, -5.0872681523358665).add(Vector3.fbm(t).scale(0.001));
+        target = new Vector3(-0.21247566790275868, 3.469965904363116, -0.4828265949411093);
+        chromatic.uniforms.gCameraFov = 22.457765885219057;
+
+        chromatic.uniforms.gMandelboxScale = 2.9815487838971206;
+        chromatic.uniforms.gCameraLightIntensity = 0.01;
+        chromatic.uniforms.gEmissiveIntensity = 1.8818642917049402;
+        chromatic.uniforms.gEdgeEps = 0.0001;
+        chromatic.uniforms.gEmissiveSpeed = 0.5;
+        chromatic.uniforms.gBallRadius = 0;
+    }).then(16, t => {
+        // ちょっとEmissive2
+        camera = new Vector3(-0.009156083313678657, 3.548031114215368, -5.16851465075457 + 0.5 * t).add(Vector3.fbm(t).scale(0.005));
+        target = camera.add(new Vector3(0.1, 0.1, 1));
+        chromatic.uniforms.gCameraFov = 23;
+
+        chromatic.uniforms.gMandelboxScale = 2.9815487838971206;
+        chromatic.uniforms.gCameraLightIntensity = 0.003;
+        chromatic.uniforms.gEdgeEps = 0.0001;
+        chromatic.uniforms.gEmissiveIntensity = 1.8818642917049402;
+        chromatic.uniforms.gEmissiveSpeed = 0.5;
+        chromatic.uniforms.gBallRadius = 0;
+    }).then(16, t => {
+        // 展開
         const camera1 = new Vector3(0, 2.8, -8);
         const camera2 = new Vector3(0, 0, -32);
 
@@ -99,6 +131,24 @@ export const animateUniforms = (time: number, debugCamera: boolean) => {
 
         chromatic.uniforms.gMandelboxScale = 1.0 + 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0;
+    }).then(16, t => {
+        // Ballをズームするカット
+        camera = new Vector3(0, 0, -9.8 + 0.003 * t * t);
+        // camera = new Vector3(0, 0, remap01(easeInOutCubic(t / 16), -9.8, -9));
+        target = new Vector3(0, 0, -10);
+
+        chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+    }).then(8, t => {
+        // Ballをズームするカット
+        camera = new Vector3(0.2 + 0.05 * t, 0.2 + 0.05 * t, -9.0 + 0.05 * t);
+        target = new Vector3(0, 0, -10);
+
+        chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
     }).then(1600, t => {
         camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);

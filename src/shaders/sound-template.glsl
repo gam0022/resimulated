@@ -131,20 +131,20 @@ vec2 synth(float note, float t) {
     return vec2(dist(v * amp, 2.0));
 }
 
-vec2 synth1_echo(float tb, float time) {
+vec2 synth1_echo(float note, float time) {
     vec2 v;
-    v = synth(tb, time) * 0.5;  // + synth2(time) * 0.5;
+    v = synth(note, time) * 0.5;  // + synth2(time) * 0.5;
     float ec = 0.4, fb = 0.6, et = 2.0 / 9.0, tm = 2.0 / 9.0;
-    v += synth(tb, time - et) * ec * vec2(1.0, 0.5);
+    v += synth(note, time - et) * ec * vec2(1.0, 0.5);
     ec *= fb;
     et += tm;
-    v += synth(tb, time - et).yx * ec * vec2(0.5, 1.0);
+    v += synth(note, time - et).yx * ec * vec2(0.5, 1.0);
     ec *= fb;
     et += tm;
-    v += synth(tb, time - et) * ec * vec2(1.0, 0.5);
+    v += synth(note, time - et) * ec * vec2(1.0, 0.5);
     ec *= fb;
     et += tm;
-    v += synth(tb, time - et).yx * ec * vec2(0.5, 1.0);
+    v += synth(note, time - et).yx * ec * vec2(0.5, 1.0);
     ec *= fb;
     et += tm;
 

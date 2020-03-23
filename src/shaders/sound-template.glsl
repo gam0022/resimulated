@@ -267,7 +267,8 @@ vec2 arp1(float beat, float time) {
     // 展開
     int[ARP1_DEV_LEN] development = int[](0, 0, 1, 1);
 
-    SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
+    // SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
+    SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, synth1_echo)
     return ret;
 }
 

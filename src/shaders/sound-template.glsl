@@ -84,13 +84,13 @@ vec2 arpsine(float note, float time) {
 }
 
 vec2 supersaw(float note, float time) {
-    float freq = noteToFreq(note);
     float amp = exp(-3.0 * time);
     float ret = 0.0;
 
-    int num = 4;
-    float step = 0.015;
+    int num = 3;
+    float step = 0.014;
     for (int i = 0; i < num; i++) {
+        float freq = noteToFreq(note + 12.0 * float(i - num / 2));
         ret += saw(freq * time * (1.0 + step * float(i - num / 2)));
     }
 

@@ -157,36 +157,33 @@ vec2 synth1_echo(float note, float time) {
 #define S(a) a | 16 << 8
 #define S4(a, b, c, d) a | 16 << 8, b | 16 << 8, c | 16 << 8, d | 16 << 8
 
-#define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                                               \
-    int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_DIV;                            \
-                                                                                                                                   \
-    int[beatLen * NOTE_DIV] indexes;                                                                                               \
-    int currentIndex = 0;                                                                                                          \
-    for (int i = 0; i < beatLen * NOTE_DIV;) {                                                                                     \
-        int div = notes[i + indexOffset] >> 8;                                                                                     \
-        if (div == 4) {                                                                                                            \
-            indexes[i + 0] = currentIndex;                                                                                         \
-            indexes[i + 1] = currentIndex;                                                                                         \
-            indexes[i + 2] = currentIndex;                                                                                         \
-            indexes[i + 3] = currentIndex;                                                                                         \
-            i += 4;                                                                                                                \
-        } else if (div == 8) {                                                                                                     \
-            indexes[i + 0] = currentIndex;                                                                                         \
-            indexes[i + 1] = currentIndex;                                                                                         \
-            i += 2;                                                                                                                \
-        } else if (div == 16) {                                                                                                    \
-            indexes[i + 0] = currentIndex;                                                                                         \
-            i += 1;                                                                                                                \
-        }                                                                                                                          \
-                                                                                                                                   \
-        currentIndex += 16 / div;                                                                                                  \
-    }                                                                                                                              \
-                                                                                                                                   \
-    float indexFloat = mod(beat * float(NOTE_DIV), float(beatLen * NOTE_DIV));                                                     \
-    int index = int(indexFloat);                                                                                                   \
-    int note = notes[index + indexOffset] & 255;                                                                                   \
-    float localTime = beatToTime((indexFloat - float(indexes[index])) / float(notes[index + indexOffset] >> 8) * float(NOTE_DIV)); \
-    float amp = (note == 0) ? 0.0 : 1.0;                                                                                           \
+#define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                    \
+    int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_DIV; \
+                                                                                                        \
+    int[beatLen * NOTE_DIV] indexes;                                                                    \
+    for (int i = 0; i < beatLen * NOTE_DIV;) {                                                          \
+        int div = notes[i + indexOffset] >> 8;                                                          \
+        if (div == 4) {                                                                                 \
+            indexes[i + 0] = i;                                                                         \
+            indexes[i + 1] = i;                                                                         \
+            indexes[i + 2] = i;                                                                         \
+            indexes[i + 3] = i;                                                                         \
+            i += 4;                                                                                     \
+        } else if (div == 8) {                                                                          \
+            indexes[i + 0] = i;                                                                         \
+            indexes[i + 1] = i;                                                                         \
+            i += 2;                                                                                     \
+        } else if (div == 16) {                                                                         \
+            indexes[i + 0] = i;                                                                         \
+            i += 1;                                                                                     \
+        }                                                                                               \
+    }                                                                                                   \
+                                                                                                        \
+    float indexFloat = mod(beat * float(NOTE_DIV), float(beatLen * NOTE_DIV));                          \
+    int index = int(indexFloat);                                                                        \
+    int note = notes[index + indexOffset] & 255;                                                        \
+    float localTime = beatToTime((indexFloat - float(indexes[index])) / float(NOTE_DIV));               \
+    float amp = (note == 0) ? 0.0 : 1.0;                                                                \
     vec2 ret = vec2(toneFunc(float(note), localTime) * amp);
 
 vec2 arp1(float beat, float time) {

@@ -84,17 +84,20 @@ vec2 arpsine(float note, float time) {
 }
 
 vec2 supersaw(float note, float time) {
-    float amp = exp(-3.0 * time);
+    float amp = exp(-5.0 * time * time);
     float ret = 0.0;
-
     int num = 3;
     float step = 0.014;
+    int reverbNum = 100;
+
     for (int i = 0; i < num; i++) {
         float freq = noteToFreq(note + 12.0 * float(i - num / 2));
-        ret += saw(freq * time * (1.0 + step * float(i - num / 2)));
+        for (int j = 0; j < reverbNum; j++) {
+            ret += saw(freq * (time - 0.008 * float(j)) * (1.0 + step * float(i - num / 2))) * exp(-3.0 * float(j));
+        }
     }
 
-    return vec2(amp * ret / float(num));
+    return vec2(0.5 * amp * ret / float(num));
 }
 
 #define NSPC 256

@@ -80,7 +80,7 @@ window.addEventListener("load", ev => {
                 timeInput.valueAsNumber = time;
                 chromatic.time = time;
 
-                animateUniforms(time, config.debugCamera);
+                animateUniforms(time, config.debugCamera, config.debugParams);
                 chromatic.render();
 
                 const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
@@ -358,9 +358,7 @@ window.addEventListener("load", ev => {
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
 
-        if (!config.debugParams) {
-            animateUniforms(time, config.debugCamera);
-        }
+        animateUniforms(time, config.debugCamera, config.debugParams);
 
         gui.updateDisplay();
     }

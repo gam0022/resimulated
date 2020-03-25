@@ -4,7 +4,7 @@ export const saturate = (x: number) => clamp(x, 0, 1);
 
 // Hologram Boxes by kaneta: https://www.shadertoy.com/view/3tX3R4
 export const remap = (x: number, im: number, ix: number, om: number, ox: number) => clamp(om + (x - im) * (ox - om) / (ix - im), om, ox);
-export const remap01 = (x: number, min: number, max: number) => remap(x, 0, 1, min, max);
+export const remap01 = (x: number, min: number, max: number) => remap(x, min, max, 0, 1);
 
 // Noise
 export const fbm = (x: number, t: number) => Math.sin(x + t) + 0.5 * Math.sin(2.0 * x + t) + 0.25 * Math.sin(4.0 * x + t);

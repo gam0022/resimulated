@@ -54,7 +54,7 @@ class Timeline {
     }
 }
 
-export const animateUniforms = (time: number, debugCamera: boolean, debugParams: boolean) => {
+export const animateUniforms = (time: number, debugCamera: boolean, debugDisableReset: boolean) => {
     const bpm = 140;
     const beat = time * bpm / 60;
 
@@ -63,9 +63,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugParams:
 
     // reset values
     chromatic.uniformArray.forEach(uniform => {
-        // debug中は値のリセットをしない
+        // debug時は値の毎フレームリセットをしない
         if (!PRODUCTION) {
-            if (debugParams) return;
+            if (debugDisableReset) return;
             if (debugCamera && uniform.key.includes("gCamera")) return;
         }
 

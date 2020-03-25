@@ -229,7 +229,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.reflectance = 1.0;
 
             if (gLogoIntensity > 0.0) {
-                intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 4.0 * beat);
+                intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 3.0 * clamp(beat - 174.0, -1000.0, 0.0));
             }
         } else {
             intersection.baseColor = vec3(gBaseColor);

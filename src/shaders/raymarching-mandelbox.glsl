@@ -190,6 +190,14 @@ float calcEdge(vec3 p) {
 uniform vec3 gEmissiveColor;   // 48 255 48
 uniform float gEmissiveSpeed;  // 1 0 2
 
+// Thanks https://shadertoy.com/view/ttsGR4
+float revisionLogo(vec2 p, float rot) {
+    int[] pat = int[](0, ~0, 0x7C, 0xC0F03C00, 0xF7FBFF01, ~0, 0, 0x8320D39F, ~0, 0x1F0010, 0);
+    int r = clamp(int(20. * length(p)), 0, 10);
+    int bit = pat[r] >> int(5.1 * atan(p.y, p.x) + 16. + (hash11(float(r * 1231)) - 0.5) * rot);
+    return float(1 & bit);
+}
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -218,7 +226,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(0.0);
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 1.0;
+            intersection.reflectance = 0.3;
+
+            intersection.emission = vec3(2.0) * revisionLogo(intersection.normal.xy * 0.6, beat);
         } else {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;

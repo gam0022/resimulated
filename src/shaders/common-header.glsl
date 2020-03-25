@@ -23,6 +23,15 @@ uniform vec3 iResolution;
 uniform float iTime;
 uniform sampler2D iPrevPass;
 
+// noise
+// https://www.shadertoy.com/view/4djSRW
+float hash11(float p) {
+    p = fract(p * .1031);
+    p *= p + 33.33;
+    p *= p + p;
+    return fract(p);
+}
+
 vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);
 

@@ -14,6 +14,7 @@ window.addEventListener("load", ev => {
 
     // dat.GUI
     const gui = new dat.GUI({ width: 1000, });
+    var hideFolder = gui.addFolder("Hide");
 
     const config = {
         debugCamera: false,
@@ -22,11 +23,6 @@ window.addEventListener("load", ev => {
         resolution: "1920x1080",
         timeMode: "beat",
         bpm: 140,
-        resetUniforms: () => {
-            chromatic.uniformArray.forEach(uniform => {
-                chromatic.uniforms[uniform.key] = uniform.initValue;
-            });
-        }
     }
 
     gui.add(config, "debugCamera").onChange(value => {
@@ -47,19 +43,16 @@ window.addEventListener("load", ev => {
     gui.add(config, "debugDisableReset").onChange(value => {
         chromatic.needsUpdate = true;
     });
-    gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
+    hideFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
-    gui.add(config, "timeMode", ["time", "beat"]).onChange(value => {
+    hideFolder.add(config, "timeMode", ["time", "beat"]).onChange(value => {
         onTimeModeChange();
     });
-    gui.add(config, "bpm", 50, 300).onChange(value => {
+    hideFolder.add(config, "bpm", 50, 300).onChange(value => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
     });
-    gui.add(config, "resetUniforms").onChange(value => {
-        chromatic.needsUpdate = true;
-    })
 
     const saevFunctions = {
         saveImage: () => {
@@ -106,9 +99,9 @@ window.addEventListener("load", ev => {
             saveAs(waveBlob, "chromatic.wav");
         }
     };
-    gui.add(saevFunctions, "saveImage");
-    gui.add(saevFunctions, "saveImageSequence");
-    gui.add(saevFunctions, "saveSound");
+    hideFolder.add(saevFunctions, "saveImage");
+    hideFolder.add(saevFunctions, "saveImageSequence");
+    hideFolder.add(saevFunctions, "saveSound");
 
     chromatic.uniformArray.forEach(unifrom => {
         if (typeof unifrom.initValue === "number") {

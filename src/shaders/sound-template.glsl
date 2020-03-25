@@ -596,7 +596,12 @@ vec2 kick1(float beat, float time) {
 
     SEQUENCER(beat, time, KICK1_BEAT_LEN, KICK1_DEV_PAT, KICK1_DEV_LEN, notes, development, kick)
 
-    sidechain = smoothstep(0.0, 0.4, localTime);
+    if (beat < 8.0) {
+        sidechain = smoothstep(0.0, 0.4, localTime);
+    } else {
+        sidechain = smoothstep(0.0, 0.2, localTime);
+    }
+
     return ret;
 }
 
@@ -704,10 +709,10 @@ vec2 mainSound(float time) {
     ret += vec2(0.6, 0.1) * arp4(beat, time);  // R70 R0 サイン波のアルペジオ
 
     // supersaw以外の音をMute
-    ret = vec2(0.0);
+    // ret = vec2(0.0);
 
     // supersawのテスト
-    ret += testSupersaw(beat, time);
+    ret += sidechain * testSupersaw(beat, time);
 
     return clamp(ret, -1.0, 1.0);
 }

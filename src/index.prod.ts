@@ -11,7 +11,7 @@ window.addEventListener("load", ev => {
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
             chromatic.onRender = (time, timeDelta) => {
-                animateUniforms(time, false);
+                animateUniforms(time, false, false);
             }
 
             chromatic.play();

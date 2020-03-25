@@ -18,6 +18,7 @@ window.addEventListener("load", ev => {
     const config = {
         debugCamera: false,
         debugParams: false,
+        debugDisableReset: false,
         resolution: "1920x1080",
         timeMode: "beat",
         bpm: 140,
@@ -41,6 +42,9 @@ window.addEventListener("load", ev => {
         chromatic.needsUpdate = true;
     });
     gui.add(config, "debugParams").onChange(value => {
+        chromatic.needsUpdate = true;
+    });
+    gui.add(config, "debugDisableReset").onChange(value => {
         chromatic.needsUpdate = true;
     });
     gui.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
@@ -80,7 +84,7 @@ window.addEventListener("load", ev => {
                 timeInput.valueAsNumber = time;
                 chromatic.time = time;
 
-                animateUniforms(time, config.debugCamera);
+                animateUniforms(time, config.debugCamera, config.debugDisableReset);
                 chromatic.render();
 
                 const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
@@ -238,6 +242,7 @@ window.addEventListener("load", ev => {
     const saveToSessionStorage = () => {
         sessionStorage.setItem("debugCamera", config.debugCamera.toString());
         sessionStorage.setItem("debugParams", config.debugParams.toString());
+        sessionStorage.setItem("debugDisableReset", config.debugDisableReset.toString());
         sessionStorage.setItem("resolution", config.resolution);
         sessionStorage.setItem("timeMode", config.timeMode);
         sessionStorage.setItem("bpm", config.bpm.toString());
@@ -270,6 +275,11 @@ window.addEventListener("load", ev => {
         const debugParamsStr = sessionStorage.getItem("debugParams");
         if (debugParamsStr) {
             config.debugParams = parseBool(debugParamsStr);
+        }
+
+        const debugDisableResetStr = sessionStorage.getItem("debugDisableReset");
+        if (debugDisableResetStr) {
+            config.debugDisableReset = parseBool(debugDisableResetStr);
         }
 
         const timeModeStr = sessionStorage.getItem("timeMode");
@@ -359,7 +369,7 @@ window.addEventListener("load", ev => {
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
 
         if (!config.debugParams) {
-            animateUniforms(time, config.debugCamera);
+            animateUniforms(time, config.debugCamera, config.debugDisableReset);
         }
 
         gui.updateDisplay();

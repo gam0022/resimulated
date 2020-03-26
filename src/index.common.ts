@@ -174,6 +174,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         camera = new Vector3(0, 0, -9 + 0.003 * t * t);
         target = new Vector3(0, 0, -10);
 
+        if (t >= 14) {
+            chromatic.uniforms.gCameraFov = 6;
+        }
+
         chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;

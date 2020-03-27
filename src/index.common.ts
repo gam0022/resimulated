@@ -154,13 +154,34 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
-    }).then(24, t => {
-        // サビ前半 なんか派手に
+    }).then(8, t => {
+        // サビ 1-1
         ball.z = -10 - 0.5 * t;
-        camera = new Vector3(0.4262075519472672, -0.12312954059740933, -8).add(Vector3.fbm(t).scale(0.001));
+        camera = new Vector3(1, -0.2, -14).add(Vector3.fbm(t).scale(0.001));
         target = ball.add(new Vector3(-0.15, 0, 0));
 
         chromatic.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
+        chromatic.uniforms.gEmissiveColor = [200, 30, 30];
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+    }).then(8, t => {
+        // サビ 1-2
+        ball.z = -10 - 0.5 * t;
+        camera = new Vector3(0.4, 0.5, -8).add(Vector3.fbm(t).scale(0.001));
+        target = ball.add(new Vector3(-0.15, -0.15, 0));
+
+        chromatic.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
+        chromatic.uniforms.gEmissiveColor = [200, 30, 30];
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+    }).then(8, t => {
+        // サビ 1-3
+        ball.z = -10 - 0.5 * t;
+        camera = new Vector3(0, 0, -1).add(ball).add(Vector3.fbm(t).scale(0.001));
+        target = ball.add(new Vector3(-0.15, 0, 0));
+        chromatic.uniforms.gCameraFov = 43;
+
+        chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveColor = [200, 30, 30];
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
@@ -174,6 +195,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveColor = [30, 30, 200];
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
+        chromatic.uniforms.gFoldRotate = 8;
     }).then(16, t => {
         // Revisonロゴをズーム
         ball.z = -10 - 0.2 * t;

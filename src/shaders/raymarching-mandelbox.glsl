@@ -134,11 +134,13 @@ float dStage(vec3 p) {
     return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
 }
 
+uniform float gBallZ;               // 0 -100 100
 uniform float gBallRadius;          // 0.1 0 0.2
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 0 0 100
+
 float dBall(vec3 p) {
-    return dSphere(p - vec3(0, 0, -10), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
+    return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
 }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }

@@ -191,7 +191,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         camera = new Vector3(0, 0, -10).add(Vector3.fbm(t).scale(0.01));
         target = camera.add(new Vector3(0, 0, -1));
 
-        chromatic.uniforms.gMandelboxScale = 1.2;
+        chromatic.uniforms.gMandelboxScale = 1.25 - 0.01 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
         //chromatic.uniforms.gFoldRotate = 8;
@@ -205,7 +205,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         camera = new Vector3(0, 0, -10).add(Vector3.fbm(t).scale(0.01));
         target = camera.add(new Vector3(0, 0, 1));
 
-        chromatic.uniforms.gMandelboxScale = 1.2;
+        chromatic.uniforms.gMandelboxScale = 1.2 - 0.01 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
         //chromatic.uniforms.gFoldRotate = 8;
@@ -253,6 +253,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
+        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
     });
 
     chromatic.uniforms.gBallZ = ball.z;

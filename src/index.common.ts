@@ -148,7 +148,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(8, t => {
         // Ballをズームするカット
         ball.z = -10 - 0.2 * t;
-        camera = new Vector3(0.2 + 0.05 * t, 0.2 + 0.05 * t, 1.0 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.001));
+        camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1.0 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.001));
         target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;

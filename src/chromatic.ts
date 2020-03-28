@@ -545,7 +545,6 @@ export class Chromatic {
 
                     if (PRODUCTION) {
                         this.time = (timestamp - startTimestamp) * 0.001;
-
                     } else {
                         if (this.isPlaying) {
                             this.time += timeDelta;

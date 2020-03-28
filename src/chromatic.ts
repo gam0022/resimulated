@@ -1,5 +1,3 @@
-import { remap } from "./math";
-
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;

@@ -134,7 +134,7 @@ vec2 tunnelUV;
 bool isTunnelLogo;
 
 float dStage(vec3 p) {
-    isTunnelLogo = 128.0 <= beat && beat < 160.0;
+    isTunnelLogo = false;  // 128.0 <= beat && beat < 160.0;
     if (isTunnelLogo) {
         vec3 q = p;
         q.x = atan(p.y, p.x) / TAU;
@@ -142,7 +142,8 @@ float dStage(vec3 p) {
         tunnelUV = q.xy;
         return 10.0 - q.y;
     } else {
-        p.xy = foldRotate(p.xy, gFoldRotate);
+        float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
+        p.xy = foldRotate(p.xy, 4.0 + saturate(b) * 4.0);
         return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
     }
 }

@@ -190,6 +190,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, -7 - t).add(Vector3.fbm(t).scale(0.01));
         target = camera.add(new Vector3(0, 0, 1));
+        target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveColor = [30, 30, 200];
@@ -200,7 +201,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         // Revisonロゴをズーム
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 1 + 0.003 * t * t).add(ball);
-        target = ball;
+        target = ball.scale(1);
 
         if (t >= 14) {
             //chromatic.uniforms.gCameraFov = 6;

@@ -128,10 +128,19 @@ vec2 foldRotate(vec2 p, float s) {
 }
 
 uniform float gFoldRotate;  // 1 0 20
+vec2 tunnelUV;
 
 float dStage(vec3 p) {
-    p.xy = foldRotate(p.xy, gFoldRotate);
-    return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
+    if (128.0 <= beat && beat < 160.0) {
+        vec3 q = p;
+        q.x = atan(p.y, p.x) / TAU;
+        q.y = length(p.xy);
+        tunnelUV = q.xy;
+        return 10.0 - q.y;
+    } else {
+        p.xy = foldRotate(p.xy, gFoldRotate);
+        return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
+    }
 }
 
 uniform float gBallZ;               // 0 -100 100
@@ -205,6 +214,18 @@ uniform vec3 gEmissiveColor;   // 48 255 48
 uniform float gEmissiveSpeed;  // 1 0 2
 uniform float gLogoIntensity;  // 0 0 4
 
+float checkeredPattern(vec3 p) {
+    float u = 1.0 - floor(mod(p.x, 2.0));
+    float v = 1.0 - floor(mod(p.z, 2.0));
+
+    if ((u == 1.0 && v < 1.0) || (u < 1.0 && v == 1.0)) {
+        return 0.2;
+
+    } else {
+        return 1.0;
+    }
+}
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -244,7 +265,11 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = gMetallic;
 
             float edge = calcEdge(p);
-            intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
+            if (128.0 <= beat && beat < 160.0) {
+                intersection.emission = vec3(checkeredPattern(vec3(tunnelUV.x * 10.0 + beat, 0.0, p.z * 0.04 + beat)));
+            } else {
+                intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
+            }
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;

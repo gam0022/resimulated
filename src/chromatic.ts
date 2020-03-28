@@ -556,7 +556,7 @@ export class Chromatic {
                 this.needsUpdate = false;
                 lastTimestamp = timestamp;
             };
-            update(0);
+            requestAnimationFrame(update);
         }
     }
 }

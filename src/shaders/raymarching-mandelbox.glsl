@@ -87,6 +87,7 @@ mat2 rotate(float a) {
     return mat2(c, s, -s, c);
 }
 
+// unused
 float dMenger(vec3 z0, vec3 offset, float scale) {
     vec4 z = vec4(z0, 1.0);
     for (int n = 0; n < 5; n++) {
@@ -143,7 +144,7 @@ float dStage(vec3 p) {
         return 10.0 - q.y;
     } else {
         float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
-        p.xy = foldRotate(p.xy, 4.0 + saturate(b) * 4.0);
+        p.xy = foldRotate(p.xy, gFoldRotate);
         return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
     }
 }
@@ -215,10 +216,10 @@ float revisionLogo(vec2 p, float rot) {
     return float(pat[r] >> int(5.1 * atan(p.y, p.x) + 16. + (hash11(float(r * 1231)) - 0.5) * rot) & 1);
 }
 
-uniform vec3 gEmissiveColor;   // 48 255 48
 uniform float gEmissiveSpeed;  // 1 0 2
 uniform float gLogoIntensity;  // 0 0 4
 
+// unused
 float checkeredPattern(vec3 p) {
     float u = 1.0 - floor(mod(p.x, 2.0));
     float v = 1.0 - floor(mod(p.z, 2.0));
@@ -230,6 +231,11 @@ float checkeredPattern(vec3 p) {
         return 1.0;
     }
 }
+
+uniform float gEmissiveHue;           // 0.33947042613522904 0 1
+uniform float gEmissiveHueShiftBeat;  // 0 0 1
+uniform float gEmissiveHueShiftZ;     // 0 0 1
+uniform float gEmissiveHueShiftXY;    // 0 0 1
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
@@ -276,7 +282,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.emission = vec3(a);
             } else {
                 float edge = calcEdge(p);
-                intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
+                float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
+
+                intersection.emission =
+                    gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
             }
 
             intersection.transparent = false;

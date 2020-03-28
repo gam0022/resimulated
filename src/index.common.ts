@@ -204,11 +204,11 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(16, t => {
         // サビ後半
-        ball.z = -12;
-        camera = new Vector3(0, 0, -10).add(Vector3.fbm(t).scale(0.01));
+        ball.z = 10;
+        camera = new Vector3(0, 0, -8 - t * 2.0).add(Vector3.fbm(t).scale(0.01));
         target = camera.add(new Vector3(0, 0, 1));
 
-        chromatic.uniforms.gMandelboxScale = 1.2 - 0.01 * t;
+        chromatic.uniforms.gMandelboxScale = 1.2 - 0.0125 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
         chromatic.uniforms.gFoldRotate = 8;
@@ -238,7 +238,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(8, t => {
         // Revisonロゴ ズームアウト
         ball.z = -10 - 0.2 * t;
-        camera = new Vector3(0.2 + 0.05 * t, 0.2 + 0.05 * t, 1 + 0.05 * t).add(ball);
+        camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1 + 0.05 * t).add(ball);
         target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1;

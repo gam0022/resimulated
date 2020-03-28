@@ -1,3 +1,5 @@
+import { remap } from "./math";
+
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;
@@ -391,13 +393,11 @@ export class Chromatic {
                 this.audioSource = audio.createBufferSource();
 
                 if (PLAY_SOUND_FILE) {
-                    fetch(PLAY_SOUND_FILE).then(response => {
-                        return response.arrayBuffer();
-                    }).then(arrayBuffer => {
-                        audio.decodeAudioData(arrayBuffer, buffer => {
-                            this.audioSource.buffer = buffer;
-                        });
-                    })
+                    (async () => {
+                        const response = await fetch(PLAY_SOUND_FILE);
+                        const arrayBuffer = await response.arrayBuffer();
+                        this.audioSource.buffer = await audio.decodeAudioData(arrayBuffer);
+                    })();
                 } else {
                     this.audioSource.buffer = audioBuffer;
                 }

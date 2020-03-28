@@ -266,7 +266,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             float edge = calcEdge(p);
             if (128.0 <= beat && beat < 160.0) {
-                intersection.emission = vec3(checkeredPattern(vec3(tunnelUV.x * 10.0 + beat, 0.0, p.z * 0.04 + beat)));
+                int[] pat = int[](0, ~0, 0x7C, 0xC0F03C00, 0xF7FBFF01, ~0, 0, 0x8320D39F, ~0, 0x1F0010, 0);
+                int r = int(0.05 * p.z + 6.0 * beat) % 10;
+                float a = float(pat[r] >> int(30.0 * tunnelUV.x + 2.0 * (hash11(float(r * 1231)) - 0.5) * beat) % 32 & 1);
+                intersection.emission = vec3(a);
             } else {
                 intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
             }

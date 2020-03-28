@@ -60,6 +60,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
 
     let camera = new Vector3(0, 0, 10);
     let target = new Vector3(0, 0, 0);
+    let ball = new Vector3(0, 0, -10);
 
     // reset values
     chromatic.uniformArray.forEach(uniform => {
@@ -136,43 +137,94 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0;
     }).then(16, t => {
         // Ballをズームするカット
-        camera = new Vector3(0, 0, -9.8 + 0.003 * t * t);
+        ball.z = -10 - 0.2 * t;
+        camera = new Vector3(0, 0, 0.2 + 0.003 * t * t).add(ball).add(Vector3.fbm(t).scale(0.001));
         // camera = new Vector3(0, 0, remap01(easeInOutCubic(t / 16), -9.8, -9));
-        target = new Vector3(0, 0, -10);
+        target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
     }).then(8, t => {
         // Ballをズームするカット
-        camera = new Vector3(0.2 + 0.05 * t, 0.2 + 0.05 * t, -9.0 + 0.05 * t);
-        target = new Vector3(0, 0, -10);
+        ball.z = -10 - 0.2 * t;
+        camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1.0 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.001));
+        target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
-    }).then(24, t => {
-        // なんか派手に
-        camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
-        target = new Vector3(0, 0, -10);
+    }).then(8, t => {
+        // サビ 1-1
+        ball.z = -10 - 0.5 * t;
+        camera = new Vector3(1, -0.2, -14).add(Vector3.fbm(t).scale(0.001));
+        target = ball.add(new Vector3(-0.15, 0, 0));
 
-        chromatic.uniforms.gMandelboxScale = 1.2;
-        chromatic.uniforms.gEmissiveColor = [200, 30, 30];
+        chromatic.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
-    }).then(32, t => {
-        // グリーティング
-        camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
-        target = new Vector3(0, 0, -10);
+    }).then(8, t => {
+        // サビ 1-2
+        ball.z = -10 - 0.5 * t;
+        camera = new Vector3(0.4, 0.5, -8).add(Vector3.fbm(t).scale(0.001));
+        target = ball.add(new Vector3(-0.15, -0.15, 0));
 
-        chromatic.uniforms.gMandelboxScale = 1.2;
-        chromatic.uniforms.gEmissiveColor = [30, 30, 200];
+        chromatic.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
+    }).then(8, t => {
+        // サビ 1-3
+        ball.z = -10 - 0.5 * t;
+        camera = new Vector3(0, 0, -1).add(ball).add(Vector3.fbm(t).scale(0.001));
+        target = ball.add(new Vector3(-0.15, 0, 0));
+        chromatic.uniforms.gCameraFov = 43;
+
+        chromatic.uniforms.gMandelboxScale = 1.2;
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+
+        // hue
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+    }).then(16, t => {
+        // サビ後半
+        ball.z = -20;
+        camera = new Vector3(0, 0, -10).add(Vector3.fbm(t).scale(0.01));
+        target = camera.add(new Vector3(0, 0, -1));
+
+        chromatic.uniforms.gMandelboxScale = 1.2 - 0.01 * t;
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+
+        if (t > 8) {
+            //chromatic.uniforms.gFoldRotate = 4 * 2 * Math.floor(t);
+        }
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
+        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
+    }).then(16, t => {
+        // サビ後半
+        ball.z = 10;
+        camera = new Vector3(0, 0, -8 - t * 2.0).add(Vector3.fbm(t).scale(0.01));
+        target = camera.add(new Vector3(0, 0, 1));
+
+        chromatic.uniforms.gMandelboxScale = 1.2 - 0.0125 * t;
+        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallRadius = 0.1;
+        chromatic.uniforms.gFoldRotate = 8;
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
+        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(16, t => {
         // Revisonロゴをズーム
-        camera = new Vector3(0, 0, -9 + 0.003 * t * t);
-        target = new Vector3(0, 0, -10);
+        ball.z = -10 - 0.2 * t;
+        camera = new Vector3(0, 0, 1 + 0.003 * t * t).add(ball);
+        target = ball.scale(1);
+
+        if (t >= 14) {
+            //chromatic.uniforms.gCameraFov = 6;
+        }
 
         chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
@@ -181,10 +233,13 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gLogoIntensity = remap(t, 4, 8, 0.02, 2);
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04 + 0.1 * saturate(Math.sin(Math.PI * 2 * t));
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
     }).then(8, t => {
         // Revisonロゴ ズームアウト
-        camera = new Vector3(0.2 + 0.05 * t, 0.2 + 0.05 * t, -9.0 + 0.05 * t);
-        target = new Vector3(0, 0, -10);
+        ball.z = -10 - 0.2 * t;
+        camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1 + 0.05 * t).add(ball);
+        target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1;
         chromatic.uniforms.gEmissiveIntensity = 6;
@@ -193,13 +248,20 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gLogoIntensity = 1;
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
     }).then(1600, t => {
         camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
-        chromatic.uniforms.gMandelboxScale = 1.0;
+        chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
+        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
     });
+
+    chromatic.uniforms.gBallZ = ball.z;
 
     if (!PRODUCTION && debugCamera) {
         return;

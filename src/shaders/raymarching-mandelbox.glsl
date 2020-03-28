@@ -87,6 +87,7 @@ mat2 rotate(float a) {
     return mat2(c, s, -s, c);
 }
 
+// unused
 float dMenger(vec3 z0, vec3 offset, float scale) {
     vec4 z = vec4(z0, 1.0);
     for (int n = 0; n < 5; n++) {
@@ -127,13 +128,34 @@ vec2 foldRotate(vec2 p, float s) {
     return p;
 }
 
-float dStage(vec3 p) { return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat)); }
+uniform float gFoldRotate;  // 1 0 20
 
+// global
+vec2 tunnelUV;
+bool isTunnelLogo;
+
+float dStage(vec3 p) {
+    isTunnelLogo = false;  // 128.0 <= beat && beat < 160.0;
+    if (isTunnelLogo) {
+        vec3 q = p;
+        q.x = atan(p.y, p.x) / TAU;
+        q.y = length(p.xy);
+        tunnelUV = q.xy;
+        return 10.0 - q.y;
+    } else {
+        float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
+        p.xy = foldRotate(p.xy, gFoldRotate);
+        return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
+    }
+}
+
+uniform float gBallZ;               // 0 -100 100
 uniform float gBallRadius;          // 0.1 0 0.2
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 0 0 100
+
 float dBall(vec3 p) {
-    return dSphere(p - vec3(0, 0, -10), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
+    return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
 }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
@@ -194,9 +216,26 @@ float revisionLogo(vec2 p, float rot) {
     return float(pat[r] >> int(5.1 * atan(p.y, p.x) + 16. + (hash11(float(r * 1231)) - 0.5) * rot) & 1);
 }
 
-uniform vec3 gEmissiveColor;   // 48 255 48
 uniform float gEmissiveSpeed;  // 1 0 2
 uniform float gLogoIntensity;  // 0 0 4
+
+// unused
+float checkeredPattern(vec3 p) {
+    float u = 1.0 - floor(mod(p.x, 2.0));
+    float v = 1.0 - floor(mod(p.z, 2.0));
+
+    if ((u == 1.0 && v < 1.0) || (u < 1.0 && v == 1.0)) {
+        return 0.2;
+
+    } else {
+        return 1.0;
+    }
+}
+
+uniform float gEmissiveHue;           // 0.33947042613522904 0 1
+uniform float gEmissiveHueShiftBeat;  // 0 0 1
+uniform float gEmissiveHueShiftZ;     // 0 0 1
+uniform float gEmissiveHueShiftXY;    // 0 0 1
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
@@ -236,8 +275,18 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
 
-            float edge = calcEdge(p);
-            intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
+            if (isTunnelLogo) {
+                int[] pat = int[](0, ~0, 0x7C, 0xC0F03C00, 0xF7FBFF01, ~0, 0, 0x8320D39F, ~0, 0x1F0010, 0);
+                int r = int(0.05 * p.z + 6.0 * beat) % 10;
+                float a = float(pat[r] >> int(30.0 * tunnelUV.x + 2.0 * (hash11(float(r * 1231)) - 0.5) * beat) % 32 & 1);
+                intersection.emission = vec3(a);
+            } else {
+                float edge = calcEdge(p);
+                float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
+
+                intersection.emission =
+                    gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
+            }
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;

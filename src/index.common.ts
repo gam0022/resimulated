@@ -187,10 +187,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0.1;
     }).then(32, t => {
         // サビ後半
-        ball.z = -10 - 0.2 * t;
-        camera = new Vector3(0, 0, -7 - t).add(Vector3.fbm(t).scale(0.01));
-        target = camera.add(new Vector3(0, 0, 1));
-        target = ball;
+        ball.z = -20;
+        camera = new Vector3(0, 0, -10).add(Vector3.fbm(t).scale(0.01));
+        target = camera.add(new Vector3(0, 0, -1));
 
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveColor = [30, 30, 200];

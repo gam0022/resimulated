@@ -128,10 +128,14 @@ vec2 foldRotate(vec2 p, float s) {
 }
 
 uniform float gFoldRotate;  // 1 0 20
+
+// global
 vec2 tunnelUV;
+bool isTunnelLogo;
 
 float dStage(vec3 p) {
-    if (128.0 <= beat && beat < 160.0) {
+    isTunnelLogo = 128.0 <= beat && beat < 160.0;
+    if (isTunnelLogo) {
         vec3 q = p;
         q.x = atan(p.y, p.x) / TAU;
         q.y = length(p.xy);
@@ -264,13 +268,13 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
 
-            float edge = calcEdge(p);
-            if (128.0 <= beat && beat < 160.0) {
+            if (isTunnelLogo) {
                 int[] pat = int[](0, ~0, 0x7C, 0xC0F03C00, 0xF7FBFF01, ~0, 0, 0x8320D39F, ~0, 0x1F0010, 0);
                 int r = int(0.05 * p.z + 6.0 * beat) % 10;
                 float a = float(pat[r] >> int(30.0 * tunnelUV.x + 2.0 * (hash11(float(r * 1231)) - 0.5) * beat) % 32 & 1);
                 intersection.emission = vec3(a);
             } else {
+                float edge = calcEdge(p);
                 intersection.emission = gEmissiveIntensity * gEmissiveColor * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
             }
 

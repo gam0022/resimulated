@@ -158,7 +158,7 @@ export class Chromatic {
                 function makeTextCanvas(text: string, width: number, height: number) {
                     textCtx.canvas.width = width;
                     textCtx.canvas.height = height;
-                    textCtx.font = "100px monospace";
+                    textCtx.font = "128px arial";
                     textCtx.textAlign = "center";
                     textCtx.textBaseline = "middle";
                     textCtx.fillStyle = "white";

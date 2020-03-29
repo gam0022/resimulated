@@ -298,6 +298,13 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     }
 }
 
+vec3 text(vec2 fragCoord) {
+    vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * uv.y;
+    return texture(iTextTexture, uv).rgb;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 
@@ -337,10 +344,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         }
     }
 
-    // text texture
-    vec2 textUv = fragCoord / iResolution.xy;
-    textUv.y = 1.0 - textUv.y;
-    color += 4.0 * texture(iTextTexture, textUv).rgb;
+    color += text(fragCoord);
 
     fragColor = vec4(color, 1.0);
 }

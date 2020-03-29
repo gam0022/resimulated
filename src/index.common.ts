@@ -27,6 +27,44 @@ export const chromatic = new Chromatic(
     require("./shaders/bloom-final.glsl").default,
 
     require("./shaders/sound-template.glsl").default,
+    gl => {
+        const canvas = document.createElement("canvas");
+        const textCtx = canvas.getContext("2d");
+        // window.document.body.appendChild(canvas);
+
+        const texts = [
+            "RE: SIMULATED",
+            "Graphics by gam0022",
+            "Music by saddakey",
+            "FMS-Cat",
+            "Ctrl-Alt-Test",
+            "RGBA & TBC",
+            "CNCD & Fairlight",
+            "0x4015 & YET1",
+            "kaneta\u{1F41B}",
+            "gaz",
+        ];
+
+        canvas.width = 2048;
+        canvas.height = 2048;
+        textCtx.font = "110px arial";
+        textCtx.textAlign = "center";
+        textCtx.textBaseline = "middle";
+        textCtx.fillStyle = "white";
+        textCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+        texts.forEach((text, index) => {
+            textCtx.fillText(text, canvas.width / 2, 64 + index * 128);
+        });
+
+        var tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return tex;
+    }
 );
 
 class Timeline {

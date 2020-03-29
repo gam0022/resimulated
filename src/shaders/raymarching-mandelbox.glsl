@@ -75,36 +75,11 @@ struct Intersection {
               vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
 
 // Distance Functions
-float sdBox(vec3 p, vec3 b) {
-    vec3 d = abs(p) - b;
-    return min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
-}
-
 float dSphere(vec3 p, float r) { return length(p) - r; }
 
 mat2 rotate(float a) {
     float c = cos(a), s = sin(a);
     return mat2(c, s, -s, c);
-}
-
-// unused
-float dMenger(vec3 z0, vec3 offset, float scale) {
-    vec4 z = vec4(z0, 1.0);
-    for (int n = 0; n < 5; n++) {
-        z = abs(z);
-
-        if (z.x < z.y) z.xy = z.yx;
-        if (z.x < z.z) z.xz = z.zx;
-        if (z.y < z.z) z.yz = z.zy;
-
-        z *= scale;
-        z.xyz -= offset * (scale - 1.0);
-
-        if (z.z < -0.5 * offset.z * (scale - 1.0)) {
-            z.z += offset.z * (scale - 1.0);
-        }
-    }
-    return length(max(abs(z.xyz) - vec3(1.0), 0.0)) / z.w;
 }
 
 float dMandelFast(vec3 p, float scale, int n) {

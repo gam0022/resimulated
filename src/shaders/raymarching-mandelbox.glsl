@@ -19,9 +19,7 @@ uniform float gEmissiveIntensity;  // 6.0 0 20
 
 // consts
 const float INF = 1e+10;
-const float EPS = 0.01;
-const float OFFSET = EPS * 10.0;
-const float GROUND_BASE = 0.0;
+const float OFFSET = 0.1;
 
 // ray
 struct Ray {
@@ -69,42 +67,16 @@ struct Intersection {
 };
 
 // util
-
 #define calcNormal(p, dFunc, eps)                                                                                                                                                 \
     normalize(vec2(eps, -eps).xyy *dFunc(p + vec2(eps, -eps).xyy) + vec2(eps, -eps).yyx * dFunc(p + vec2(eps, -eps).yyx) + vec2(eps, -eps).yxy * dFunc(p + vec2(eps, -eps).yxy) + \
               vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
 
 // Distance Functions
-float sdBox(vec3 p, vec3 b) {
-    vec3 d = abs(p) - b;
-    return min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
-}
-
 float dSphere(vec3 p, float r) { return length(p) - r; }
 
 mat2 rotate(float a) {
     float c = cos(a), s = sin(a);
     return mat2(c, s, -s, c);
-}
-
-// unused
-float dMenger(vec3 z0, vec3 offset, float scale) {
-    vec4 z = vec4(z0, 1.0);
-    for (int n = 0; n < 5; n++) {
-        z = abs(z);
-
-        if (z.x < z.y) z.xy = z.yx;
-        if (z.x < z.z) z.xz = z.zx;
-        if (z.y < z.z) z.yz = z.zy;
-
-        z *= scale;
-        z.xyz -= offset * (scale - 1.0);
-
-        if (z.z < -0.5 * offset.z * (scale - 1.0)) {
-            z.z += offset.z * (scale - 1.0);
-        }
-    }
-    return length(max(abs(z.xyz) - vec3(1.0), 0.0)) / z.w;
 }
 
 float dMandelFast(vec3 p, float scale, int n) {
@@ -130,23 +102,10 @@ vec2 foldRotate(vec2 p, float s) {
 
 uniform float gFoldRotate;  // 1 0 20
 
-// global
-vec2 tunnelUV;
-bool isTunnelLogo;
-
 float dStage(vec3 p) {
-    isTunnelLogo = false;  // 128.0 <= beat && beat < 160.0;
-    if (isTunnelLogo) {
-        vec3 q = p;
-        q.x = atan(p.y, p.x) / TAU;
-        q.y = length(p.xy);
-        tunnelUV = q.xy;
-        return 10.0 - q.y;
-    } else {
-        float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
-        p.xy = foldRotate(p.xy, gFoldRotate);
-        return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
-    }
+    float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
+    p.xy = foldRotate(p.xy, gFoldRotate);
+    return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
 }
 
 uniform float gBallZ;               // 0 -100 100
@@ -219,19 +178,6 @@ float revisionLogo(vec2 p, float rot) {
 uniform float gEmissiveSpeed;  // 1 0 2
 uniform float gLogoIntensity;  // 0 0 4
 
-// unused
-float checkeredPattern(vec3 p) {
-    float u = 1.0 - floor(mod(p.x, 2.0));
-    float v = 1.0 - floor(mod(p.z, 2.0));
-
-    if ((u == 1.0 && v < 1.0) || (u < 1.0 && v == 1.0)) {
-        return 0.2;
-
-    } else {
-        return 1.0;
-    }
-}
-
 uniform float gEmissiveHue;           // 0.33947042613522904 0 1
 uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
@@ -275,18 +221,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
 
-            if (isTunnelLogo) {
-                int[] pat = int[](0, ~0, 0x7C, 0xC0F03C00, 0xF7FBFF01, ~0, 0, 0x8320D39F, ~0, 0x1F0010, 0);
-                int r = int(0.05 * p.z + 6.0 * beat) % 10;
-                float a = float(pat[r] >> int(30.0 * tunnelUV.x + 2.0 * (hash11(float(r * 1231)) - 0.5) * beat) % 32 & 1);
-                intersection.emission = vec3(a);
-            } else {
-                float edge = calcEdge(p);
-                float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
-
-                intersection.emission =
-                    gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
-            }
+            float edge = calcEdge(p);
+            float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
+            intersection.emission = gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;
@@ -297,34 +234,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
-}
-
-float calcAo(in vec3 p, in vec3 n) {
-    float k = 1.0, occ = 0.0;
-    for (int i = 0; i < 5; i++) {
-        float len = 0.15 + float(i) * 0.15;
-        float distance = map(n * len + p);
-        occ += (len - distance) * k;
-        k *= 0.5;
-    }
-    return saturate(1.0 - occ);
-}
-
-float calcShadow(in vec3 p, in vec3 rd) {
-    float d;
-    float distance = OFFSET;
-    float bright = 1.0;
-    float shadowIntensity = 0.8;
-    float shadowSharpness = 10.0;
-
-    for (int i = 0; i < 30; i++) {
-        d = map(p + rd * distance);
-        if (d < EPS) return shadowIntensity;
-        bright = min(bright, shadowSharpness * d / distance);
-        distance += d;
-    }
-
-    return shadowIntensity + (1.0 - shadowIntensity) * bright;
 }
 
 #define FLT_EPS 5.960464478e-8
@@ -346,8 +255,6 @@ vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 h = normalize(l + v);
 
     vec3 diffuse = mix(1.0 - ref, vec3(0.0), i.metallic) * i.baseColor / PI;
-    // ref *= fresnelSchlick(gF0, dot(l, h));
-
     float m = roughnessToExponent(i.roughness);
     vec3 specular = ref * pow(max(0.0, dot(n, h)), m) * (m + 2.0) / (8.0 * PI);
     return (diffuse + specular) * radiance * max(0.0, dot(l, n)) / (len * len);
@@ -362,8 +269,6 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
     vec3 h = normalize(l + v);
 
     vec3 diffuse = mix(1.0 - ref, vec3(0.0), i.metallic) * i.baseColor / PI;
-    // ref *= fresnelSchlick(gF0, dot(l, h));
-
     float m = roughnessToExponent(i.roughness);
     vec3 specular = ref * pow(max(0.0, dot(n, h)), m) * (m + 2.0) / (8.0 * PI);
     return (diffuse + specular) * radiance * max(0.0, dot(l, n));
@@ -394,7 +299,6 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 
-    // camera and ray
     Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);

@@ -311,8 +311,9 @@ vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
 }
 
 vec3 text(vec2 uv) {
-    // aaa
-    return texture(iTextTexture, textUv(uv, floor(beat / 4.0), vec2(0.0, 0.0), 2.0)).rgb;
+    float id = floor(beat / 4.0);
+    float scale = (id == 0.0) ? 3.0 : 1.5;
+    return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

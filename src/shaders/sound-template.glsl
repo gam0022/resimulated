@@ -311,7 +311,7 @@ vec2 attackbass(float note, float t) {
     return vec2(dist(v * amp, 2.0));
 }
 
-// 1ビートを最大何分割するか。16分音符に対応するなら2（本当なら4だが16bitずつにpackingして2にした）
+// 1ビートを最大何分割するか。16分音符に対応するなら2（本当なら4だが、16bitずつpaddingすることで2にした）
 #define NOTE_DIV 2
 #define NOTE_VDIV 4
 

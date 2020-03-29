@@ -194,9 +194,9 @@ uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
 // http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
-float field(in vec3 p, float s) {
-    float strength = 7. + .03 * log(1.e-6 + fract(sin(iTime) * 4373.11));
-    float accum = s / 4.;
+float field(in vec3 p) {
+    float strength = 7.0;
+    float accum = 0.25;
     float prev = 0.;
     float tw = 0.;
     for (int i = 0; i < 26; ++i) {
@@ -219,8 +219,8 @@ vec3 stars(vec2 uv) {
 
 vec3 skyboxUniverse(vec2 uv) {
     vec3 col = stars(uv);
-    float f = field(vec3(0.2 * uv + vec2(0.3, 0.1), 1.8), 1.0);
-    col += 0.1 * vec3(1.3 * f * f * f, 1.8 * f * f, f);
+    float f = field(vec3(0.2 * uv + vec2(0.3, 0.1), 1.7 + (beat - 192.0) * 0.001));
+    col += 0.1 * vec3(1.3 * f * f * f * saturate(cos(TAU * beat / 4.0)), 1.8 * f * f, f);
     return col;
 }
 

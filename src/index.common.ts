@@ -301,7 +301,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
     }).then(32, t => {
+        // 宇宙
         chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gTonemapExposure = 1;
 
         camera = new Vector3(0, 0, 10.0 - t);

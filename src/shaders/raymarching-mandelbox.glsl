@@ -19,9 +19,7 @@ uniform float gEmissiveIntensity;  // 6.0 0 20
 
 // consts
 const float INF = 1e+10;
-const float EPS = 0.01;
-const float OFFSET = EPS * 10.0;
-const float GROUND_BASE = 0.0;
+const float OFFSET = 0.1;
 
 // ray
 struct Ray {
@@ -69,7 +67,6 @@ struct Intersection {
 };
 
 // util
-
 #define calcNormal(p, dFunc, eps)                                                                                                                                                 \
     normalize(vec2(eps, -eps).xyy *dFunc(p + vec2(eps, -eps).xyy) + vec2(eps, -eps).yyx * dFunc(p + vec2(eps, -eps).yyx) + vec2(eps, -eps).yxy * dFunc(p + vec2(eps, -eps).yxy) + \
               vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
@@ -237,34 +234,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
-}
-
-float calcAo(in vec3 p, in vec3 n) {
-    float k = 1.0, occ = 0.0;
-    for (int i = 0; i < 5; i++) {
-        float len = 0.15 + float(i) * 0.15;
-        float distance = map(n * len + p);
-        occ += (len - distance) * k;
-        k *= 0.5;
-    }
-    return saturate(1.0 - occ);
-}
-
-float calcShadow(in vec3 p, in vec3 rd) {
-    float d;
-    float distance = OFFSET;
-    float bright = 1.0;
-    float shadowIntensity = 0.8;
-    float shadowSharpness = 10.0;
-
-    for (int i = 0; i < 30; i++) {
-        d = map(p + rd * distance);
-        if (d < EPS) return shadowIntensity;
-        bright = min(bright, shadowSharpness * d / distance);
-        distance += d;
-    }
-
-    return shadowIntensity + (1.0 - shadowIntensity) * bright;
 }
 
 #define FLT_EPS 5.960464478e-8

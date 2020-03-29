@@ -17,6 +17,8 @@ uniform float gRoughness;          // 0.1
 uniform float gMetallic;           // 0.4
 uniform float gEmissiveIntensity;  // 6.0 0 20
 
+uniform sampler2D iTextTexture;
+
 // consts
 const float INF = 1e+10;
 const float OFFSET = 0.1;
@@ -334,6 +336,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             ray.direction = l;
         }
     }
+
+    // text texture
+    vec2 textUv = fragCoord / iResolution.xy;
+    textUv.y = 1.0 - textUv.y;
+    color += 4.0 * texture(iTextTexture, textUv).rgb;
 
     fragColor = vec4(color, 1.0);
 }

@@ -152,6 +152,33 @@ export class Chromatic {
                 //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             };
 
+            const initTextTexture = () => {
+                var textCtx = document.createElement("canvas").getContext("2d");
+                // window.document.body.appendChild(textCtx.canvas);
+                function makeTextCanvas(text: string, width: number, height: number) {
+                    textCtx.canvas.width = width;
+                    textCtx.canvas.height = height;
+                    textCtx.font = "100px monospace";
+                    textCtx.textAlign = "center";
+                    textCtx.textBaseline = "middle";
+                    textCtx.fillStyle = "white";
+                    textCtx.clearRect(0, 0, textCtx.canvas.width, textCtx.canvas.height);
+                    textCtx.fillText(text, width / 2, height / 2);
+                    return textCtx.canvas;
+                }
+                const textCanvas = makeTextCanvas("RE: SIMULATED", 1024, 1024);
+                var textTex = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, textTex);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
+                // make sure we can render it even if it's not a power of 2
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                return textTex;
+            }
+
+            const textTexture = initTextTexture();
+
             const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
 
             const loadShader = (src: string, type: number) => {
@@ -269,6 +296,7 @@ export class Chromatic {
                     iBeforeBloom: { type: "t", value: Math.max(bloomPassBeginIndex - 1, 0) },
                     iBlockOffset: { type: "f", value: 0.0 },
                     iSampleRate: { type: "f", value: audio.sampleRate },
+                    iTextTexture: { type: "t", value: 0 },
                 };
 
                 if (type === PassType.BloomUpsample) {
@@ -307,11 +335,18 @@ export class Chromatic {
                         iPrevPass: 0,
                         iBeforeBloom: 1,
                         iPairBloomDown: 2,
+                        iTextTexture: 3,
                     }
 
                     if (uniform.type === "t") {
                         gl.activeTexture(gl.TEXTURE0 + textureUnitIds[key]);
-                        gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
+
+                        if (key === "iTextTexture") {
+                            gl.bindTexture(gl.TEXTURE_2D, textTexture);
+                        } else {
+                            gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
+                        }
+
                         // methods[uniform.type].call(gl, pass.locations[key], textureUnitIds[key]);
                         gl.uniform1i(pass.locations[key], textureUnitIds[key]);
                     } else {

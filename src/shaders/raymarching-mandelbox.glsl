@@ -219,19 +219,6 @@ float revisionLogo(vec2 p, float rot) {
 uniform float gEmissiveSpeed;  // 1 0 2
 uniform float gLogoIntensity;  // 0 0 4
 
-// unused
-float checkeredPattern(vec3 p) {
-    float u = 1.0 - floor(mod(p.x, 2.0));
-    float v = 1.0 - floor(mod(p.z, 2.0));
-
-    if ((u == 1.0 && v < 1.0) || (u < 1.0 && v == 1.0)) {
-        return 0.2;
-
-    } else {
-        return 1.0;
-    }
-}
-
 uniform float gEmissiveHue;           // 0.33947042613522904 0 1
 uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1

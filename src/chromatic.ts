@@ -391,13 +391,11 @@ export class Chromatic {
                 this.audioSource = audio.createBufferSource();
 
                 if (PLAY_SOUND_FILE) {
-                    fetch(PLAY_SOUND_FILE).then(response => {
-                        return response.arrayBuffer();
-                    }).then(arrayBuffer => {
-                        audio.decodeAudioData(arrayBuffer, buffer => {
-                            this.audioSource.buffer = buffer;
-                        });
-                    })
+                    (async () => {
+                        const response = await fetch(PLAY_SOUND_FILE);
+                        const arrayBuffer = await response.arrayBuffer();
+                        this.audioSource.buffer = await audio.decodeAudioData(arrayBuffer);
+                    })();
                 } else {
                     this.audioSource.buffer = audioBuffer;
                 }
@@ -523,8 +521,13 @@ export class Chromatic {
 
             // Rendering Loop
             let lastTimestamp = 0;
+            let startTimestamp: number | null = null;
             const update = (timestamp: number) => {
                 requestAnimationFrame(update);
+                if (!startTimestamp) {
+                    startTimestamp = timestamp;
+                }
+
                 const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
                 if (!PRODUCTION) {
@@ -540,15 +543,19 @@ export class Chromatic {
 
                     this.render();
 
-                    if (this.isPlaying) {
-                        this.time += timeDelta;
+                    if (PRODUCTION) {
+                        this.time = (timestamp - startTimestamp) * 0.001;
+                    } else {
+                        if (this.isPlaying) {
+                            this.time += timeDelta;
+                        }
                     }
                 }
 
                 this.needsUpdate = false;
                 lastTimestamp = timestamp;
             };
-            update(0);
+            requestAnimationFrame(update);
         }
     }
 }

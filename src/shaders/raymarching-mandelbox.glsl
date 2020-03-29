@@ -193,43 +193,6 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
-// http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
-float fractal(vec3 p, int n) {
-    float strength = 7.0;
-    float accum = 0.25;
-    float prev = 0.;
-    float tw = 0.;
-    for (int i = 0; i < n; i++) {
-        float mag = dot(p, p);
-        p = abs(p) / mag + vec3(-.5, -.4, -1.5);
-        float w = exp(-float(i) / 7.);
-        accum += w * exp(-strength * pow(abs(mag - prev), 2.2));
-        tw += w;
-        prev = mag;
-    }
-    return max(0., 5. * accum / tw - .7);
-}
-
-vec3 stars(vec2 uv) {
-    float a = fract(cos(uv.x * 8.3e-2 + uv.y) * 4.7e5);
-    float b = fract(sin(uv.x * 0.3e-2 + uv.y) * 1.0e5);
-    float c = mix(a, b, 0.5);
-    return vec3(pow(c, 30.0));
-}
-
-vec3 skyboxUniverse(vec2 uv) {
-    vec3 col = stars(uv);
-    float b = saturate(cos(TAU * beat / 8.0));
-
-    float f = fractal(vec3(0.2 * uv + vec2(0.3, 0.1), 1.7 + (beat - 192.0) * 0.001), 28);
-    col = mix(col, 0.3 * vec3(1.3 * f * f * f * b, 1.8 * f * f, f), f);
-
-    f = fractal(vec3(0.2 * uv + vec2(0.8, 0.2), 2.7 + (beat - 192.0) * 0.002), 15);
-    col = mix(col, 0.05 * vec3(1.9 * f * f * f, 1.3 * f * f, 1.3 * f * f), f * 0.5);
-
-    return col;
-}
-
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -322,6 +285,43 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
 }
 
 uniform float gCameraLightIntensity;  // 1 0 10
+
+// http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
+float fractal(vec3 p, int n) {
+    float strength = 7.0;
+    float accum = 0.25;
+    float prev = 0.;
+    float tw = 0.;
+    for (int i = 0; i < n; i++) {
+        float mag = dot(p, p);
+        p = abs(p) / mag + vec3(-.5, -.4, -1.5);
+        float w = exp(-float(i) / 7.);
+        accum += w * exp(-strength * pow(abs(mag - prev), 2.2));
+        tw += w;
+        prev = mag;
+    }
+    return max(0., 5. * accum / tw - .7);
+}
+
+vec3 stars(vec2 uv) {
+    float a = fract(cos(uv.x * 8.3e-2 + uv.y) * 4.7e5);
+    float b = fract(sin(uv.x * 0.3e-2 + uv.y) * 1.0e5);
+    float c = mix(a, b, 0.5);
+    return vec3(pow(c, 30.0));
+}
+
+vec3 skyboxUniverse(vec2 uv) {
+    vec3 col = stars(uv);
+    float b = saturate(cos(TAU * beat / 8.0));
+
+    float f = fractal(vec3(0.2 * uv + vec2(0.3, 0.1), 1.7 + (beat - 192.0) * 0.001), 28);
+    col = mix(col, 0.3 * vec3(1.3 * f * f * f * b, 1.8 * f * f, f), f);
+
+    f = fractal(vec3(0.2 * uv + vec2(0.8, 0.2), 2.7 + (beat - 192.0) * 0.002), 15);
+    col = mix(col, 0.05 * vec3(1.9 * f * f * f, 1.3 * f * f, 1.3 * f * f), f * 0.5);
+
+    return col;
+}
 
 void calcRadiance(inout Intersection intersection, inout Ray ray) {
     intersection.hit = false;

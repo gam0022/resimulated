@@ -17,6 +17,8 @@ uniform float gRoughness;          // 0.1
 uniform float gMetallic;           // 0.4
 uniform float gEmissiveIntensity;  // 6.0 0 20
 
+uniform sampler2D iTextTexture;
+
 // consts
 const float INF = 1e+10;
 const float OFFSET = 0.1;
@@ -296,6 +298,24 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     }
 }
 
+vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
+    uv -= p;
+    uv /= scale;
+
+    float offset = 128.0 / 2048.0;
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
+    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
+
+    return uv;
+}
+
+vec3 text(vec2 uv) {
+    float id = floor(beat / 4.0);
+    float scale = (id == 0.0) ? 3.0 : 1.5;
+    return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
 
@@ -334,6 +354,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             ray.direction = l;
         }
     }
+
+    color += text(uv);
 
     fragColor = vec4(color, 1.0);
 }

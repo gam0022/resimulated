@@ -167,7 +167,7 @@ export class Chromatic {
                     "RGBA & TBC",
                     "CNCD & Fairlight",
                     "0x4015 & YET1",
-                    "kaneta" + String.fromCodePoint(0x1F41B),
+                    "kaneta\u{1F41B}",
                     "gaz",
                 ];
 

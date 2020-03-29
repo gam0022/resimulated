@@ -31,8 +31,6 @@ float sidechain3;
 float timeToBeat(float t) { return t / 60.0 * BPM; }
 float beatToTime(float b) { return b / BPM * 60.0; }
 float noteToFreq(float n) { return 440.0 * pow(2.0, (n - 69.0) / 12.0); }
-float chord(float n) { return (n < 1.0 ? 33.0 : n < 2.0 ? 0.0 : n < 3.0 ? 0.0 : 0.0); }
-// float chord(float n) { return (n < 1.0 ? 55.0 : n < 2.0 ? 58.0 : n < 3.0 ? 62.0 : 65.0); }
 
 // https://www.shadertoy.com/view/4djSRW
 vec4 noise(float p) {
@@ -3653,9 +3651,6 @@ vec2 mainSound(float time) {
     // hihat
     ret += vec2(0.0, 0.4) * sidechain * hihat33(beat, time);
     ret += vec2(0.3, 0.1) * sidechain * testhihat2(beat, time);
-
-    // chord
-    ret += sidechain * 0.0 * vec2(pad(chord(0.0), time) + pad(chord(1.0), time) + pad(chord(2.0), time) + pad(chord(3.0), time)) / 4.0;
 
     ret += vec2(0.3, 0.3) * bass1(beat, time);                        // L70 R0
     ret += vec2(0.09, 0.09) * bass2(beat, time);                      // L70 R0

@@ -298,8 +298,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
     }).then(32, t => {
-        camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(0, 0, 10.0 - t);
         target = new Vector3(0, 0, 0);
+        ball.z = 0;
         chromatic.uniforms.gSceneId = 1;
     });
 

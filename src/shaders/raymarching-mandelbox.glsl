@@ -193,6 +193,18 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
+vec3 nrand3(vec2 co) {
+    vec3 a = fract(cos(co.x * 8.3e-3 + co.y) * vec3(1.3e5, 4.7e5, 2.9e5));
+    vec3 b = fract(sin(co.x * 0.3e-3 + co.y) * vec3(8.1e5, 1.0e5, 0.1e5));
+    vec3 c = mix(a, b, 0.5);
+    return c;
+}
+
+vec3 stars(vec2 uv) {
+    vec3 rnd = nrand3(uv);
+    return vec3(pow(rnd.y, 10.0));
+}
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -226,6 +238,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             if (gLogoIntensity > 0.0) {
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 3.0 * clamp(beat - 174.0, -1000.0, 0.0));
             }
+
+            if (gSceneId == SCENE_UNIVERSE) {
+                intersection.emission = vec3(0.5);
+            }
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
@@ -238,7 +254,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.transparent = false;
             intersection.reflectance = 0.0;
         }
-    } else if (gSceneId == SCENE_UNIVERSE) {
     }
 }
 
@@ -304,6 +319,12 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         //                         intersection.distance));
     } else {
         intersection.color = vec3(0.01);
+
+        if (gSceneId == SCENE_UNIVERSE) {
+            float rdo = ray.direction.y + 0.3;
+            vec2 uv = (ray.direction.xz + ray.direction.xz * (250000.0 - 0.0) / rdo) * 0.000008;
+            intersection.color += mix(vec3(0.0), vec3(1.0), smoothstep(0.0, 1.0, stars(uv)));
+        }
     }
 }
 

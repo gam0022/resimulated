@@ -326,7 +326,7 @@ vec2 attackbass(float note, float t) {
     for (int i = 0; i < beatLen * NOTE_VDIV;) {                                                          \
         int index = i + indexOffset;                                                                     \
         int shift = (index % 2 == 1) ? 16 : 0;                                                           \
-        int div = notes[index >> 1] >> shift >> 8;                                                       \
+        int div = ((notes[index >> 1] >> shift) >> 8) & 255;                                             \
         if (div == 4) {                                                                                  \
             indexes[i + 0] = i;                                                                          \
             indexes[i + 1] = i;                                                                          \
@@ -340,7 +340,8 @@ vec2 attackbass(float note, float t) {
         } else if (div == 16) {                                                                          \
             indexes[i + 0] = i;                                                                          \
             i += 1;                                                                                      \
-        }                                                                                                \
+        } else                                                                                           \
+            i++;                                                                                         \
     }                                                                                                    \
                                                                                                          \
     float indexFloat = mod(beat * float(NOTE_VDIV), float(beatLen * NOTE_VDIV));                         \
@@ -3657,8 +3658,8 @@ vec2 mainSound(float time) {
     ret += vec2(0.3, 0.3) * bass1(beat, time);                        // L70 R0
     ret += vec2(0.09, 0.09) * bass2(beat, time);                      // L70 R0
     ret += vec2(0.1, 0.05) * sidechain2 * sideSupersaw1(beat, time);  // ベースの補強
-    // ret += vec2(0.05, 0.1) * sidechain2 * sideSupersaw2(beat, time);  // ベースの補強
-    ret += vec2(0.05, 0.05) * sidechain * tb303synth(beat, time);  // ベースの補強
+    ret += vec2(0.05, 0.1) * sidechain2 * sideSupersaw2(beat, time);  // ベースの補強
+    ret += vec2(0.05, 0.05) * sidechain * tb303synth(beat, time);     // ベースの補強
 
     // arp
     ret += vec2(0.1, 0.1) * sidechain * subbass1(beat, time);          // L70 R0

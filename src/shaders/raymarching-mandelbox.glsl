@@ -17,6 +17,10 @@ uniform float gRoughness;          // 0.1
 uniform float gMetallic;           // 0.4
 uniform float gEmissiveIntensity;  // 6.0 0 20
 
+uniform float gSceneId;  // 0 0 2
+#define SCENE_MANDEL 0.0
+#define SCENE_UNIVERSE 1.0
+
 uniform sampler2D iTextTexture;
 
 // consts
@@ -122,7 +126,11 @@ float dBall(vec3 p) {
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
-    float d = dStage(p);
+    float d = INF;
+
+    if (gSceneId == SCENE_MANDEL) {
+        d = dStage(p);
+    };
 
     if (gBallRadius > 0.0) {
         d = min(d, dBall(p));
@@ -218,7 +226,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             if (gLogoIntensity > 0.0) {
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 3.0 * clamp(beat - 174.0, -1000.0, 0.0));
             }
-        } else {
+        } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
@@ -230,6 +238,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.transparent = false;
             intersection.reflectance = 0.0;
         }
+    } else if (gSceneId == SCENE_UNIVERSE) {
     }
 }
 

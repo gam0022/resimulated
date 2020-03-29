@@ -5,7 +5,7 @@ import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from ".
 declare var PRODUCTION: boolean;
 
 export const chromatic = new Chromatic(
-    82.28571428571429,// デモの長さ（秒）
+    96,// デモの長さ（秒）
     require("./shaders/vertex.glsl").default,
     require("./shaders/common-header.glsl").default,
     [
@@ -288,7 +288,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
 
         chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
-    }).then(1600, t => {
+    }).then(8, t => {
         camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         chromatic.uniforms.gMandelboxScale = 1.2;
@@ -297,6 +297,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
 
         chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
+    }).then(32, t => {
+        camera = new Vector3(0, 0, 25.0).add(Vector3.fbm(t).scale(0.01));
+        target = new Vector3(0, 0, 0);
+        chromatic.uniforms.gSceneId = 1;
     });
 
     chromatic.uniforms.gBallZ = ball.z;

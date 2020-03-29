@@ -311,40 +311,44 @@ vec2 attackbass(float note, float t) {
     return vec2(dist(v * amp, 2.0));
 }
 
-// 1ビートを最大何分割するか。16分音符に対応するなら4
-#define NOTE_DIV 4
+// 1ビートを最大何分割するか。16分音符に対応するなら2（本当なら4だが16bitずつにpackingして2にした）
+#define NOTE_DIV 2
+#define NOTE_VDIV 4
 
-#define F(a) a | 4 << 8, a | 4 << 8, a | 4 << 8, a | 4 << 8
-#define E2(a, b) a | 8 << 8, a | 8 << 8, b | 8 << 8, b | 8 << 8
-#define S4(a, b, c, d) a | 16 << 8, b | 16 << 8, c | 16 << 8, d | 16 << 8
+#define F(a) (a | 4 << 8) | ((a | 4 << 8) << 16), (a | 4 << 8) | ((a | 4 << 8) << 16)
+#define E2(a, b) (a | 8 << 8) | ((a | 8 << 8) << 16), (b | 8 << 8) | ((b | 8 << 8) << 16)
+#define S4(a, b, c, d) (a | 16 << 8) | ((b | 16 << 8) << 16), (c | 16 << 8) | ((d | 16 << 8) << 16)
 
-#define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                    \
-    int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_DIV; \
-                                                                                                        \
-    int[beatLen * NOTE_DIV] indexes;                                                                    \
-    for (int i = 0; i < beatLen * NOTE_DIV;) {                                                          \
-        int div = notes[i + indexOffset] >> 8;                                                          \
-        if (div == 4) {                                                                                 \
-            indexes[i + 0] = i;                                                                         \
-            indexes[i + 1] = i;                                                                         \
-            indexes[i + 2] = i;                                                                         \
-            indexes[i + 3] = i;                                                                         \
-            i += 4;                                                                                     \
-        } else if (div == 8) {                                                                          \
-            indexes[i + 0] = i;                                                                         \
-            indexes[i + 1] = i;                                                                         \
-            i += 2;                                                                                     \
-        } else if (div == 16) {                                                                         \
-            indexes[i + 0] = i;                                                                         \
-            i += 1;                                                                                     \
-        }                                                                                               \
-    }                                                                                                   \
-                                                                                                        \
-    float indexFloat = mod(beat * float(NOTE_DIV), float(beatLen * NOTE_DIV));                          \
-    int index = int(indexFloat);                                                                        \
-    int note = notes[index + indexOffset] & 255;                                                        \
-    float localTime = beatToTime((indexFloat - float(indexes[index])) / float(NOTE_DIV));               \
-    float amp = (note == 0) ? 0.0 : 1.0;                                                                \
+#define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                     \
+    int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_VDIV; \
+                                                                                                         \
+    int[beatLen * NOTE_VDIV] indexes;                                                                    \
+    for (int i = 0; i < beatLen * NOTE_VDIV;) {                                                          \
+        int index = i + indexOffset;                                                                     \
+        int shift = (index % 2 == 1) ? 16 : 0;                                                           \
+        int div = notes[index >> 1] >> shift >> 8;                                                       \
+        if (div == 4) {                                                                                  \
+            indexes[i + 0] = i;                                                                          \
+            indexes[i + 1] = i;                                                                          \
+            indexes[i + 2] = i;                                                                          \
+            indexes[i + 3] = i;                                                                          \
+            i += 4;                                                                                      \
+        } else if (div == 8) {                                                                           \
+            indexes[i + 0] = i;                                                                          \
+            indexes[i + 1] = i;                                                                          \
+            i += 2;                                                                                      \
+        } else if (div == 16) {                                                                          \
+            indexes[i + 0] = i;                                                                          \
+            i += 1;                                                                                      \
+        }                                                                                                \
+    }                                                                                                    \
+                                                                                                         \
+    float indexFloat = mod(beat * float(NOTE_VDIV), float(beatLen * NOTE_VDIV));                         \
+    int index = int(indexFloat);                                                                         \
+    int shift = (index % 2 == 1) ? 16 : 0;                                                               \
+    int note = (notes[(index + indexOffset) >> 1] >> shift) & 255;                                       \
+    float localTime = beatToTime((indexFloat - float(indexes[index])) / float(NOTE_VDIV));               \
+    float amp = (note == 0) ? 0.0 : 1.0;                                                                 \
     vec2 ret = vec2(toneFunc(float(note), localTime) * amp);
 
 //  KICK  //

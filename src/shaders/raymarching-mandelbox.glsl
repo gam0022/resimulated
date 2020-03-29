@@ -194,10 +194,10 @@ uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
 vec3 stars(vec2 uv) {
-    float a = fract(cos(uv.x * 8.3e-3 + uv.y) * 4.7e5);
-    float b = fract(sin(uv.x * 0.3e-3 + uv.y) * 1.0e5);
+    float a = fract(cos(uv.x * 8.3e-2 + uv.y) * 4.7e5);
+    float b = fract(sin(uv.x * 0.3e-2 + uv.y) * 1.0e5);
     float c = mix(a, b, 0.5);
-    return vec3(pow(c, 7.0));
+    return vec3(pow(c, 30.0));
 }
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {

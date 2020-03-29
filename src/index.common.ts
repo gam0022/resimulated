@@ -112,6 +112,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     });
 
     new Timeline(beat).then(8, t => {
+        chromatic.uniforms.gTonemapExposure = 0.2;
+
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
@@ -121,6 +123,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gBallRadius = 0;
     }).then(8, t => {
+        chromatic.uniforms.gTonemapExposure = 0.2;
         camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
@@ -299,6 +302,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
     }).then(32, t => {
         chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gTonemapExposure = 1;
 
         camera = new Vector3(0, 0, 10.0 - t);
         target = new Vector3(0, 0, 0);

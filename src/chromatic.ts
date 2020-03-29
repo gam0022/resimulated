@@ -152,32 +152,47 @@ export class Chromatic {
                 //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             };
 
-            const initTextTexture = () => {
-                var textCtx = document.createElement("canvas").getContext("2d");
-                // window.document.body.appendChild(textCtx.canvas);
-                function makeTextCanvas(text: string, width: number, height: number) {
-                    textCtx.canvas.width = width;
-                    textCtx.canvas.height = height;
-                    textCtx.font = "128px arial";
-                    textCtx.textAlign = "center";
-                    textCtx.textBaseline = "middle";
-                    textCtx.fillStyle = "white";
-                    textCtx.clearRect(0, 0, textCtx.canvas.width, textCtx.canvas.height);
-                    textCtx.fillText(text, width / 2, height / 2);
-                    return textCtx.canvas;
-                }
-                const textCanvas = makeTextCanvas("RE: SIMULATED", 1024, 1024);
-                var textTex = gl.createTexture();
-                gl.bindTexture(gl.TEXTURE_2D, textTex);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
-                // make sure we can render it even if it's not a power of 2
+            const createTextTexture = () => {
+                const canvas = document.createElement("canvas");
+                const textCtx = canvas.getContext("2d");
+                // window.document.body.appendChild(canvas);
+
+                // TODO: 引数にしたい
+                const texts = [
+                    "RE: SIMULATED",
+                    "Graphics by gam0022",
+                    "Music by saddakey",
+                    "FMS-Cat",
+                    "Ctrl-Alt-Test",
+                    "RGBA & TBC",
+                    "CNCD & Fairlight",
+                    "0x4015 & YET1",
+                    "kaneta",
+                    "gaz",
+                ];
+
+                canvas.width = 2048;
+                canvas.height = 2048;
+                textCtx.font = "128px arial";
+                textCtx.textAlign = "center";
+                textCtx.textBaseline = "top";
+                textCtx.fillStyle = "white";
+                textCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+                texts.forEach((text, index) => {
+                    textCtx.fillText(text, canvas.width / 2, index * 128);
+                });
+
+                var tex = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-                return textTex;
+                return tex;
             }
 
-            const textTexture = initTextTexture();
+            const textTexture = createTextTexture();
 
             const imageCommonHeaderShaderLineCount = imageCommonHeaderShader.split("\n").length;
 

@@ -3660,8 +3660,8 @@ vec2 mainSound(float time) {
     ret += vec2(0.3, 0.3) * bass1(beat, time);                        // L70 R0
     ret += vec2(0.09, 0.09) * bass2(beat, time);                      // L70 R0
     ret += vec2(0.1, 0.05) * sidechain2 * sideSupersaw1(beat, time);  // ベースの補強
-    ret += vec2(0.05, 0.1) * sidechain2 * sideSupersaw2(beat, time);  // ベースの補強
-    ret += vec2(0.05, 0.05) * sidechain * tb303synth(beat, time);     // ベースの補強
+    // ret += vec2(0.05, 0.1) * sidechain2 * sideSupersaw2(beat, time);  // ベースの補強
+    ret += vec2(0.05, 0.05) * sidechain * tb303synth(beat, time);  // ベースの補強
 
     // arp
     ret += vec2(0.1, 0.1) * sidechain * subbass1(beat, time);          // L70 R0

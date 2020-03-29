@@ -32,6 +32,12 @@ float hash11(float p) {
     return fract(p);
 }
 
+float hash12(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
 vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);
 

@@ -315,9 +315,7 @@ vec2 attackbass(float note, float t) {
 #define NOTE_DIV 4
 
 #define F(a) a | 4 << 8, a | 4 << 8, a | 4 << 8, a | 4 << 8
-#define E(a) a | 8 << 8, a | 8 << 8
 #define E2(a, b) a | 8 << 8, a | 8 << 8, b | 8 << 8, b | 8 << 8
-#define S(a) a | 16 << 8
 #define S4(a, b, c, d) a | 16 << 8, b | 16 << 8, c | 16 << 8, d | 16 << 8
 
 #define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                    \

@@ -193,11 +193,35 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
+// http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
+float field(in vec3 p, float s) {
+    float strength = 7. + .03 * log(1.e-6 + fract(sin(iTime) * 4373.11));
+    float accum = s / 4.;
+    float prev = 0.;
+    float tw = 0.;
+    for (int i = 0; i < 26; ++i) {
+        float mag = dot(p, p);
+        p = abs(p) / mag + vec3(-.5, -.4, -1.5);
+        float w = exp(-float(i) / 7.);
+        accum += w * exp(-strength * pow(abs(mag - prev), 2.2));
+        tw += w;
+        prev = mag;
+    }
+    return max(0., 5. * accum / tw - .7);
+}
+
 vec3 stars(vec2 uv) {
     float a = fract(cos(uv.x * 8.3e-2 + uv.y) * 4.7e5);
     float b = fract(sin(uv.x * 0.3e-2 + uv.y) * 1.0e5);
     float c = mix(a, b, 0.5);
     return vec3(pow(c, 30.0));
+}
+
+vec3 skyboxUniverse(vec2 uv) {
+    vec3 col = stars(uv);
+    float f = field(vec3(0.2 * uv + vec2(0.3, 0.1), 1.8), 1.0);
+    col += 0.1 * vec3(1.3 * f * f * f, 1.8 * f * f, f);
+    return col;
 }
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
@@ -314,7 +338,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         if (gSceneId == SCENE_UNIVERSE) {
             float rdo = ray.direction.y + 0.3;
             vec2 uv = (ray.direction.xz + ray.direction.xz * (250000.0 - 0.0) / rdo) * 0.000008;
-            intersection.color += mix(vec3(0.0), vec3(1.0), smoothstep(0.0, 1.0, stars(uv)));
+            intersection.color += skyboxUniverse(uv);
         }
     }
 }

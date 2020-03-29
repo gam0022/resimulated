@@ -298,18 +298,21 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     }
 }
 
-vec2 textUv(vec2 uv, int id, vec2 p, float scale) {
-    uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * uv.y;
+vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
+    uv -= p;
+    uv /= scale;
 
     float offset = 128.0 / 2048.0;
-    uv.y += offset * float(id);
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
+    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
+
     return uv;
 }
 
 vec3 text(vec2 uv) {
     // aaa
-    return texture(iTextTexture, textUv(uv, int(beat), vec2(0.0), 1.0)).rgb;
+    return texture(iTextTexture, textUv(uv, floor(beat / 4.0), vec2(0.0, 0.0), 2.0)).rgb;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

@@ -130,23 +130,10 @@ vec2 foldRotate(vec2 p, float s) {
 
 uniform float gFoldRotate;  // 1 0 20
 
-// global
-vec2 tunnelUV;
-bool isTunnelLogo;
-
 float dStage(vec3 p) {
-    isTunnelLogo = false;  // 128.0 <= beat && beat < 160.0;
-    if (isTunnelLogo) {
-        vec3 q = p;
-        q.x = atan(p.y, p.x) / TAU;
-        q.y = length(p.xy);
-        tunnelUV = q.xy;
-        return 10.0 - q.y;
-    } else {
-        float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
-        p.xy = foldRotate(p.xy, gFoldRotate);
-        return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
-    }
+    float b = max(beat - 128.0, 0.0) + (p.z + 10.0);
+    p.xy = foldRotate(p.xy, gFoldRotate);
+    return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
 }
 
 uniform float gBallZ;               // 0 -100 100
@@ -262,18 +249,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
 
-            if (isTunnelLogo) {
-                int[] pat = int[](0, ~0, 0x7C, 0xC0F03C00, 0xF7FBFF01, ~0, 0, 0x8320D39F, ~0, 0x1F0010, 0);
-                int r = int(0.05 * p.z + 6.0 * beat) % 10;
-                float a = float(pat[r] >> int(30.0 * tunnelUV.x + 2.0 * (hash11(float(r * 1231)) - 0.5) * beat) % 32 & 1);
-                intersection.emission = vec3(a);
-            } else {
-                float edge = calcEdge(p);
-                float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
-
-                intersection.emission =
-                    gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
-            }
+            float edge = calcEdge(p);
+            float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
+            intersection.emission = gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;

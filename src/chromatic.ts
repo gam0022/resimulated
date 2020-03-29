@@ -167,20 +167,20 @@ export class Chromatic {
                     "RGBA & TBC",
                     "CNCD & Fairlight",
                     "0x4015 & YET1",
-                    "kaneta",
+                    "kaneta" + String.fromCodePoint(0x1F41B),
                     "gaz",
                 ];
 
                 canvas.width = 2048;
                 canvas.height = 2048;
-                textCtx.font = "128px arial";
+                textCtx.font = "110px arial";
                 textCtx.textAlign = "center";
-                textCtx.textBaseline = "top";
+                textCtx.textBaseline = "middle";
                 textCtx.fillStyle = "white";
                 textCtx.clearRect(0, 0, canvas.width, canvas.height);
 
                 texts.forEach((text, index) => {
-                    textCtx.fillText(text, canvas.width / 2, index * 128);
+                    textCtx.fillText(text, canvas.width / 2, 64 + index * 128);
                 });
 
                 var tex = gl.createTexture();

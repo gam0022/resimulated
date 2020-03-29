@@ -312,7 +312,7 @@ vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
 
 vec3 text(vec2 uv) {
     float id = floor(beat / 4.0);
-    float scale = (id == 0.0) ? 3.0 : 1.5;
+    float scale = (id == 0.0) ? 3.0 : 2.0;
     return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
 }
 

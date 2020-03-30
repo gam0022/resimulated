@@ -14,8 +14,12 @@ window.addEventListener("load", ev => {
                 animateUniforms(time, false, false);
             }
 
-            chromatic.play();
-            chromatic.playSound();
+            chromatic.init();
+
+            setTimeout(() => {
+                chromatic.play();
+                chromatic.playSound();
+            }, 1000);
         });
     }
 }, false);

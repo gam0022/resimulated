@@ -9,6 +9,7 @@ const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
 window.addEventListener("load", ev => {
+    chromatic.init();
     chromatic.play();
 
 

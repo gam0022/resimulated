@@ -54,9 +54,10 @@ export class Chromatic {
     uniformArray: { key: string, initValue: any, min: number, max: number }[];
     uniforms: { [key: string]: any };
 
-    play: () => void;
+    init: () => void;
     render: () => void;
     setSize: (width: number, height: number) => void;
+    play: () => void;
     playSound: () => void;
     stopSound: () => void;
 
@@ -76,7 +77,7 @@ export class Chromatic {
         soundShader: string,
         createTextTexture: (gl: WebGL2RenderingContext) => WebGLTexture,
     ) {
-        this.play = () => {
+        this.init = () => {
             this.timeLength = timeLength;
             this.isPlaying = true;
             this.needsUpdate = false;
@@ -350,7 +351,7 @@ export class Chromatic {
                     this.audioSource = newAudioSource;
                 }
 
-                this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
+                this.audioSource.start(0, this.time % this.timeLength);
             }
 
             if (!PRODUCTION) {
@@ -566,7 +567,10 @@ export class Chromatic {
                 this.needsUpdate = false;
                 lastTimestamp = timestamp;
             };
-            requestAnimationFrame(update);
+
+            this.play = () => {
+                requestAnimationFrame(update);
+            }
         }
     }
 }

@@ -38,6 +38,11 @@ float hash12(vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 
+// https://www.shadertoy.com/view/3tX3R4
+float remap(float val, float im, float ix, float om, float ox) { return clamp(om + (val - im) * (ox - om) / (ix - im), om, ox); }
+
+float remap01(float val, float im, float ix) { return remap(val, im, ix, 0.0, 1.0); }  // TODO: optimize
+
 vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);
 

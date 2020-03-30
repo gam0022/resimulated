@@ -38,6 +38,44 @@ float hash12(vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 
+// https://www.shadertoy.com/view/4dlGW2
+float hashScale(in vec2 p, in float scale) {
+    // This is tiling part, adjusts with the scale...
+    p = mod(p, scale);
+    return fract(sin(dot(p, vec2(27.16898, 38.90563))) * 5151.5473453);
+}
+
+float noise(in vec2 p, in float scale) {
+    vec2 f;
+
+    p *= scale;
+
+    f = fract(p);  // Separate integer from fractional
+    p = floor(p);
+
+    f = f * f * (3.0 - 2.0 * f);  // Cosine interpolation approximation
+
+    float res = mix(mix(hashScale(p, scale), hashScale(p + vec2(1.0, 0.0), scale), f.x), mix(hashScale(p + vec2(0.0, 1.0), scale), hashScale(p + vec2(1.0, 1.0), scale), f.x), f.y);
+    return res;
+}
+
+float fBm(in vec2 p) {
+    float f = 0.0;
+    // Change starting scale to any integer value...
+    float scale = 10.;
+    p = mod(p, scale);
+    float amp = 0.6;
+
+    for (int i = 0; i < 5; i++) {
+        f += noise(p, scale) * amp;
+        amp *= .5;
+        // Scale must be multiplied by an integer value...
+        scale *= 2.;
+    }
+    // Clamp it just in case....
+    return min(f, 1.0);
+}
+
 // https://www.shadertoy.com/view/3tX3R4
 float remap(float val, float im, float ix, float om, float ox) { return clamp(om + (val - im) * (ox - om) / (ix - im), om, ox); }
 

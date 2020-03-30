@@ -123,44 +123,18 @@ float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
 }
 
+vec2 uvSphere(vec3 n) {
+    float u = 0.5 + atan(n.z, n.x) / TAU;
+    float v = 0.5 - asin(n.y) / PI;
+    return vec2(u, v);
+}
+
 float dEarth(vec3 p) { return dSphere(p, 1.0); }
 
-// https://www.shadertoy.com/view/4dlGW2
-float hashScale(in vec2 p, in float scale) {
-    // This is tiling part, adjusts with the scale...
-    p = mod(p, scale);
-    return fract(sin(dot(p, vec2(27.16898, 38.90563))) * 5151.5473453);
-}
-
-float noise(in vec2 p, in float scale) {
-    vec2 f;
-
-    p *= scale;
-
-    f = fract(p);  // Separate integer from fractional
-    p = floor(p);
-
-    f = f * f * (3.0 - 2.0 * f);  // Cosine interpolation approximation
-
-    float res = mix(mix(hashScale(p, scale), hashScale(p + vec2(1.0, 0.0), scale), f.x), mix(hashScale(p + vec2(0.0, 1.0), scale), hashScale(p + vec2(1.0, 1.0), scale), f.x), f.y);
-    return res;
-}
-
-float fBm(in vec2 p) {
-    float f = 0.0;
-    // Change starting scale to any integer value...
-    float scale = 10.;
-    p = mod(p, scale);
-    float amp = 0.6;
-
-    for (int i = 0; i < 5; i++) {
-        f += noise(p, scale) * amp;
-        amp *= .5;
-        // Scale must be multiplied by an integer value...
-        scale *= 2.;
-    }
-    // Clamp it just in case....
-    return min(f, 1.0);
+float dEarthDetail(vec3 p) {
+    vec2 uv = uvSphere(normalize(p));
+    float h = fBm(uv);
+    return dSphere(p, 1.0) + 0.07 * h;
 }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
@@ -237,8 +211,6 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
-uniform vec3 gEarthSeaColor;  // 48 56 128
-
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -274,18 +246,17 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             }
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
-            float u = 0.5 + atan(n.z, n.x) / TAU;
-            float v = 0.5 - asin(n.y) / PI;
-            vec2 uv = vec2(u, v);
-
+            vec2 uv = uvSphere(n);
             float h = fBm(uv);
 
             if (h > 0.67) {
+                // land
                 intersection.baseColor = mix(vec3(0.1, 0.7, 0.3), vec3(240. / 255., 204. / 255., 170. / 255.), remap01(h, 0.7, 1.0));
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.01;
+                intersection.normal = calcNormal(p, dEarthDetail, 0.01);
             } else {
-                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0 / 255.0, 18.0 / 255.0, 150.0 / 255.0), remap01(h, 0.0, 0.6));
+                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0 / 255.0, 18.0 / 255.0, 200.0 / 255.0), remap01(h, 0.0, 0.6));
                 intersection.roughness = 0.1;
                 intersection.metallic = 0.134;
             }
@@ -293,7 +264,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(0.0);
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 0.0;
+            intersection.reflectance = 0.3;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;

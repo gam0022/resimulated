@@ -533,12 +533,8 @@ export class Chromatic {
 
             // Rendering Loop
             let lastTimestamp = 0;
-            let startTimestamp: number | null = null;
             const update = (timestamp: number) => {
                 requestAnimationFrame(update);
-                if (!startTimestamp) {
-                    startTimestamp = timestamp;
-                }
 
                 const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
@@ -555,13 +551,11 @@ export class Chromatic {
 
                     this.render();
 
-                    if (PRODUCTION) {
-                        this.time = (timestamp - startTimestamp) * 0.001;
-                    } else {
-                        if (this.isPlaying) {
-                            this.time += timeDelta;
-                        }
+
+                    if (this.isPlaying) {
+                        this.time += timeDelta;
                     }
+
                 }
 
                 this.needsUpdate = false;

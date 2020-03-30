@@ -311,6 +311,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
 
         chromatic.uniforms.gLogoIntensity = 1;
+    }).then(999999, t => {
+        // 終わり(仮)
+        chromatic.uniforms.gTonemapExposure = 0;
     });
 
     chromatic.uniforms.gBallZ = ball.z;

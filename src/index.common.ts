@@ -90,6 +90,16 @@ class Timeline {
         this.done = true;
         return this;
     }
+
+    over(event: (offset: number) => void) {
+        if (this.done) {
+            return this;
+        }
+
+        event(this.input - this.begin);
+        this.done = true;
+        return this;
+    }
 }
 
 export const animateUniforms = (time: number, debugCamera: boolean, debugDisableReset: boolean) => {
@@ -311,7 +321,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
 
         chromatic.uniforms.gLogoIntensity = 1;
-    }).then(999999, t => {
+    }).over(t => {
         // 終わり(仮)
         chromatic.uniforms.gTonemapExposure = 0;
     });

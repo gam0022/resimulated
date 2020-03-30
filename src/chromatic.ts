@@ -351,7 +351,7 @@ export class Chromatic {
                     this.audioSource = newAudioSource;
                 }
 
-                this.audioSource.start(0, this.time % this.timeLength);
+                this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
             }
 
             if (!PRODUCTION) {

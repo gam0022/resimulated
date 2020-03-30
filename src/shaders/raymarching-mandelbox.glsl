@@ -126,13 +126,13 @@ float dBall(vec3 p) {
 float dEarth(vec3 p) { return dSphere(p, 1.0); }
 
 // https://www.shadertoy.com/view/4dlGW2
-float Hash(in vec2 p, in float scale) {
+float hashScale(in vec2 p, in float scale) {
     // This is tiling part, adjusts with the scale...
     p = mod(p, scale);
     return fract(sin(dot(p, vec2(27.16898, 38.90563))) * 5151.5473453);
 }
 
-float Noise(in vec2 p, in float scale) {
+float noise(in vec2 p, in float scale) {
     vec2 f;
 
     p *= scale;
@@ -142,7 +142,7 @@ float Noise(in vec2 p, in float scale) {
 
     f = f * f * (3.0 - 2.0 * f);  // Cosine interpolation approximation
 
-    float res = mix(mix(Hash(p, scale), Hash(p + vec2(1.0, 0.0), scale), f.x), mix(Hash(p + vec2(0.0, 1.0), scale), Hash(p + vec2(1.0, 1.0), scale), f.x), f.y);
+    float res = mix(mix(hashScale(p, scale), hashScale(p + vec2(1.0, 0.0), scale), f.x), mix(hashScale(p + vec2(0.0, 1.0), scale), hashScale(p + vec2(1.0, 1.0), scale), f.x), f.y);
     return res;
 }
 
@@ -154,7 +154,7 @@ float fBm(in vec2 p) {
     float amp = 0.6;
 
     for (int i = 0; i < 5; i++) {
-        f += Noise(p, scale) * amp;
+        f += noise(p, scale) * amp;
         amp *= .5;
         // Scale must be multiplied by an integer value...
         scale *= 2.;

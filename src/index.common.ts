@@ -316,11 +316,15 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gTonemapExposure = 1;
 
-        camera = new Vector3(0, 0, 10.0 - t);
+        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154);
         target = new Vector3(0, 0, 0);
         ball.z = 0;
 
-        chromatic.uniforms.gLogoIntensity = 1;
+        chromatic.uniforms.gBallRadius = 0;
+        chromatic.uniforms.gLogoIntensity = 0;
+        chromatic.uniforms.gF0 = 0.1094292903071209;
+        chromatic.uniforms.gBloomIntensity = 5.199888174447861;
+        chromatic.uniforms.gBloomThreshold = 0.7188785494628379;
     }).over(t => {
         // 終わり(仮)
         chromatic.uniforms.gTonemapExposure = 0;

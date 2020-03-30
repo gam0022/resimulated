@@ -264,7 +264,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(0.0);
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 0.3;
+            intersection.reflectance = 0.5;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;

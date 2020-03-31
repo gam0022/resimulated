@@ -15,7 +15,7 @@ window.addEventListener("load", ev => {
 
     // dat.GUI
     const gui = new dat.GUI({ width: 1000, });
-    var hideFolder = gui.addFolder("Hide");
+    var miscFolder = gui.addFolder("misc");
 
     const config = {
         debugCamera: false,
@@ -44,13 +44,13 @@ window.addEventListener("load", ev => {
     gui.add(config, "debugDisableReset").onChange(value => {
         chromatic.needsUpdate = true;
     });
-    hideFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
+    miscFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
-    hideFolder.add(config, "timeMode", ["time", "beat"]).onChange(value => {
+    miscFolder.add(config, "timeMode", ["time", "beat"]).onChange(value => {
         onTimeModeChange();
     });
-    hideFolder.add(config, "bpm", 50, 300).onChange(value => {
+    miscFolder.add(config, "bpm", 50, 300).onChange(value => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
     });
@@ -100,11 +100,9 @@ window.addEventListener("load", ev => {
             saveAs(waveBlob, "chromatic.wav");
         }
     };
-    hideFolder.add(saevFunctions, "saveImage");
-    hideFolder.add(saevFunctions, "saveImageSequence");
-    hideFolder.add(saevFunctions, "saveSound");
-
-    console.log(chromatic.uniformArray);
+    miscFolder.add(saevFunctions, "saveImage");
+    miscFolder.add(saevFunctions, "saveImageSequence");
+    miscFolder.add(saevFunctions, "saveSound");
 
     const groupFolders: { [index: string]: dat.GUI } = {};
 

@@ -407,7 +407,8 @@ vec3 text(vec2 uv) {
     return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
 }
 
-uniform float gExplodeDistortion;  // 0 0 500 distortion
+uniform float gShockDistortion;    // 0 0 1  distortion
+uniform float gExplodeDistortion;  // 0 0 1
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
@@ -416,9 +417,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // uv += 1.5 * uv * sin(l + beat * PIH);
 
     float b = mod(beat, 4.0);
-    uv += -0.2 * exp(-10.0 * b) * uv * cos(l);
+    uv += -gShockDistortion * exp(-10.0 * b) * uv * cos(l);
 
-    uv += gExplodeDistortion * uv * exp(-2.0 * l);
+    float explode = 30.0 * gExplodeDistortion * exp(-2.0 * l);
+    explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);
+    uv += explode * uv;
 
     Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);

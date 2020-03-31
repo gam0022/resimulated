@@ -72,8 +72,8 @@ float fbm(in vec2 p, float scale) {
         // Scale must be multiplied by an integer value...
         scale *= 2.;
     }
-    // Clamp it just in case....
-    return min(f, 1.0);
+
+    return f;
 }
 
 // https://www.shadertoy.com/view/lsf3WH

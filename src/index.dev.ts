@@ -255,7 +255,7 @@ window.addEventListener("load", ev => {
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
 
-        sessionStorage.setItem("guiFolder", JSON.stringify(gui.getSaveObject()));
+        sessionStorage.setItem("guiClosed", gui.closed.toString());
 
         for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
             sessionStorage.setItem(key, uniform.toString());
@@ -320,6 +320,11 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onTimeLengthUpdate();
         onBeatLengthUpdate();
+
+        const guiClosedStr = sessionStorage.getItem("guiClosed")
+        if (guiClosedStr) {
+            gui.closed = parseBool(guiClosedStr);
+        }
 
         for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
             const unifromStr = sessionStorage.getItem(key);

@@ -420,7 +420,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     uv += -gShockDistortion * exp(-10.0 * b) * uv * cos(l);
 
     float explode = 30.0 * gExplodeDistortion * exp(-2.0 * l);
-    explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);
+    explode = mix(explode, 2.0 * sin(l + 2.0 * gExplodeDistortion), 30.0 * remap01(gExplodeDistortion, 0.8, 1.0));
     uv += explode * uv;
 
     Camera camera;

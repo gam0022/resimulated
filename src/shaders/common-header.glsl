@@ -39,6 +39,7 @@ float hash12(vec2 p) {
 }
 
 // https://www.shadertoy.com/view/4dlGW2
+// Tileable Noise
 float hashScale(in vec2 p, in float scale) {
     // This is tiling part, adjusts with the scale...
     p = mod(p, scale);
@@ -59,10 +60,9 @@ float noise(in vec2 p, in float scale) {
     return res;
 }
 
-float fBm(in vec2 p) {
+float fbm(in vec2 p, float scale) {
     float f = 0.0;
-    // Change starting scale to any integer value...
-    float scale = 10.;
+
     p = mod(p, scale);
     float amp = 0.6;
 
@@ -72,8 +72,31 @@ float fBm(in vec2 p) {
         // Scale must be multiplied by an integer value...
         scale *= 2.;
     }
-    // Clamp it just in case....
-    return min(f, 1.0);
+
+    return f;
+}
+
+// https://www.shadertoy.com/view/lsf3WH
+// Noise - value - 2D by iq
+float noise(in vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash12(i + vec2(0.0, 0.0)), hash12(i + vec2(1.0, 0.0)), u.x), mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float fbm(in vec2 uv) {
+    float f = 0.0;
+    mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+    f = 0.5000 * noise(uv);
+    uv = m * uv;
+    f += 0.2500 * noise(uv);
+    uv = m * uv;
+    f += 0.1250 * noise(uv);
+    uv = m * uv;
+    f += 0.0625 * noise(uv);
+    uv = m * uv;
+    return f;
 }
 
 // https://www.shadertoy.com/view/3tX3R4

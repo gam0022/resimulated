@@ -17,7 +17,7 @@ window.addEventListener("load", ev => {
     const gui = new dat.GUI({ width: 1000 });
     gui.useLocalStorage = true;
 
-    var miscFolder = gui.addFolder("misc");
+    const miscFolder = gui.addFolder("misc");
 
     const config = {
         debugCamera: false,

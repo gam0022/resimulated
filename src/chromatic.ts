@@ -51,7 +51,7 @@ export class Chromatic {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    uniformArray: { key: string, initValue: any, min: number, max: number, group: string }[];
+    uniformArray: { key: string, initValue: any, min?: number, max?: number, group?: string }[];
     uniforms: { [key: string]: any };
 
     init: () => void;
@@ -441,15 +441,18 @@ export class Chromatic {
                     let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?( [\w\d]+)?/g;
                     let result: RegExpExecArray;
                     while ((result = reg.exec(fragmentShader)) !== null) {
-                        let uniform: any;
+                        let uniform: { key: string, initValue: any, min?: number, max?: number, group?: string };
 
                         if (result[1] === "float") {
                             uniform = {
                                 key: result[2],
                                 initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
-                                min: result[6] !== undefined ? parseFloat(result[6]) : 0,
-                                max: result[7] !== undefined ? parseFloat(result[7]) : 1,
                             };
+
+                            if (!PRODUCTION) {
+                                uniform.min = result[6] !== undefined ? parseFloat(result[6]) : 0;
+                                uniform.max = result[7] !== undefined ? parseFloat(result[7]) : 1;
+                            }
                         } else {
                             uniform = {
                                 key: result[2],

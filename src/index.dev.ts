@@ -23,7 +23,6 @@ window.addEventListener("load", ev => {
         debugCamera: false,
         debugParams: false,
         debugDisableReset: false,
-        debugFrameNumber: 0,
         resolution: "1920x1080",
         timeMode: "beat",
         bpm: 140,
@@ -57,8 +56,7 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
     });
-    miscFolder.add(config, "debugFrameNumber", -1, 30, 1).onChange(value => {
-        chromatic.debugFrameNumber = value;
+    miscFolder.add(chromatic, "debugFrameNumber", -1, 30, 1).onChange(value => {
         chromatic.needsUpdate = true;
     });
 
@@ -255,6 +253,7 @@ window.addEventListener("load", ev => {
         sessionStorage.setItem("resolution", config.resolution);
         sessionStorage.setItem("timeMode", config.timeMode);
         sessionStorage.setItem("bpm", config.bpm.toString());
+        sessionStorage.setItem("debugFrameNumber", chromatic.debugFrameNumber.toString());
 
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
@@ -302,6 +301,11 @@ window.addEventListener("load", ev => {
         const bpmStr = sessionStorage.getItem("bpm");
         if (bpmStr) {
             config.bpm = parseFloat(bpmStr);
+        }
+
+        const debugFrameNumberStr = sessionStorage.getItem("debugFrameNumber");
+        if (debugFrameNumberStr) {
+            chromatic.debugFrameNumber = parseFloat(debugFrameNumberStr);
         }
 
         const timeStr = sessionStorage.getItem("time")

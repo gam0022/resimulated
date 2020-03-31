@@ -14,7 +14,21 @@ window.addEventListener("load", ev => {
 
 
     // dat.GUI
-    const gui = new dat.GUI({ width: 1000, });
+    const guiOption: dat.GUIParams = { width: 1000 };
+
+    const guiFolderStr = sessionStorage.getItem("guiFolder");
+    if (guiFolderStr) {
+        guiOption.load = JSON.parse(guiFolderStr);
+        console.log(guiFolderStr);
+    }
+
+    console.log(guiOption);
+    console.log(guiOption.load);
+
+    const gui = new dat.GUI(guiOption);
+    gui.remember(chromatic.uniforms);
+    gui.useLocalStorage = true;
+
     var miscFolder = gui.addFolder("misc");
 
     const config = {
@@ -98,11 +112,16 @@ window.addEventListener("load", ev => {
         saveSound: () => {
             const waveBlob = bufferToWave(chromatic.audioSource.buffer, chromatic.audioContext.sampleRate * chromatic.timeLength);
             saveAs(waveBlob, "chromatic.wav");
+        },
+        test: () => {
+            console.log(JSON.stringify(gui.getSaveObject()));
+            console.log(JSON.stringify(gui.load));
         }
     };
     miscFolder.add(saevFunctions, "saveImage");
     miscFolder.add(saevFunctions, "saveImageSequence");
     miscFolder.add(saevFunctions, "saveSound");
+    miscFolder.add(saevFunctions, "test");
 
     const groupFolders: { [index: string]: dat.GUI } = {};
 
@@ -252,6 +271,8 @@ window.addEventListener("load", ev => {
         sessionStorage.setItem("time", chromatic.time.toString());
         sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
+
+        sessionStorage.setItem("guiFolder", JSON.stringify(gui.getSaveObject()));
 
         for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
             sessionStorage.setItem(key, uniform.toString());

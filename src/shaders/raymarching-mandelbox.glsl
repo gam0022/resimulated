@@ -265,6 +265,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
             }
 
+            float cloud = fbm(uv, 15.0);
+            intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
+
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
             intersection.reflectance = 0.0;

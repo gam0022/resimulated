@@ -303,16 +303,17 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
     }).then(8, t => {
         // 爆発とディストーション
-        ball.z = -10 - 0.2 * t;
+        ball.z = -12 - 0.2 * t;
         const a = Math.exp(-t * 0.3);
         camera = new Vector3(0.3 * a, 0.3 * a, 2 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
-        chromatic.uniforms.gMandelboxScale = 1.0;
+        chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
 
         chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
+        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 8)) * 50;
     }).then(32, t => {
         // 宇宙
         chromatic.uniforms.gSceneId = 1;

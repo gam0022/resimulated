@@ -1,5 +1,4 @@
-// debug uniforms
-uniform float gCameraEyeX;     // 0 -100 100
+uniform float gCameraEyeX;     // 0 -100 100 camera
 uniform float gCameraEyeY;     // 2.8 -100 100
 uniform float gCameraEyeZ;     // -8 -100 100
 uniform float gCameraTargetX;  // 0 -100 100
@@ -7,7 +6,7 @@ uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 uniform float gCameraFov;      // 13 0 180
 
-uniform float gMandelboxScale;     // 2.7 1 5
+uniform float gMandelboxScale;     // 2.7 1 5 mandel
 uniform float gMandelboxRepeat;    // 10 1 100
 uniform float gSceneEps;           // 0.001 0.00001 0.01
 uniform float gEdgeEps;            // 0.0005 0.0001 0.01
@@ -114,7 +113,7 @@ float dStage(vec3 p) {
     return dMandelFast(p, gMandelboxScale, int(gMandelboxRepeat));
 }
 
-uniform float gBallZ;               // 0 -100 100
+uniform float gBallZ;               // 0 -100 100 ball
 uniform float gBallRadius;          // 0.1 0 0.2
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 0 0 100
@@ -203,7 +202,7 @@ float revisionLogo(vec2 p, float rot) {
     return float(pat[r] >> int(5.1 * atan(p.y, p.x) + 16. + (hash11(float(r * 1231)) - 0.5) * rot) & 1);
 }
 
-uniform float gEmissiveSpeed;  // 1 0 2
+uniform float gEmissiveSpeed;  // 1 0 2 emissive
 uniform float gLogoIntensity;  // 0 0 4
 
 uniform float gEmissiveHue;           // 0.33947042613522904 0 1
@@ -289,7 +288,7 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
 
 float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughness * roughness)) - 2.0, FLT_EPS, 1.0 / FLT_EPS); }
 
-uniform float gF0;  // 0.95 0 1
+uniform float gF0;  // 0.95 0 1 lighting
 float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {

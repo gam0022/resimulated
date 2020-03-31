@@ -1,4 +1,4 @@
-uniform float gTonemapExposure;  // 0.1 0.0 2
+uniform float gTonemapExposure;  // 0.1 0.0 2 post
 
 vec3 acesFilm(const vec3 x) {
     const float a = 2.51;

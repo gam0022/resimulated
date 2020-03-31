@@ -409,6 +409,8 @@ vec3 text(vec2 uv) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
+    float l = length(uv);
+    uv += 1.5 * uv * sin(l + beat);
 
     Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);

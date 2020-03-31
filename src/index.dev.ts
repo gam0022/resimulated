@@ -104,9 +104,19 @@ window.addEventListener("load", ev => {
     hideFolder.add(saevFunctions, "saveImageSequence");
     hideFolder.add(saevFunctions, "saveSound");
 
+    console.log(chromatic.uniformArray);
+
+    const groupFolders: { [index: string]: dat.GUI } = {};
+
     chromatic.uniformArray.forEach(unifrom => {
+        let groupFolder = groupFolders[unifrom.group];
+        if (!groupFolder) {
+            groupFolder = gui.addFolder(unifrom.group);
+            groupFolders[unifrom.group] = groupFolder;
+        }
+
         if (typeof unifrom.initValue === "number") {
-            gui.add(chromatic.uniforms, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+            groupFolder.add(chromatic.uniforms, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
                 if (config.debugCamera) {
                     switch (unifrom.key) {
                         case "gCameraEyeX":
@@ -133,7 +143,7 @@ window.addEventListener("load", ev => {
                 chromatic.needsUpdate = true;
             });
         } else {
-            gui.addColor(chromatic.uniforms, unifrom.key).onChange(value => {
+            groupFolder.addColor(chromatic.uniforms, unifrom.key).onChange(value => {
                 chromatic.needsUpdate = true;
             });
         }

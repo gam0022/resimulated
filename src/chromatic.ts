@@ -457,11 +457,13 @@ export class Chromatic {
                             };
                         }
 
-                        if (result[8] !== undefined) {
-                            currentGroup = result[8];
-                        }
+                        if (!PRODUCTION) {
+                            if (result[8] !== undefined) {
+                                currentGroup = result[8];
+                            }
 
-                        uniform.group = currentGroup;
+                            uniform.group = currentGroup;
+                        }
 
                         this.uniformArray.push(uniform);
                         this.uniforms[uniform.key] = uniform.initValue;

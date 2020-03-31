@@ -210,6 +210,9 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
+uniform float gF0;  // 0.95 0 1 lighting
+float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -250,20 +253,21 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             if (h > 0.67) {
                 // land
-                intersection.baseColor = mix(vec3(0.1, 0.7, 0.3), vec3(240. / 255., 204. / 255., 170. / 255.), remap01(h, 0.7, 1.0));
+                intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.01;
                 intersection.normal = calcNormal(p, dEarthDetail, 0.01);
+                intersection.emission = vec3(0.0);
             } else {
-                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0 / 255.0, 18.0 / 255.0, 200.0 / 255.0), remap01(h, 0.0, 0.6));
+                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
                 intersection.roughness = 0.1;
                 intersection.metallic = 0.134;
+                intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
             }
 
-            intersection.emission = vec3(0.0);
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 0.5;
+            intersection.reflectance = 0.0;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
@@ -287,9 +291,6 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
 #define FLT_EPS 5.960464478e-8
 
 float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughness * roughness)) - 2.0, FLT_EPS, 1.0 / FLT_EPS); }
-
-uniform float gF0;  // 0.95 0 1 lighting
-float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 n = i.normal;

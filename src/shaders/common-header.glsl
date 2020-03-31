@@ -60,10 +60,9 @@ float noise(in vec2 p, in float scale) {
     return res;
 }
 
-float fbmTile(in vec2 p) {
+float fbm(in vec2 p, float scale) {
     float f = 0.0;
-    // Change starting scale to any integer value...
-    float scale = 10.;
+
     p = mod(p, scale);
     float amp = 0.6;
 

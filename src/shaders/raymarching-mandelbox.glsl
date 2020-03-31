@@ -132,7 +132,7 @@ float dEarth(vec3 p) { return dSphere(p, 1.0); }
 
 float dEarthDetail(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
-    float h = fbmTile(uv);
+    float h = fbm(uv, 10.0);
     return dSphere(p, 1.0) + 0.07 * h;
 }
 
@@ -246,7 +246,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
             vec2 uv = uvSphere(n);
-            float h = fbmTile(uv);
+            float h = fbm(uv, 10.0);
 
             if (h > 0.67) {
                 // land

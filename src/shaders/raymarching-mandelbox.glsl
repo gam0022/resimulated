@@ -249,6 +249,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
             vec2 uv = uvSphere(n);
+            uv.x += 0.01 * beat;
             float h = fbm(uv, 10.0);
 
             if (h > 0.67) {

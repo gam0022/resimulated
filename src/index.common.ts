@@ -316,9 +316,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gTonemapExposure = 1;
 
-        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154);
+        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         ball.z = 0;
+        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gLogoIntensity = 0;

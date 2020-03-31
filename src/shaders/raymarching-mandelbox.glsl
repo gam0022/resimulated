@@ -132,7 +132,7 @@ float dEarth(vec3 p) { return dSphere(p, 1.0); }
 
 float dEarthDetail(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
-    float h = fBm(uv);
+    float h = fbmTile(uv);
     return dSphere(p, 1.0) + 0.07 * h;
 }
 
@@ -246,7 +246,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
             vec2 uv = uvSphere(n);
-            float h = fBm(uv);
+            float h = fbmTile(uv);
 
             if (h > 0.67) {
                 // land
@@ -341,15 +341,10 @@ float fractal(vec3 p, int n) {
     return max(0., 5. * accum / tw - .7);
 }
 
-vec3 stars(vec2 uv) {
-    float a = fract(cos(uv.x * 8.3e-2 + uv.y) * 4.7e5);
-    float b = fract(sin(uv.x * 0.3e-2 + uv.y) * 1.0e5);
-    float c = mix(a, b, 0.5);
-    return vec3(pow(c, 30.0));
-}
-
 vec3 skyboxUniverse(vec2 uv) {
-    vec3 col = stars(uv);
+    // stars
+    vec3 col = vec3(1.2) * pow(fbm(uv * 200.0), 10.0);
+
     float b = saturate(cos(TAU * beat / 8.0));
 
     float f = fractal(vec3(0.2 * uv + vec2(0.3, 0.1), 1.7 + (beat - 192.0) * 0.001), 28);
@@ -382,8 +377,8 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         intersection.color = vec3(0.01);
 
         if (gSceneId == SCENE_UNIVERSE) {
-            float rdo = ray.direction.y + 0.3;
-            vec2 uv = (ray.direction.xz + ray.direction.xz * (250000.0 - 0.0) / rdo) * 0.000008;
+            float rdo = ray.direction.y + 0.6;
+            vec2 uv = (ray.direction.xz + ray.direction.xz * 250000.0 / rdo) * 0.000008;
             intersection.color += skyboxUniverse(uv);
         }
     }

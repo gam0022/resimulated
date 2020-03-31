@@ -61,6 +61,8 @@ export class Chromatic {
     playSound: () => void;
     stopSound: () => void;
 
+    debugFrameNumber: number;
+
     constructor(
         timeLength: number,
         vertexShader: string,
@@ -82,6 +84,7 @@ export class Chromatic {
             this.isPlaying = true;
             this.needsUpdate = false;
             this.time = 0;
+            this.debugFrameNumber = -1;
 
             if (GLOBAL_UNIFORMS) {
                 this.uniformArray = [];
@@ -320,6 +323,9 @@ export class Chromatic {
 
                         if (key === "iTextTexture") {
                             gl.bindTexture(gl.TEXTURE_2D, textTexture);
+                        } else if (!PRODUCTION && this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
+                            const i = Math.min(Math.floor(this.debugFrameNumber), imagePasses.length - 1);
+                            gl.bindTexture(gl.TEXTURE_2D, imagePasses[i].texture);
                         } else {
                             gl.bindTexture(gl.TEXTURE_2D, imagePasses[uniform.value].texture);
                         }
@@ -421,11 +427,13 @@ export class Chromatic {
                     pass.uniforms.iTime.value = this.time;
                     if (GLOBAL_UNIFORMS) {
                         for (const [key, value] of Object.entries(this.uniforms)) {
-                            if (typeof value === "number") {
-                                pass.uniforms[key].value = value;
-                            } else {
-                                // NOTE: for dat.GUI addColor
-                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                            if (pass.uniforms[key] !== undefined) {
+                                if (typeof value === "number") {
+                                    pass.uniforms[key].value = value;
+                                } else {
+                                    // NOTE: for dat.GUI addColor
+                                    pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                                }
                             }
                         }
                     }

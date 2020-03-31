@@ -3,8 +3,6 @@ float brightness(vec3 c) { return max(max(c.r, c.g), c.b); }
 uniform float gBloomThreshold;  // 1.0 0 100 bloom
 uniform float gBloomSoftKnee;   // 0.5 0 4
 
-bool isNan(float val) { return (val <= 0.0 || 0.0 <= val) ? false : true; }
-
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Runtime/Components/BloomComponent.cs#L65-L67
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Resources/Shaders/Bloom.shader#L86-L117
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

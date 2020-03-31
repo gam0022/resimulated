@@ -421,11 +421,13 @@ export class Chromatic {
                     pass.uniforms.iTime.value = this.time;
                     if (GLOBAL_UNIFORMS) {
                         for (const [key, value] of Object.entries(this.uniforms)) {
-                            if (typeof value === "number") {
-                                pass.uniforms[key].value = value;
-                            } else {
-                                // NOTE: for dat.GUI addColor
-                                pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                            if (pass.uniforms[key] !== undefined) {
+                                if (typeof value === "number") {
+                                    pass.uniforms[key].value = value;
+                                } else {
+                                    // NOTE: for dat.GUI addColor
+                                    pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
+                                }
                             }
                         }
                     }

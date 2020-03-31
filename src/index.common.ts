@@ -11,7 +11,7 @@ export const chromatic = new Chromatic(
     [
         //require("./shaders/kaleidoscope.glsl").default,
         require("./shaders/raymarching-mandelbox.glsl").default,
-        require("./shaders/tone-mapping.glsl").default,
+        require("./shaders/blit.glsl").default,
 
         //require("./shaders/kaleidoscope.glsl").default,
         //require("./shaders/invert.glsl").default,

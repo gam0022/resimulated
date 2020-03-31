@@ -123,6 +123,20 @@ float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
 }
 
+vec2 uvSphere(vec3 n) {
+    float u = 0.5 + atan(n.z, n.x) / TAU;
+    float v = 0.5 - asin(n.y) / PI;
+    return vec2(u, v);
+}
+
+float dEarth(vec3 p) { return dSphere(p, 1.0); }
+
+float dEarthDetail(vec3 p) {
+    vec2 uv = uvSphere(normalize(p));
+    float h = fBm(uv);
+    return dSphere(p, 1.0) + 0.07 * h;
+}
+
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
@@ -131,6 +145,10 @@ float map(vec3 p) {
     if (gSceneId == SCENE_MANDEL) {
         d = dStage(p);
     };
+
+    if (gSceneId == SCENE_UNIVERSE) {
+        d = min(d, dEarth(p));
+    }
 
     if (gBallRadius > 0.0) {
         d = min(d, dBall(p));
@@ -226,6 +244,27 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             if (gLogoIntensity > 0.0) {
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 3.0 * clamp(beat - 174.0, -1000.0, 0.0));
             }
+        } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
+            vec3 n = normalize(p);
+            vec2 uv = uvSphere(n);
+            float h = fBm(uv);
+
+            if (h > 0.67) {
+                // land
+                intersection.baseColor = mix(vec3(0.1, 0.7, 0.3), vec3(240. / 255., 204. / 255., 170. / 255.), remap01(h, 0.7, 1.0));
+                intersection.roughness = 0.4;
+                intersection.metallic = 0.01;
+                intersection.normal = calcNormal(p, dEarthDetail, 0.01);
+            } else {
+                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0 / 255.0, 18.0 / 255.0, 200.0 / 255.0), remap01(h, 0.0, 0.6));
+                intersection.roughness = 0.1;
+                intersection.metallic = 0.134;
+            }
+
+            intersection.emission = vec3(0.0);
+            intersection.transparent = false;
+            intersection.refractiveIndex = 1.2;
+            intersection.reflectance = 0.5;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
@@ -331,7 +370,9 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         intersection.color = intersection.emission;
         intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
         // intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
-        intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), vec3(2.0, 1.0, 1.0));
+
+        vec3 sunColor = (gSceneId == SCENE_MANDEL) ? vec3(2.0, 1.0, 1.0) : vec3(1.0, 0.9, 0.8);
+        intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
 
         // fog
         // intersection.color = mix(intersection.color, vec3(0.6),

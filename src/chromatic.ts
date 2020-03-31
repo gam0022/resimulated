@@ -323,7 +323,7 @@ export class Chromatic {
 
                         if (key === "iTextTexture") {
                             gl.bindTexture(gl.TEXTURE_2D, textTexture);
-                        } else if (this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
+                        } else if (!PRODUCTION && this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
                             const i = Math.min(Math.floor(this.debugFrameNumber), imagePasses.length - 1);
                             gl.bindTexture(gl.TEXTURE_2D, imagePasses[i].texture);
                         } else {

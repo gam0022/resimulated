@@ -23,6 +23,7 @@ window.addEventListener("load", ev => {
         debugCamera: false,
         debugParams: false,
         debugDisableReset: false,
+        debugFrameNumber: 0,
         resolution: "1920x1080",
         timeMode: "beat",
         bpm: 140,
@@ -55,6 +56,10 @@ window.addEventListener("load", ev => {
     miscFolder.add(config, "bpm", 50, 300).onChange(value => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
+    });
+    miscFolder.add(config, "debugFrameNumber", -1, 30, 1).onChange(value => {
+        chromatic.debugFrameNumber = value;
+        chromatic.needsUpdate = true;
     });
 
     const saevFunctions = {

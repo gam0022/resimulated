@@ -84,7 +84,7 @@ export class Chromatic {
             this.isPlaying = true;
             this.needsUpdate = false;
             this.time = 0;
-            this.debugFrameNumber = 0;
+            this.debugFrameNumber = -1;
 
             if (GLOBAL_UNIFORMS) {
                 this.uniformArray = [];

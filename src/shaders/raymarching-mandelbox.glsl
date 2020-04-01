@@ -1,5 +1,5 @@
 uniform float gSceneId;   // 0 0 2 scene
-uniform float gSceneEps;  // 0.001 0.00001 0.01
+uniform float gSceneEps;  // 0.002 0.00001 0.01
 #define SCENE_MANDEL 0.0
 #define SCENE_UNIVERSE 1.0
 

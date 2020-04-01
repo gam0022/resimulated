@@ -128,13 +128,11 @@ vec2 uvSphere(vec3 n) {
     return vec2(u, v);
 }
 
-float dEarth(vec3 p) { return dSphere(p, 1.0); }
-
-float dEarthDetail(vec3 p) {
+float dEarth(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
     uv.x += 0.01 * beat;
     float h = fbm(uv, 10.0);
-    return dSphere(p, 1.0) + 0.07 * h;
+    return dSphere(p, 1.0) + 0.05 * h;
 }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
@@ -263,7 +261,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
-                    intersection.normal = calcNormal(p, dEarthDetail, 0.01);
                     intersection.emission = vec3(0.0);
                 } else {
                     intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
@@ -278,7 +275,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.baseColor = vec3(1.0);
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.01;
-                intersection.normal = calcNormal(p, dEarthDetail, 0.01);
                 intersection.emission = vec3(0.0);
             }
 

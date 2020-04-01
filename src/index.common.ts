@@ -286,12 +286,14 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
 
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04 + 0.1 * saturate(Math.sin(Math.PI * 2 * t));
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.3;
+        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(8, t => {
         // 不穏感
         ball.z = -10 - 0.2 * t;
-        camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(-0.2 - 0.1 * t, 0.2 + 0.02 * t, 1 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
+        chromatic.uniforms.gCameraFov = remap(t, 0, 8, 13, 20);
 
         chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.01, 0.05);
 
@@ -310,15 +312,14 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gShockDistortion = a;
         }
 
-        chromatic.uniforms.gMandelboxScale = 1;
-        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.3;
+
+        chromatic.uniforms.gMandelboxScale = 1.1;
         chromatic.uniforms.gBallRadius = 0.1;
         chromatic.uniforms.gLogoIntensity = 1.0 + Math.sin(t * Math.PI * 2);
-
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
-
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatic.uniforms.gEmissiveIntensity = 6;
     }).then(16, t => {
         // 爆発とディストーション
         ball.z = -12 - 0.2 * t;
@@ -343,14 +344,17 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gBallDistortion *= Math.exp(-2 * (t - 15));
         }*/
 
+        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
+        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
+
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
 
-        chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
-        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
-        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
-        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
+        chromatic.uniforms.gEmissiveHue = 0.01;
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0;
+        chromatic.uniforms.gEmissiveHueShiftZ = remap01(t, 4, 16);
+        chromatic.uniforms.gEmissiveHueShiftXY = remap01(t, 4, 16);
     }).then(32, t => {
         // 宇宙
         chromatic.uniforms.gSceneId = 1;

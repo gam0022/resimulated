@@ -316,7 +316,7 @@ float noise2(float phi) { return fract(sin(phi * 0.011753) * 122.3762) * 2.0 - 1
 
 vec2 snare(float note, float t) {
     float i = t * 44100.0;
-    float env = exp(-t * 10.0);
+    float env = exp(-t * 10.0);  // 全音符で使うなら 10.0 じゃなくて 3.0 くらいの方がいいかも
     float v = 0.9 * env * (1.5 * noise2(i) + 0.3 * sin(100.0 * i));
     return vec2(v);
 }

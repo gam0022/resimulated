@@ -331,26 +331,11 @@ vec2 attackbass(float note, float t) {
         int index = i + indexOffset;                                                                     \
         int shift = (index % 2 == 1) ? 16 : 0;                                                           \
         int div = ((notes[index >> 1] >> shift) >> 8) & 255;                                             \
-        if (div == 1) {                                                                                  \
-            for (int j = 0; j < 16; j++) {                                                               \
-                indexes[i + j] = i;                                                                      \
-            }                                                                                            \
-            i += 16;                                                                                     \
-        } else if (div == 4) {                                                                           \
-            indexes[i + 0] = i;                                                                          \
-            indexes[i + 1] = i;                                                                          \
-            indexes[i + 2] = i;                                                                          \
-            indexes[i + 3] = i;                                                                          \
-            i += 4;                                                                                      \
-        } else if (div == 8) {                                                                           \
-            indexes[i + 0] = i;                                                                          \
-            indexes[i + 1] = i;                                                                          \
-            i += 2;                                                                                      \
-        } else if (div == 16) {                                                                          \
-            indexes[i + 0] = i;                                                                          \
-            i += 1;                                                                                      \
-        } else                                                                                           \
-            i++;                                                                                         \
+        int len = NOTE_VDIV * NOTE_VDIV / div;                                                           \
+        for (int j = 0; j < len; j++) {                                                                  \
+            indexes[i + j] = i;                                                                          \
+        }                                                                                                \
+        i += len;                                                                                        \
     }                                                                                                    \
                                                                                                          \
     float indexFloat = mod(beat * float(NOTE_VDIV), float(beatLen * NOTE_VDIV));                         \

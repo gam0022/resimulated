@@ -443,14 +443,14 @@ vec3 text(vec2 uv) {
         if (uv.x > remap(t, 0.0, 1.0, 1.0, -0.78)) {
             col *= 0.0;
         }
-    } /*else if (b < 32.0) {
+    } else if (b < 32.0) {
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        float t2 = remap01(t, 0.25, 0.5);
-        t2 = easeInOutCubic(t2);
-        if (uv.x > remap(t2, 0.0, 1.0, -0.78, 1.0)) {
+        float t = remap01(t8, 0.25, 0.5);
+        t = easeInOutCubic(t);
+        if (uv.x > remap(t, 0.0, 1.0, -0.78, 1.0)) {
             col *= 0.0;
         }
-    }*/
+    }
 
     return 0.3 * col;
 }

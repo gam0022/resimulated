@@ -1,3 +1,8 @@
+uniform float gSceneId;   // 0 0 2 scene
+uniform float gSceneEps;  // 0.002 0.00001 0.01
+#define SCENE_MANDEL 0.0
+#define SCENE_UNIVERSE 1.0
+
 uniform float gCameraEyeX;     // 0 -100 100 camera
 uniform float gCameraEyeY;     // 2.8 -100 100
 uniform float gCameraEyeZ;     // -8 -100 100
@@ -6,19 +11,13 @@ uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 uniform float gCameraFov;      // 13 0 180
 
-uniform float gMandelboxScale;     // 2.7 1 5 mandel
-uniform float gMandelboxRepeat;    // 10 1 100
-uniform float gSceneEps;           // 0.001 0.00001 0.01
-uniform float gEdgeEps;            // 0.0005 0.0001 0.01
-uniform float gEdgePower;          // 1 0.1 10
-uniform float gBaseColor;          // 0.5
-uniform float gRoughness;          // 0.1
-uniform float gMetallic;           // 0.4
-uniform float gEmissiveIntensity;  // 6.0 0 20
-
-uniform float gSceneId;  // 0 0 2
-#define SCENE_MANDEL 0.0
-#define SCENE_UNIVERSE 1.0
+uniform float gMandelboxScale;   // 2.7 1 5 mandel
+uniform float gMandelboxRepeat;  // 10 1 100
+uniform float gEdgeEps;          // 0.0005 0.0001 0.01
+uniform float gEdgePower;        // 1 0.1 10
+uniform float gBaseColor;        // 0.5
+uniform float gRoughness;        // 0.1
+uniform float gMetallic;         // 0.4
 
 uniform sampler2D iTextTexture;
 
@@ -117,6 +116,7 @@ uniform float gBallZ;               // 0 -100 100 ball
 uniform float gBallRadius;          // 0.1 0 0.2
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 0 0 100
+uniform float gLogoIntensity;       // 0 0 4
 
 float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
@@ -202,13 +202,15 @@ float revisionLogo(vec2 p, float rot) {
     return float(pat[r] >> int(5.1 * atan(p.y, p.x) + 16. + (hash11(float(r * 1231)) - 0.5) * rot) & 1);
 }
 
-uniform float gEmissiveSpeed;  // 1 0 2 emissive
-uniform float gLogoIntensity;  // 0 0 4
-
+uniform float gEmissiveIntensity;     // 6.0 0 20 emissive
+uniform float gEmissiveSpeed;         // 1 0 2
 uniform float gEmissiveHue;           // 0.33947042613522904 0 1
 uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
+
+uniform float gF0;  // 0.95 0 1 lighting
+float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
@@ -246,24 +248,29 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
             vec2 uv = uvSphere(n);
+            uv.x += 0.01 * beat;
             float h = fbm(uv, 10.0);
 
             if (h > 0.67) {
                 // land
-                intersection.baseColor = mix(vec3(0.1, 0.7, 0.3), vec3(240. / 255., 204. / 255., 170. / 255.), remap01(h, 0.7, 1.0));
+                intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.01;
                 intersection.normal = calcNormal(p, dEarthDetail, 0.01);
+                intersection.emission = vec3(0.0);
             } else {
-                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0 / 255.0, 18.0 / 255.0, 200.0 / 255.0), remap01(h, 0.0, 0.6));
+                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
                 intersection.roughness = 0.1;
                 intersection.metallic = 0.134;
+                intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
             }
 
-            intersection.emission = vec3(0.0);
+            float cloud = fbm(uv, 15.0);
+            intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
+
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 0.5;
+            intersection.reflectance = 0.0;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
@@ -287,9 +294,6 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
 #define FLT_EPS 5.960464478e-8
 
 float roughnessToExponent(float roughness) { return clamp(2.0 * (1.0 / (roughness * roughness)) - 2.0, FLT_EPS, 1.0 / FLT_EPS); }
-
-uniform float gF0;  // 0.95 0 1 lighting
-float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
 vec3 evalPointLight(inout Intersection i, vec3 v, vec3 lp, vec3 radiance) {
     vec3 n = i.normal;
@@ -402,8 +406,25 @@ vec3 text(vec2 uv) {
     return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
 }
 
+uniform float gShockDistortion;    // 0 0 1  distortion
+uniform float gExplodeDistortion;  // 0 0 1
+
+vec2 distortion(vec2 uv) {
+    float l = length(uv);
+    // uv += 1.5 * uv * sin(l + beat * PIH);
+
+    float b = mod(beat, 4.0);
+    uv += -gShockDistortion * exp(-10.0 * b) * uv * cos(l);
+
+    float explode = 30.0 * gExplodeDistortion * exp(-2.0 * l);
+    explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);
+    uv += explode * uv;
+    return uv;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
+    uv = distortion(uv);
 
     Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);

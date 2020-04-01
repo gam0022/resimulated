@@ -33,9 +33,11 @@ export const chromatic = new Chromatic(
         // window.document.body.appendChild(canvas);
 
         const texts = [
-            "RE: SIMULATED",
+            "A 64k INTRO",
             "Graphics by gam0022",
-            "Music by saddakey",
+            "Music by sadakkey",
+            "RE: SIMULATED",
+            "REALITY",
             "FMS-Cat",
             "Ctrl-Alt-Test",
             "RGBA & TBC",
@@ -335,15 +337,6 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gBallDistortionFreq = t * 10;
         }
 
-        /*if (t < 8) {
-            
-        } else if (t < 13) {
-            chromatic.uniforms.gBallDistortionFreq = 100;
-        } else {
-            chromatic.uniforms.gBallDistortionFreq = 50 + t * 10;
-            chromatic.uniforms.gBallDistortion *= Math.exp(-2 * (t - 15));
-        }*/
-
         chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
         chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
 
@@ -391,7 +384,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBlend = easeInOutCubic(1.0 - remap01(t, 0, 8));
     }).over(t => {
         // 終わり(仮)
-        chromatic.uniforms.gTonemapExposure = 0;
+        chromatic.uniforms.gBlend = -1;
     });
 
     chromatic.uniforms.gBallZ = ball.z;

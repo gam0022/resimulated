@@ -429,27 +429,35 @@ vec3 text(vec2 uv) {
 
     if (b < 0.0) {
         // nop
-    } else if (b < 8.0) {
+    } else if (b < 4.0) {
+        // 0-4 (4)
         col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
-        col *= remap(t8, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 16.0) {
+        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
+    } else if (b < 8.0) {
+        // 4-8 (4)
         col += texture(iTextTexture, textUv(uv, 1.0, vec2(0.0, 0.5), 1.5)).rgb;
         col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, -0.5), 1.5)).rgb;
-        col *= remap(t8, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 24.0) {
+        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
+    } else if (b < 16.0) {
+        // 8-16 (8)
         col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
         float t = remap01(t8, 0.5, 1.0);
         t = easeInOutCubic(t);
         if (uv.x > remap(t, 0.0, 1.0, 1.0, -0.78)) {
             col *= 0.0;
         }
-    } else if (b < 32.0) {
+    } else if (b < 24.0) {
+        // 16-24 (8)
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
         float t = remap01(t8, 0.25, 0.5);
         t = easeInOutCubic(t);
         if (uv.x > remap(t, 0.0, 1.0, -0.78, 1.0)) {
             col *= 0.0;
         }
+    } else {
+        // 24-32 (8)
+        col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
+        col *= remap(t8, 0.5, 1.0, 1.0, 0.0);
     }
 
     return 0.3 * col;

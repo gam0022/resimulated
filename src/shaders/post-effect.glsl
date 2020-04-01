@@ -1,27 +1,11 @@
-uniform float gTonemapExposure;  // 0.1 0.0 2 post
-
-vec3 acesFilm(const vec3 x) {
-    const float a = 2.51;
-    const float b = 0.03;
-    const float c = 2.43;
-    const float d = 0.59;
-    const float e = 0.14;
-    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
-}
+uniform float gChromaticAberrationIntensity;  // 0.03 0 0.1 post
+uniform float gChromaticAberrationDistance;   // 0.45 0 1
 
 uniform float gVignetteIntensity;   // 1.34 0 3
 uniform float gVignetteSmoothness;  // 2 0 5
 uniform float gVignetteRoundness;   // 1 0 1
 
-uniform float gChromaticAberrationIntensity;  // 0.03 0 0.1
-uniform float gChromaticAberrationDistance;   // 0.45 0 1
-
-float vignette(vec2 uv) {
-    vec2 d = abs(uv - 0.5) * gVignetteIntensity;
-    float roundness = (1.0 - gVignetteRoundness) * 6.0 + gVignetteRoundness;
-    d = pow(d, vec2(roundness));
-    return pow(saturate(1.0 - dot(d, d)), gVignetteSmoothness);
-}
+uniform float gTonemapExposure;  // 0.1 0.0 2 post
 
 vec3 chromaticAberration(vec2 uv) {
     vec2 d = abs(uv - 0.5);
@@ -34,6 +18,22 @@ vec3 chromaticAberration(vec2 uv) {
     col.g = texture(iPrevPass, uv).g;
     col.b = texture(iPrevPass, uv - d).b;
     return col;
+}
+
+float vignette(vec2 uv) {
+    vec2 d = abs(uv - 0.5) * gVignetteIntensity;
+    float roundness = (1.0 - gVignetteRoundness) * 6.0 + gVignetteRoundness;
+    d = pow(d, vec2(roundness));
+    return pow(saturate(1.0 - dot(d, d)), gVignetteSmoothness);
+}
+
+vec3 acesFilm(const vec3 x) {
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

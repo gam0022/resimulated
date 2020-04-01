@@ -296,9 +296,88 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     }
 }
 
+bool equals(float x, float y) { return abs(x - y) < 0.0001; }
+
+// http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
+bool intersectAABB(inout Intersection intersection, inout Ray ray, vec3 lb, vec3 rt) {
+    vec3 dirfrac;
+    dirfrac.x = 1.0 / ray.direction.x;
+    dirfrac.y = 1.0 / ray.direction.y;
+    dirfrac.z = 1.0 / ray.direction.z;
+
+    float t1 = (lb.x - ray.origin.x) * dirfrac.x;
+    float t2 = (rt.x - ray.origin.x) * dirfrac.x;
+    float t3 = (lb.y - ray.origin.y) * dirfrac.y;
+    float t4 = (rt.y - ray.origin.y) * dirfrac.y;
+    float t5 = (lb.z - ray.origin.z) * dirfrac.z;
+    float t6 = (rt.z - ray.origin.z) * dirfrac.z;
+
+    float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+    float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+    if (tmin <= tmax && 0.0 <= tmin && tmin < intersection.distance) {
+        intersection.hit = true;
+        intersection.position = ray.origin + ray.direction * (tmin > 0.0 ? tmin : tmax);
+        intersection.distance = tmin;
+
+        vec3 uvw = (intersection.position - lb) / (rt - lb);
+
+        // 交点座標から法線を求める
+        // 高速化のためにY軸から先に判定する
+        if (equals(intersection.position.y, rt.y)) {
+            intersection.normal = vec3(0.0, 1.0, 0.0);
+            intersection.uv = uvw.xz;
+        } else if (equals(intersection.position.y, lb.y)) {
+            intersection.normal = vec3(0.0, -1.0, 0.0);
+            intersection.uv = uvw.xz;
+        } else if (equals(intersection.position.x, lb.x)) {
+            intersection.normal = vec3(-1.0, 0.0, 0.0);
+            intersection.uv = uvw.zy;
+        } else if (equals(intersection.position.x, rt.x)) {
+            intersection.normal = vec3(1.0, 0.0, 0.0);
+            intersection.uv = uvw.zy;
+        } else if (equals(intersection.position.z, lb.z)) {
+            intersection.normal = vec3(0.0, 0.0, -1.0);
+            intersection.uv = uvw.xy;
+        } else if (equals(intersection.position.z, rt.z)) {
+            intersection.normal = vec3(0.0, 0.0, 1.0);
+            intersection.uv = uvw.xy;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
+    uv -= p;
+    uv /= scale;
+
+    float offset = 128.0 / 2048.0;
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
+    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
+
+    return uv;
+}
+
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
+
+    if (gSceneId == SCENE_UNIVERSE && beat > 200.0) {
+        Intersection textIntersection = intersection;
+        if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
+            vec2 uv = 2.0 * textIntersection.uv - 1.0;
+            float id = 5.0 + floor((beat - 200.0) / 4.0);
+            vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
+            // alpha test
+            if (length(t) > 0.01) {
+                intersection.emission = 0.5 * t;
+                intersection.hit = true;
+            }
+        }
+    }
 }
 
 #define FLT_EPS 5.960464478e-8
@@ -410,18 +489,6 @@ vec2 distortion(vec2 uv) {
     float explode = 30.0 * gExplodeDistortion * exp(-2.0 * l);
     explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);
     uv += explode * uv;
-    return uv;
-}
-
-vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
-    uv -= p;
-    uv /= scale;
-
-    float offset = 128.0 / 2048.0;
-    uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
-    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
-
     return uv;
 }
 

@@ -38,6 +38,7 @@ export const chromatic = new Chromatic(
             "Music by sadakkey",
             "RE: SIMULATED",
             "REALITY",
+            "MERCURY",
             "FMS-Cat",
             "Ctrl-Alt-Test",
             "RGBA & TBC",
@@ -356,7 +357,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gTonemapExposure = 1;// あとで 1 に戻す
 
-        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);

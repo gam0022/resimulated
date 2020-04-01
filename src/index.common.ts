@@ -314,6 +314,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
         chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 8));
+        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 7.5, 8));
     }).then(32, t => {
         // 宇宙
         chromatic.uniforms.gSceneId = 1;

@@ -446,14 +446,17 @@ vec3 text(vec2 uv) {
         // RE: SIMULATED -> RE
         float t = remap01(t4, 0.0, 1.0);
         // t = easeInOutCubic(t);
-        t = pow(t, 1.5);
+        // t = pow(t, 1.5);
 
         float glitch = 0.0;
-        float fade = uv.x - remap(t, 0.0, 1.0, 1.0, -0.78);
+        float fade = uv.x - remap(t, 0.25, 1.0, 2.0, -0.78);
         if (fade > 0.0) {
-            glitch = remap(fbm(vec2(uv.x, beat)), 0.0, 1.0, 0.1, 1.0);
-            fade = saturate(remap01(fade, 0.3, 0.0));
+            glitch = saturate(0.8 - fade) * fbm(uv);
+            fade = saturate(0.5 - fade) * saturate(0.7 - abs(uv.y));
+        } else {
+            fade = 1.0;
         }
+
         col += fade * texture(iTextTexture, textUv(uv, 3.0 + glitch, vec2(0.0, 0.0), 3.0)).rgb;
     } else if (b < 24.0) {
         // 20-24 (4)

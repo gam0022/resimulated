@@ -5,20 +5,17 @@ import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from ".
 declare var PRODUCTION: boolean;
 
 export const chromatic = new Chromatic(
-    96,// デモの長さ（秒）
+    109.714285714,// デモの長さ（秒）
     require("./shaders/vertex.glsl").default,
+
+    // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
-        //require("./shaders/kaleidoscope.glsl").default,
         require("./shaders/raymarching-mandelbox.glsl").default,
         require("./shaders/post-effect.glsl").default,
-
-        //require("./shaders/kaleidoscope.glsl").default,
-        //require("./shaders/invert.glsl").default,
-        //require("./shaders/dot-matrix.glsl").default,
-        //require("./shaders/chromatic-aberration.glsl").default,
     ],
 
+    // Bloom
     1,
     5,
     require("./shaders/bloom-prefilter.glsl").default,
@@ -26,7 +23,10 @@ export const chromatic = new Chromatic(
     require("./shaders/bloom-upsample.glsl").default,
     require("./shaders/bloom-final.glsl").default,
 
+    // Sound Shader
     require("./shaders/sound-template.glsl").default,
+
+    // Text Texture
     gl => {
         const canvas = document.createElement("canvas");
         const textCtx = canvas.getContext("2d");
@@ -356,7 +356,24 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftZ = remap01(t, 4, 16);
         chromatic.uniforms.gEmissiveHueShiftXY = remap01(t, 4, 16);
     }).then(32, t => {
-        // 宇宙
+        // 惑星でグリーティング
+        chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gSceneEps = 0.003;
+        chromatic.uniforms.gTonemapExposure = 1;
+
+        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
+        target = new Vector3(0, 0, 0);
+        ball.z = 0;
+        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
+
+        chromatic.uniforms.gBallRadius = 0;
+        chromatic.uniforms.gLogoIntensity = 0;
+        chromatic.uniforms.gF0 = 0.1094292903071209;
+        chromatic.uniforms.gBloomIntensity = 5.199888174447861;
+        chromatic.uniforms.gBloomThreshold = 0.7188785494628379;
+        chromatic.uniforms.gBlend = easeInOutCubic(1.0 - remap01(t, 0, 8));
+    }).then(32, t => {
+        // クレジット
         chromatic.uniforms.gSceneId = 1;
         chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gTonemapExposure = 1;

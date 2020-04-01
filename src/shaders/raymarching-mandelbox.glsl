@@ -1,3 +1,8 @@
+uniform float gSceneId;   // 0 0 2 scene
+uniform float gSceneEps;  // 0.001 0.00001 0.01
+#define SCENE_MANDEL 0.0
+#define SCENE_UNIVERSE 1.0
+
 uniform float gCameraEyeX;     // 0 -100 100 camera
 uniform float gCameraEyeY;     // 2.8 -100 100
 uniform float gCameraEyeZ;     // -8 -100 100
@@ -6,19 +11,13 @@ uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 uniform float gCameraFov;      // 13 0 180
 
-uniform float gMandelboxScale;     // 2.7 1 5 mandel
-uniform float gMandelboxRepeat;    // 10 1 100
-uniform float gSceneEps;           // 0.001 0.00001 0.01
-uniform float gEdgeEps;            // 0.0005 0.0001 0.01
-uniform float gEdgePower;          // 1 0.1 10
-uniform float gBaseColor;          // 0.5
-uniform float gRoughness;          // 0.1
-uniform float gMetallic;           // 0.4
-uniform float gEmissiveIntensity;  // 6.0 0 20
-
-uniform float gSceneId;  // 0 0 2
-#define SCENE_MANDEL 0.0
-#define SCENE_UNIVERSE 1.0
+uniform float gMandelboxScale;   // 2.7 1 5 mandel
+uniform float gMandelboxRepeat;  // 10 1 100
+uniform float gEdgeEps;          // 0.0005 0.0001 0.01
+uniform float gEdgePower;        // 1 0.1 10
+uniform float gBaseColor;        // 0.5
+uniform float gRoughness;        // 0.1
+uniform float gMetallic;         // 0.4
 
 uniform sampler2D iTextTexture;
 
@@ -117,6 +116,7 @@ uniform float gBallZ;               // 0 -100 100 ball
 uniform float gBallRadius;          // 0.1 0 0.2
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 0 0 100
+uniform float gLogoIntensity;       // 0 0 4
 
 float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
@@ -202,9 +202,8 @@ float revisionLogo(vec2 p, float rot) {
     return float(pat[r] >> int(5.1 * atan(p.y, p.x) + 16. + (hash11(float(r * 1231)) - 0.5) * rot) & 1);
 }
 
-uniform float gEmissiveSpeed;  // 1 0 2 emissive
-uniform float gLogoIntensity;  // 0 0 4
-
+uniform float gEmissiveIntensity;     // 6.0 0 20 emissive
+uniform float gEmissiveSpeed;         // 1 0 2
 uniform float gEmissiveHue;           // 0.33947042613522904 0 1
 uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1

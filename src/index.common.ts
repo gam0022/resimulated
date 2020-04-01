@@ -352,8 +352,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(32, t => {
         // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gPlanetId = 1;
         chromatic.uniforms.gSceneEps = 0.003;
-        chromatic.uniforms.gTonemapExposure = 0.1;// あとで 1 に戻す
+        chromatic.uniforms.gTonemapExposure = 1;// あとで 1 に戻す
 
         camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);

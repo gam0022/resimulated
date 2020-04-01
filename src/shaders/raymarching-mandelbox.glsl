@@ -132,6 +132,7 @@ float dEarth(vec3 p) { return dSphere(p, 1.0); }
 
 float dEarthDetail(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
+    uv.x += 0.01 * beat;
     float h = fbm(uv, 10.0);
     return dSphere(p, 1.0) + 0.07 * h;
 }
@@ -212,6 +213,8 @@ uniform float gEmissiveHueShiftXY;    // 0 0 1
 uniform float gF0;  // 0.95 0 1 lighting
 float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
+uniform float gPlanetId;  // 0 0 10 planet
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -254,22 +257,30 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             uv.x += 0.01 * beat;
             float h = fbm(uv, 10.0);
 
-            if (h > 0.67) {
-                // land
-                intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
+            if (gPlanetId == 0.0) {
+                if (h > 0.67) {
+                    // land
+                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.normal = calcNormal(p, dEarthDetail, 0.01);
+                    intersection.emission = vec3(0.0);
+                } else {
+                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
+                    intersection.roughness = 0.1;
+                    intersection.metallic = 0.134;
+                    intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
+                }
+
+                float cloud = fbm(uv, 15.0);
+                intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
+            } else {
+                intersection.baseColor = vec3(1.0);
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.01;
                 intersection.normal = calcNormal(p, dEarthDetail, 0.01);
                 intersection.emission = vec3(0.0);
-            } else {
-                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
-                intersection.roughness = 0.1;
-                intersection.metallic = 0.134;
-                intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
             }
-
-            float cloud = fbm(uv, 15.0);
-            intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
 
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
@@ -391,7 +402,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     }
 }
 
-uniform float gShockDistortion;    // 0 0 1  distortion
+uniform float gShockDistortion;    // 0 0 1 distortion
 uniform float gExplodeDistortion;  // 0 0 1
 
 vec2 distortion(vec2 uv) {

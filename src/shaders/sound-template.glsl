@@ -311,6 +311,16 @@ vec2 attackbass(float note, float t) {
     return vec2(dist(v * amp, 2.0));
 }
 
+// https://www.shadertoy.com/view/4sSSWz
+float noise2(float phi) { return fract(sin(phi * 0.011753) * 122.3762) * 2.0 - 1.0; }
+
+vec2 snare(float note, float t) {
+    float i = t * 44100.0;
+    float env = exp(-t * 10.0);
+    float v = 0.9 * env * (1.5 * noise2(i) + 0.3 * sin(100.0 * i));
+    return vec2(v);
+}
+
 // 1ビートを最大何分割するか。16分音符に対応するなら2（本当なら4だが、16bitずつpaddingすることで2にした）
 #define NOTE_DIV 2
 #define NOTE_VDIV 4
@@ -3635,6 +3645,131 @@ vec2 chordSquare3(float beat, float time) {
     return ret;
 }
 
+vec2 snare1(float beat, float time) {
+// 1つの展開のビート数
+#define SNARE1_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define SNARE1_DEV_PAT 4
+
+// 展開の長さ
+#define SNARE1_DEV_LEN 16
+
+    // ノート番号
+    // F: 4分音符
+    // E: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[SNARE1_BEAT_LEN * NOTE_DIV * SNARE1_DEV_PAT] notes = int[](
+        //
+        // 展開0
+        //
+
+        // 1
+        F(0),
+
+        // 2
+        F(0),
+
+        // 3
+        F(0),
+
+        // 4
+        F(0),
+
+        // 5
+        F(0),
+
+        // 6
+        F(0),
+
+        // 7
+        F(0),
+
+        // 8
+        F(0),
+
+        //
+        // 展開1（とりあえず今は展開0と同じ）
+        //
+
+        // 1
+        S4(1, 1, 0, 1),
+
+        // 2
+        S4(1, 0, 1, 1),
+
+        // 3
+        S4(1, 1, 0, 1),
+
+        // 4
+        S4(1, 0, 1, 1),
+
+        // 5
+        S4(1, 1, 0, 1),
+
+        // 6
+        S4(1, 0, 1, 1),
+
+        // 7
+        S4(1, 1, 0, 1),
+
+        // 8
+        S4(1, 0, 72, 72),
+
+        //
+        // 展開2
+        //
+
+        // 1
+        S4(1, 1, 0, 1),
+
+        // 2
+        S4(1, 0, 1, 1),
+
+        // 3
+        S4(1, 1, 0, 1),
+
+        // 4
+        S4(1, 0, 1, 1),
+
+        // 5
+        S4(1, 1, 0, 1),
+
+        // 6
+        S4(1, 0, 1, 1),
+
+        // 7
+        S4(1, 1, 0, 1),
+
+        // 8
+        S4(0, 0, 1, 1),
+
+        //
+        // 展開3
+        //
+
+        // 1
+        O(1),
+
+        // 5
+        S4(1, 1, 0, 1),
+
+        // 6
+        S4(1, 0, 1, 1),
+
+        // 7
+        S4(1, 1, 0, 1),
+
+        // 8
+        S4(0, 0, 1, 1));
+
+    // 展開 #define SNARE1_DEV_LEN 8　変える
+    int[SNARE1_DEV_LEN] development = int[](2, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3);
+    SEQUENCER(beat, time, SNARE1_BEAT_LEN, SNARE1_DEV_PAT, SNARE1_DEV_LEN, notes, development, snare)
+    return ret;
+}
+
 vec2 mainSound(float time) {
     float beat = timeToBeat(time);
     vec2 ret = vec2(0.0);
@@ -3670,12 +3805,15 @@ vec2 mainSound(float time) {
     ret += vec2(0.15, 0.15) * sidechain2 * chordSquare2(beat, time);   //
     ret += vec2(0.2, 0.1) * sidechain2 * chordSquare3(beat, time);     //
 
-    // supersaw以外の音をMute
-    // ret = vec2(0.0);
-
-    // supersawのテスト
+    // supersaw
     ret += vec2(0.02, 0.08) * sidechain * introSupersaw1(beat, time);
     ret += vec2(0.08, 0.02) * sidechain2 * introSupersaw2(beat, time);
+
+    // ここまでの音をMute
+    ret = vec2(0.0);
+
+    // snare
+    ret += vec2(0.3, 0.3) * snare1(beat, time);
 
     return clamp(ret, -1.0, 1.0);
 }

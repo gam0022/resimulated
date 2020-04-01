@@ -391,24 +391,6 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     }
 }
 
-vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
-    uv -= p;
-    uv /= scale;
-
-    float offset = 128.0 / 2048.0;
-    uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
-    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
-
-    return uv;
-}
-
-vec3 text(vec2 uv) {
-    float id = floor(beat / 4.0);
-    float scale = (id == 0.0) ? 3.0 : 2.0;
-    return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
-}
-
 uniform float gShockDistortion;    // 0 0 1  distortion
 uniform float gExplodeDistortion;  // 0 0 1
 
@@ -422,6 +404,41 @@ vec2 distortion(vec2 uv) {
     explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);
     uv += explode * uv;
     return uv;
+}
+
+vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
+    uv -= p;
+    uv /= scale;
+
+    float offset = 128.0 / 2048.0;
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
+    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
+
+    return uv;
+}
+
+vec3 text(vec2 uv) {
+    vec3 col = vec3(0.0);
+    float b = beat - 224.0;
+    float t = mod(b, 8.0) / 8.0;
+    int i = int(b / 8.0);
+    float kick = sin(TAU * t);
+
+    if (b < 0.0) {
+        // nop
+    } else if (i == 0) {
+        col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
+    } else if (i == 1) {
+        col += texture(iTextTexture, textUv(uv, 1.0, vec2(0.0, 0.5), 1.5)).rgb;
+        col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, -0.5), 1.5)).rgb;
+    } else if (i == 2) {
+        col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
+    } else if (i == 3) {
+        col += texture(iTextTexture, textUv(uv, 4.0, vec2(0.0, 0.0), 3.0)).rgb;
+    }
+
+    return 0.3 * col;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

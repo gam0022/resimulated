@@ -124,6 +124,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     });
 
     new Timeline(beat).then(8, t => {
+        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remap01(t, 0, 4));
         chromatic.uniforms.gTonemapExposure = 0.2;
 
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
@@ -352,12 +353,12 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;
         chromatic.uniforms.gSceneEps = 0.003;
-        chromatic.uniforms.gTonemapExposure = 1;
+        chromatic.uniforms.gTonemapExposure = 0.1;// あとで 1 に戻す
 
         camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         ball.z = 0;
-        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
+        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
@@ -366,18 +367,17 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;
-        chromatic.uniforms.gSceneEps = 0.003;
+        chromatic.uniforms.gSceneEps = 0.005;
         chromatic.uniforms.gTonemapExposure = 1;
 
-        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(-47.38, -0.85, 12.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         ball.z = 0;
-        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
+        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = -easeInOutCubic(1.0 - remap01(t, 0, 8));
     }).over(t => {
         // 終わり(仮)
         chromatic.uniforms.gBlend = -1;

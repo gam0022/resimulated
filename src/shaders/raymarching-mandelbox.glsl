@@ -418,11 +418,12 @@ vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
     return uv;
 }
 
-vec3 text(vec2 uv) {
+void text(vec2 uv, inout vec3 result) {
     vec3 col = vec3(0.0);
     float b = beat - 224.0;
     float t4 = mod(b, 4.0) / 4.0;
     float t8 = mod(b, 8.0) / 8.0;
+    float brightness = 1.0;
 
     if (b < 0.0) {
         // nop
@@ -446,13 +447,13 @@ vec3 text(vec2 uv) {
         // RE: SIMULATED -> RE
         float t = remap01(t4, 0.0, 1.0);
         // t = easeInOutCubic(t);
-        // t = pow(t, 1.5);
+        // t = pow(t4, 2.0);
 
         float glitch = 0.0;
-        float fade = uv.x - remap(t, 0.25, 1.0, 2.0, -0.78);
+        float fade = uv.x - remap(t, 0.0, 1.0, 1.6, -0.78);
         if (fade > 0.0) {
-            glitch = saturate(0.8 - fade) * fbm(uv);
-            fade = saturate(0.5 - fade) * saturate(0.7 - abs(uv.y));
+            glitch = fade * hash11(uv.x);
+            fade = saturate(0.8 - fade) * saturate(0.8 - abs(uv.y));
         } else {
             fade = 1.0;
         }
@@ -465,6 +466,7 @@ vec3 text(vec2 uv) {
         if (uv.x > -0.78) {
             col *= 0.0;
         }
+        brightness = remap(t4, 0.0, 1.0, 1.0, 0.5);
     } else {
         // 24-32 (8)
         // REALITY
@@ -476,9 +478,11 @@ vec3 text(vec2 uv) {
             col *= 0.0;
         }
         col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
+        brightness = remap(t8, 0.0, 1.0, 0.5, 0.0);
     }
 
-    return 0.3 * col;
+    result *= brightness;
+    result += 0.3 * col;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -521,7 +525,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         }
     }
 
-    color += text(uv);
+    text(uv, color);
 
     fragColor = vec4(color, 1.0);
 }

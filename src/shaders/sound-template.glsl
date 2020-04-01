@@ -315,6 +315,10 @@ vec2 attackbass(float note, float t) {
 #define NOTE_DIV 2
 #define NOTE_VDIV 4
 
+#define O(a)                                                                                                                                                                                 \
+    (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), \
+        (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16)
+
 #define F(a) (a | 4 << 8) | ((a | 4 << 8) << 16), (a | 4 << 8) | ((a | 4 << 8) << 16)
 #define E2(a, b) (a | 8 << 8) | ((a | 8 << 8) << 16), (b | 8 << 8) | ((b | 8 << 8) << 16)
 #define S4(a, b, c, d) (a | 16 << 8) | ((b | 16 << 8) << 16), (c | 16 << 8) | ((d | 16 << 8) << 16)
@@ -327,7 +331,12 @@ vec2 attackbass(float note, float t) {
         int index = i + indexOffset;                                                                     \
         int shift = (index % 2 == 1) ? 16 : 0;                                                           \
         int div = ((notes[index >> 1] >> shift) >> 8) & 255;                                             \
-        if (div == 4) {                                                                                  \
+        if (div == 1) {                                                                                  \
+            for (int j = 0; j < 16; j++) {                                                               \
+                indexes[i + j] = i;                                                                      \
+            }                                                                                            \
+            i += 16;                                                                                     \
+        } else if (div == 4) {                                                                           \
             indexes[i + 0] = i;                                                                          \
             indexes[i + 1] = i;                                                                          \
             indexes[i + 2] = i;                                                                          \

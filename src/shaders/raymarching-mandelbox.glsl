@@ -422,26 +422,24 @@ vec3 text(vec2 uv) {
     vec3 col = vec3(0.0);
     float b = beat - 224.0;
     float t = mod(b, 8.0) / 8.0;
-    int i = int(b / 8.0);
-    float kick = sin(TAU * t);
 
     if (b < 0.0) {
         // nop
-    } else if (i == 0) {
+    } else if (b < 8.0) {
         col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
         col *= remap(t, 0.5, 1.0, 1.0, 0.0);
-    } else if (i == 1) {
+    } else if (b < 16.0) {
         col += texture(iTextTexture, textUv(uv, 1.0, vec2(0.0, 0.5), 1.5)).rgb;
         col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, -0.5), 1.5)).rgb;
         col *= remap(t, 0.5, 1.0, 1.0, 0.0);
-    } else if (i == 2) {
+    } else if (b < 24.0) {
         col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
         float t2 = remap01(t, 0.85, 1.0);
         t2 = easeInOutCubic(t2);
         if (uv.x > remap(t2, 0.0, 1.0, 1.0, -0.78)) {
             col *= 0.0;
         }
-    } else if (i == 3) {
+    } else if (b < 32.0) {
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
         float t2 = remap01(t, 0.25, 0.5);
         t2 = easeInOutCubic(t2);

@@ -421,9 +421,6 @@ vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
 vec3 text(vec2 uv) {
     vec3 col = vec3(0.0);
     float b = beat - 224.0;
-
-    // b = 19.999;
-
     float t4 = mod(b, 4.0) / 4.0;
     float t8 = mod(b, 8.0) / 8.0;
 
@@ -447,13 +444,17 @@ vec3 text(vec2 uv) {
     } else if (b < 20.0) {
         // 16-20 (4)
         // RE: SIMULATED -> RE
-        col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
-        float t = remap01(t4, 0.5, 1.0);
+        float t = remap01(t4, 0.0, 1.0);
         // t = easeInOutCubic(t);
-        t = pow(t, 4.0);
-        if (uv.x > remap(t, 0.0, 1.0, 1.0, -0.78)) {
-            col *= 0.0;
+        t = pow(t, 1.5);
+
+        float glitch = 0.0;
+        float fade = uv.x - remap(t, 0.0, 1.0, 1.0, -0.78);
+        if (fade > 0.0) {
+            glitch = remap(fbm(vec2(uv.x, beat)), 0.0, 1.0, 0.1, 1.0);
+            fade = saturate(remap01(fade, 0.3, 0.0));
         }
+        col += fade * texture(iTextTexture, textUv(uv, 3.0 + glitch, vec2(0.0, 0.0), 3.0)).rgb;
     } else if (b < 24.0) {
         // 20-24 (4)
         // RE

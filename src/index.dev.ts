@@ -12,12 +12,9 @@ window.addEventListener("load", ev => {
     chromatic.init();
     chromatic.play();
 
-
     // dat.GUI
     const gui = new dat.GUI({ width: 1000 });
     gui.useLocalStorage = true;
-
-    const miscFolder = gui.addFolder("misc");
 
     const config = {
         debugCamera: false,
@@ -28,7 +25,8 @@ window.addEventListener("load", ev => {
         bpm: 140,
     }
 
-    gui.add(config, "debugCamera").onChange(value => {
+    const debugFolder = gui.addFolder("debug");
+    debugFolder.add(config, "debugCamera").onChange(value => {
         if (value) {
             camera.position.x = chromatic.uniforms.gCameraEyeX;
             camera.position.y = chromatic.uniforms.gCameraEyeY;
@@ -40,12 +38,14 @@ window.addEventListener("load", ev => {
 
         chromatic.needsUpdate = true;
     });
-    gui.add(config, "debugParams").onChange(value => {
+    debugFolder.add(config, "debugParams").onChange(value => {
         chromatic.needsUpdate = true;
     });
-    gui.add(config, "debugDisableReset").onChange(value => {
+    debugFolder.add(config, "debugDisableReset").onChange(value => {
         chromatic.needsUpdate = true;
     });
+
+    const miscFolder = gui.addFolder("misc");
     miscFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "1920x1080", "1600x900", "1280x720"]).onChange(value => {
         onResolutionCange();
     });
@@ -56,6 +56,7 @@ window.addEventListener("load", ev => {
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
         onBeatLengthUpdate();
     });
+    // NOTE: 使用頻度が低いのでmisc送りに
     miscFolder.add(chromatic, "debugFrameNumber", -1, 30, 1).onChange(value => {
         chromatic.needsUpdate = true;
     });

@@ -360,10 +360,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
 
         chromatic.uniforms.gBallRadius = 0;
-        chromatic.uniforms.gLogoIntensity = 0;
-        chromatic.uniforms.gF0 = 0.1094292903071209;
-        chromatic.uniforms.gBloomIntensity = 5.199888174447861;
-        chromatic.uniforms.gBloomThreshold = 0.7188785494628379;
+        chromatic.uniforms.gBloomIntensity = 5;
+        chromatic.uniforms.gBloomThreshold = 0.7;
         chromatic.uniforms.gBlend = easeInOutCubic(1.0 - remap01(t, 0, 8));
     }).then(32, t => {
         // クレジット
@@ -377,11 +375,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
 
         chromatic.uniforms.gBallRadius = 0;
-        chromatic.uniforms.gLogoIntensity = 0;
-        chromatic.uniforms.gF0 = 0.1094292903071209;
-        chromatic.uniforms.gBloomIntensity = 5.199888174447861;
-        chromatic.uniforms.gBloomThreshold = 0.7188785494628379;
-        chromatic.uniforms.gBlend = easeInOutCubic(1.0 - remap01(t, 0, 8));
+        chromatic.uniforms.gBloomIntensity = 5;
+        chromatic.uniforms.gBloomThreshold = 0.7;
+        chromatic.uniforms.gBlend = -easeInOutCubic(1.0 - remap01(t, 0, 8));
     }).over(t => {
         // 終わり(仮)
         chromatic.uniforms.gBlend = -1;

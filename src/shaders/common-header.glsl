@@ -85,6 +85,8 @@ float noise(in vec2 p) {
     return mix(mix(hash12(i + vec2(0.0, 0.0)), hash12(i + vec2(1.0, 0.0)), u.x), mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
 }
 
+float easeInOutCubic(float t) { return t < 0.5 ? 4.0 * t * t * t : (t - 1.0) * (2.0 * t - 2.0) * (2.0 * t - 2.0) + 1.0; }
+
 float fbm(in vec2 uv) {
     float f = 0.0;
     mat2 m = mat2(1.6, 1.2, -1.2, 1.6);

@@ -267,54 +267,90 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
         chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
-    }).then(16, t => {
-        // Revisonロゴをズーム
+    }).then(8, t => {
+        // Revisonロゴ
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 1 + 0.003 * t * t).add(ball);
         target = ball.scale(1);
 
-        if (t >= 14) {
-            //chromatic.uniforms.gCameraFov = 6;
-        }
-
-        chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
+        chromatic.uniforms.gMandelboxScale = 1.32 - 0.04 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
 
         chromatic.uniforms.gLogoIntensity = remap(t, 4, 8, 0.02, 2);
+        if (t >= 7) {
+            const a = Math.exp(-10 * (t - 7));
+            chromatic.uniforms.gShockDistortion = a;
+            chromatic.uniforms.gLogoIntensity += a;
+        }
+
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04 + 0.1 * saturate(Math.sin(Math.PI * 2 * t));
-
         chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
     }).then(8, t => {
-        // Revisonロゴ ズームアウト
+        // 不穏感
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
 
+        chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.01, 0.05);
+
+        if (t < 2) {
+            chromatic.uniforms.gBallDistortionFreq = 12;
+        } else if (t < 4) {
+            chromatic.uniforms.gBallDistortionFreq = 20;
+        } else if (t < 6) {
+            chromatic.uniforms.gBallDistortionFreq = 20 + t * 5;
+        } else {
+            chromatic.uniforms.gBallDistortionFreq = 30;
+        }
+
+        if (t >= 7) {
+            const a = Math.exp(-10 * (t - 7));
+            chromatic.uniforms.gShockDistortion = a;
+        }
+
         chromatic.uniforms.gMandelboxScale = 1;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
+        chromatic.uniforms.gLogoIntensity = 1.0 + Math.sin(t * Math.PI * 2);
 
-        chromatic.uniforms.gLogoIntensity = 1;
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
 
         chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
-    }).then(8, t => {
+    }).then(16, t => {
         // 爆発とディストーション
         ball.z = -12 - 0.2 * t;
         const a = Math.exp(-t * 0.3);
         camera = new Vector3(0.3 * a, 0.3 * a, 2 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
+
+        const b = (t % 1);
+        chromatic.uniforms.gBallDistortion = 0.1 * Math.exp(-5 * b);
+        chromatic.uniforms.gBallDistortionFreq = remap(t, 0, 16, 25, 40);
+
+        if (t > 4) {
+            chromatic.uniforms.gBallDistortionFreq = t * 10;
+        }
+
+        /*if (t < 8) {
+            
+        } else if (t < 13) {
+            chromatic.uniforms.gBallDistortionFreq = 100;
+        } else {
+            chromatic.uniforms.gBallDistortionFreq = 50 + t * 10;
+            chromatic.uniforms.gBallDistortion *= Math.exp(-2 * (t - 15));
+        }*/
+
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
 
         chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
-        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 8));
-        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 7.5, 8));
+        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
+        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
     }).then(32, t => {
         // 宇宙
         chromatic.uniforms.gSceneId = 1;
@@ -331,6 +367,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gF0 = 0.1094292903071209;
         chromatic.uniforms.gBloomIntensity = 5.199888174447861;
         chromatic.uniforms.gBloomThreshold = 0.7188785494628379;
+        chromatic.uniforms.gBlend = easeInOutCubic(1.0 - remap01(t, 0, 8));
     }).over(t => {
         // 終わり(仮)
         chromatic.uniforms.gTonemapExposure = 0;

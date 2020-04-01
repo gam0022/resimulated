@@ -114,9 +114,9 @@ float dStage(vec3 p) {
 
 uniform float gBallZ;               // 0 -100 100 ball
 uniform float gBallRadius;          // 0.1 0 0.2
-uniform float gBallDistortion;      // 0.0 0 0.1
-uniform float gBallDistortionFreq;  // 0 0 100
 uniform float gLogoIntensity;       // 0 0 4
+uniform float gBallDistortion;      // 0.0 0 0.1
+uniform float gBallDistortionFreq;  // 30 0 100
 
 float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
@@ -243,7 +243,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.reflectance = 1.0;
 
             if (gLogoIntensity > 0.0) {
-                intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 3.0 * clamp(beat - 174.0, -1000.0, 0.0));
+                float b = beat - 160.0;
+                float r = remap01(b, 0.0, 7.0);
+                r = r - 1.0;
+                intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
@@ -413,8 +416,7 @@ vec2 distortion(vec2 uv) {
     float l = length(uv);
     // uv += 1.5 * uv * sin(l + beat * PIH);
 
-    float b = mod(beat, 4.0);
-    uv += -gShockDistortion * exp(-10.0 * b) * uv * cos(l);
+    uv += -gShockDistortion * uv * cos(l);
 
     float explode = 30.0 * gExplodeDistortion * exp(-2.0 * l);
     explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);

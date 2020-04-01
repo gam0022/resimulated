@@ -434,7 +434,7 @@ vec3 text(vec2 uv) {
         col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, -0.5), 1.5)).rgb;
     } else if (i == 2) {
         col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
-        if (t > 0.5 && uv.x > 1.0 - remap(t - 0.5, 0.0, 1.0, 0.0, 3.5)) {
+        if (t > 0.5 && uv.x > remap(t - 0.5, 0.0, 1.0, 1.0, -2.5)) {
             col *= 0.0;
         }
     } else if (i == 3) {

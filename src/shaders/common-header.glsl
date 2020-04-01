@@ -102,8 +102,8 @@ float fbm(in vec2 uv) {
 }
 
 // https://www.shadertoy.com/view/3tX3R4
-float remap(float val, float im, float ix, float om, float ox) { return clamp(om + (val - im) * (ox - om) / (ix - im), om, ox); }
-
+float clamp2(float x, float min, float max) { return (min < max) ? clamp(x, min, max) : clamp(x, max, min); }
+float remap(float val, float im, float ix, float om, float ox) { return clamp2(om + (val - im) * (ox - om) / (ix - im), om, ox); }
 float remap01(float val, float im, float ix) { return remap(val, im, ix, 0.0, 1.0); }  // TODO: optimize
 
 vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {

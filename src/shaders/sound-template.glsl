@@ -3771,6 +3771,9 @@ vec2 snare1(float beat, float time) {
 }
 
 vec2 mainSound(float time) {
+    // 編集用に時間を途中からすすめる
+    // time += 10.0;
+
     float beat = timeToBeat(time);
     vec2 ret = vec2(0.0);
 
@@ -3810,7 +3813,7 @@ vec2 mainSound(float time) {
     ret += vec2(0.08, 0.02) * sidechain2 * introSupersaw2(beat, time);
 
     // ここまでの音をMute
-    ret = vec2(0.0);
+    // ret = vec2(0.0);
 
     // snare
     ret += vec2(0.3, 0.3) * snare1(beat, time);

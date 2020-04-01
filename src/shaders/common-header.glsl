@@ -23,6 +23,12 @@ uniform vec3 iResolution;
 uniform float iTime;
 uniform sampler2D iPrevPass;
 
+// https://www.shadertoy.com/view/3tX3R4
+float clamp2(float x, float min, float max) { return (min < max) ? clamp(x, min, max) : clamp(x, max, min); }
+float remap(float val, float im, float ix, float om, float ox) { return clamp2(om + (val - im) * (ox - om) / (ix - im), om, ox); }
+float remap01(float val, float im, float ix) { return remap(val, im, ix, 0.0, 1.0); }  // TODO: optimize
+float easeInOutCubic(float t) { return t < 0.5 ? 4.0 * t * t * t : (t - 1.0) * (2.0 * t - 2.0) * (2.0 * t - 2.0) + 1.0; }
+
 // noise
 // https://www.shadertoy.com/view/4djSRW
 float hash11(float p) {
@@ -85,8 +91,6 @@ float noise(in vec2 p) {
     return mix(mix(hash12(i + vec2(0.0, 0.0)), hash12(i + vec2(1.0, 0.0)), u.x), mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
 }
 
-float easeInOutCubic(float t) { return t < 0.5 ? 4.0 * t * t * t : (t - 1.0) * (2.0 * t - 2.0) * (2.0 * t - 2.0) + 1.0; }
-
 float fbm(in vec2 uv) {
     float f = 0.0;
     mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
@@ -100,11 +104,6 @@ float fbm(in vec2 uv) {
     uv = m * uv;
     return f;
 }
-
-// https://www.shadertoy.com/view/3tX3R4
-float clamp2(float x, float min, float max) { return (min < max) ? clamp(x, min, max) : clamp(x, max, min); }
-float remap(float val, float im, float ix, float om, float ox) { return clamp2(om + (val - im) * (ox - om) / (ix - im), om, ox); }
-float remap01(float val, float im, float ix) { return remap(val, im, ix, 0.0, 1.0); }  // TODO: optimize
 
 vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
     vec4 d = texelSize.xyxy * vec4(-1.0, -1.0, 1.0, 1.0);

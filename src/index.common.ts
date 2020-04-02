@@ -34,8 +34,8 @@ export const chromatic = new Chromatic(
 
         const texts = [
             "A 64k INTRO",
-            "Graphics by gam0022",
-            "Music by sadakkey",
+            "GRAPHICS by gam0022",
+            "MUSIC by sadakkey",
             "RE: SIMULATED",
             "REALITY",
             "MERCURY",

@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remapFrom, easeInOutCubic } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -125,7 +125,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     });
 
     new Timeline(beat).then(8, t => {
-        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remap01(t, 0, 4));
+        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remapFrom(t, 0, 4));
         chromatic.uniforms.gTonemapExposure = 0.2;
 
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
@@ -348,8 +348,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gShockDistortion = 4.0 * Math.exp(-10 * (t - 4));
         }
 
-        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
-        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
+        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remapFrom(t, 4, 16));
+        chromatic.uniforms.gBlend = easeInOutCubic(remapFrom(t, 13, 16));
 
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
@@ -357,8 +357,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
 
         chromatic.uniforms.gEmissiveHue = 0.01;
         chromatic.uniforms.gEmissiveHueShiftBeat = 0;
-        chromatic.uniforms.gEmissiveHueShiftZ = remap01(t, 4, 16);
-        chromatic.uniforms.gEmissiveHueShiftXY = remap01(t, 4, 16);
+        chromatic.uniforms.gEmissiveHueShiftZ = remapFrom(t, 4, 16);
+        chromatic.uniforms.gEmissiveHueShiftXY = remapFrom(t, 4, 16);
     }).then(32, t => {
         // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;

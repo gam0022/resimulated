@@ -369,7 +369,7 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
         Intersection textIntersection = intersection;
         if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
             vec2 uv = 2.0 * textIntersection.uv - 1.0;
-            float id = 5.0 + floor((beat - 200.0) / 4.0);
+            float id = 7.0 + floor((beat - 200.0) / 4.0);
             vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
             // alpha test
             if (length(t) > 0.01) {
@@ -509,13 +509,13 @@ void text(vec2 uv, inout vec3 result) {
     } else if (b < 8.0) {
         // 4-8 (4)
         // gam0022 & sadakkey
-        col += texture(iTextTexture, textUv(uv, 1.0, vec2(0.0, 0.5), 1.5)).rgb;
-        col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, -0.5), 1.5)).rgb;
+        col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, 0.5), 1.5)).rgb;
+        col += texture(iTextTexture, textUv(uv, 4.0, vec2(0.0, -0.5), 1.5)).rgb;
         col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
     } else if (b < 16.0) {
         // 8-16 (8)
         // RE: SIMULATED
-        col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
+        col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
     } else if (b < 20.0) {
         // 16-20 (4)
         // RE: SIMULATED -> RE
@@ -535,13 +535,13 @@ void text(vec2 uv, inout vec3 result) {
         }
 
         float a = saturate(cos(fract(b * TAU * 4.0)));
-        col.r += fade * texture(iTextTexture, textUv(uv + glitch * mix(0.5, 1.0, a), 3.0, vec2(0.0, 0.0), 3.0)).r;
-        col.g += fade * texture(iTextTexture, textUv(uv + glitch * mix(1.5, 1.0, a), 3.0, vec2(0.0, 0.0), 3.0)).g;
-        col.b += fade * texture(iTextTexture, textUv(uv + glitch * mix(2.0, 1.0, a), 3.0, vec2(0.0, 0.0), 3.0)).b;
+        col.r += fade * texture(iTextTexture, textUv(uv + glitch * mix(0.5, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).r;
+        col.g += fade * texture(iTextTexture, textUv(uv + glitch * mix(1.5, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).g;
+        col.b += fade * texture(iTextTexture, textUv(uv + glitch * mix(2.0, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).b;
     } else if (b < 24.0) {
         // 20-24 (4)
         // RE
-        col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
+        col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
         if (uv.x > -0.78) {
             col *= 0.0;
         }
@@ -549,7 +549,7 @@ void text(vec2 uv, inout vec3 result) {
     } else {
         // 24-32 (8)
         // REALITY
-        col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
+        col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
         float t = remapFrom(t8, 0.5, 0.75);
         // t = easeInOutCubic(t);
         t = pow(t, 4.0);

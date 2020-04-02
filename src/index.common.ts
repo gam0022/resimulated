@@ -33,19 +33,21 @@ export const chromatic = new Chromatic(
         // window.document.body.appendChild(canvas);
 
         const texts = [
-            "A 64k INTRO",
-            "GRAPHICS by gam0022",
-            "MUSIC by sadakkey",
-            "RE: SIMULATED",
-            "REALITY",
-            "MERCURY",
-            "FMS_Cat",
-            "Ctrl-Alt-Test",
-            "RGBA & TBC",
-            "CNCD & Fairlight",
-            "0x4015 & YET1",
-            "kaneta\u{1F41B}",
-            "gaz",
+            /* 0 */ "A 64k INTRO",
+            /* 1 */ "GRAPHICS",
+            /* 2 */ "gam0022",
+            /* 3 */ "MUSIC",
+            /* 4 */ "sadakkey",
+            /* 5 */ "RE: SIMULATED",
+            /* 6 */ "REALITY",
+            /* 7 */ "MERCURY",
+            /* 8 */ "FMS_Cat",
+            /* 9 */ "Ctrl-Alt-Test",
+            /* 10 */ "RGBA & TBC",
+            /* 11 */ "CNCD & Fairlight",
+            /* 12 */ "0x4015 & YET1",
+            /* 13 */ "kaneta\u{1F41B}",
+            /* 14 */ "gaz",
         ];
 
         canvas.width = 2048;

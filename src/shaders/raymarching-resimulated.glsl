@@ -524,11 +524,11 @@ void text(vec2 uv, inout vec3 result) {
         t = pow(t4, 2.0);
 
         vec2 glitch = vec2(0.0);
-        float fade = uv.x - remap(t, 0.0, 1.0, 1.6, -0.78);
+        float fade = uv.x - remapTo(t, 1.6, -0.78);
         if (fade > 0.0) {
             glitch = hash23(vec3(floor(vec2(uv.x * 32.0, uv.y * 8.0)), beat));
-            glitch.x = fade * fade * remap(glitch.x, 0.0, 1.0, 0.0, 0.05);
-            glitch.y = fade * fade * remap(glitch.y, 0.0, 1.0, -0.4, 0.0);
+            glitch.x = fade * fade * remapTo(glitch.x, 0.0, 0.05);
+            glitch.y = fade * fade * remapTo(glitch.y, -0.4, 0.0);
             fade = saturate(1.0 - fade) * saturate(1.0 - abs(glitch.y));
         } else {
             fade = 1.0;
@@ -545,7 +545,7 @@ void text(vec2 uv, inout vec3 result) {
         if (uv.x > -0.78) {
             col *= 0.0;
         }
-        brightness = remap(t4, 0.0, 1.0, 1.0, 0.5);
+        brightness = remapTo(t4, 1.0, 0.5);
     } else {
         // 24-32 (8)
         // REALITY
@@ -553,11 +553,11 @@ void text(vec2 uv, inout vec3 result) {
         float t = remapFrom(t8, 0.5, 0.75);
         // t = easeInOutCubic(t);
         t = pow(t, 4.0);
-        if (uv.x > remap(t, 0.0, 1.0, -0.78, 1.0)) {
+        if (uv.x > remapTo(t, -0.78, 1.0)) {
             col *= 0.0;
         }
         col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
-        brightness = remap(t8, 0.0, 1.0, 0.5, 0.0);
+        brightness = remapTo(t8, 0.5, 0.0);
     }
 
     result *= brightness;

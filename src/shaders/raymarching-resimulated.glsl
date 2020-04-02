@@ -369,7 +369,7 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
         Intersection textIntersection = intersection;
         if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
             vec2 uv = 2.0 * textIntersection.uv - 1.0;
-            float id = 7.0 + floor((beat - 200.0) / 4.0);
+            float id = 7.0 + floor((beat - 200.0) / 2.0);
             vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
             // alpha test
             if (length(t) > 0.01) {
@@ -509,17 +509,21 @@ void text(vec2 uv, inout vec3 result) {
     } else if (b < 8.0) {
         // 4-8 (4)
         // gam0022 & sadakkey
-        col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, 0.5), 1.5)).rgb;
-        col += texture(iTextTexture, textUv(uv, 4.0, vec2(0.0, -0.5), 1.5)).rgb;
+        col += texture(iTextTexture, textUv(uv, 1.0, vec2(-1.0, 0.1), 1.0)).rgb;
+        col += texture(iTextTexture, textUv(uv, 2.0, vec2(-1.0, -0.1), 1.0)).rgb;
+
+        col += texture(iTextTexture, textUv(uv, 3.0, vec2(1.0, 0.1), 1.0)).rgb;
+        col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
         col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
     } else if (b < 16.0) {
         // 8-16 (8)
         // RE: SIMULATED
         col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
+        col *= remap(t8, 0.25, 1.0, 0.0, 1.0);
     } else if (b < 20.0) {
         // 16-20 (4)
         // RE: SIMULATED -> RE
-        float t = remapFrom(t4, 0.0, 1.0);
+        float t = remapFrom(t4, 0.5, 1.0);
         // t = easeInOutCubic(t);
         t = pow(t4, 2.0);
 

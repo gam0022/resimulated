@@ -26,6 +26,8 @@ void main() {
 float sidechain;
 float sidechain2;
 float sidechain3;
+float sidechain4;
+float sidechain5;
 
 // general functions
 float timeToBeat(float t) { return t / 60.0 * BPM; }
@@ -59,7 +61,7 @@ float tri(float phase) { return abs(2. * fract(phase * .5 - .25) - 1.) * 2. - 1.
 // drums
 float kick(float note, float time) {
     float amp = exp(-2.0 * time);
-    float phase = 30.0 * time - 15.0 * exp(-55.0 * time);
+    float phase = 33.0 * time - 16.0 * exp(-60.0 * time);
     return amp * sine(phase);
 }
 
@@ -112,7 +114,7 @@ vec2 pad(float note, float time) {
 vec2 arp(float note, float time) {
     float freq = noteToFreq(note);
     float fmamp = 0.1 * exp(-30.0 * time);
-    float fm = fmamp * square(time * freq * 1.2);
+    float fm = fmamp * square(time * freq * 1.5);
     float amp = exp(-50.0 * time);
     return amp * vec2(square(freq * time), tri(freq * time));
 }
@@ -121,7 +123,7 @@ vec2 arpsaw(float note, float time) {
     float freq = noteToFreq(note);
     float fmamp = 0.02 * exp(-30.0 * time);
     float fm = fmamp * sine(time * freq * 1.0);
-    float amp = exp(-30.0 * time);
+    float amp = exp(-20.0 * time);
     return amp * vec2(sine(freq * 0.999 * time + fm), saw(freq * 1.001 * time + fm));
 }
 
@@ -129,7 +131,7 @@ vec2 arpsine(float note, float time) {
     float freq = noteToFreq(note);
     float fmamp = 0.02 * exp(-70.0 * time);
     float fm = fmamp * sine(time * freq * 1.0);
-    float amp = exp(-70.0 * time);
+    float amp = exp(-50.0 * time);
     return amp * vec2(sine(freq * 0.999 * time + fm), sine(freq * 1.001 * time + fm));
 }
 
@@ -180,6 +182,23 @@ vec2 basssaw2(float note, float time) {
     float amp = exp(15.0 * time * time);
     float ret = 0.0;
     int num = 2;
+    float step = 0.014;
+    int reverbNum = 100;
+
+    for (int i = 0; i < num; i++) {
+        float freq = noteToFreq(note + 12.0 * float(i - num / 2));
+        for (int j = 0; j < reverbNum; j++) {
+            ret += saw(freq * (time - 0.008 * float(j)) * (1.0 + step * float(i - num / 2))) * exp(-3.0 * float(j));
+        }
+    }
+
+    return vec2(0.5 * amp * ret / float(num));
+}
+
+vec2 basssaw3(float note, float time) {
+    float amp = exp(1.3 * time * time);
+    float ret = 0.0;
+    int num = 3;
     float step = 0.014;
     int reverbNum = 100;
 
@@ -312,12 +331,33 @@ vec2 attackbass(float note, float t) {
 }
 
 // https://www.shadertoy.com/view/4sSSWz
-float noise2(float phi) { return fract(sin(phi * 0.011753) * 122.3762) * 2.0 - 1.0; }
+float noise2(float phi) { return fract(sin(phi * 0.055753) * 122.3762) * 4.0 - 3.0; }
 
 vec2 snare(float note, float t) {
-    float i = t * 44100.0;
-    float env = exp(-t * 10.0);  // 全音符で使うなら 10.0 じゃなくて 3.0 くらいの方がいいかも
-    float v = 0.9 * env * (1.5 * noise2(i) + 0.3 * sin(100.0 * i));
+    float i = t * iSampleRate;
+    float env = exp(-t * 17.0);  // 全音符で使うなら 10.0 じゃなくて 3.0 くらいの方がいいかも
+    float v = 0.3 * env * (2.3 * noise2(i) + 0.5 * sin(30.0 * i));
+    return vec2(v);
+}
+
+vec2 snarefill(float note, float t) {
+    float i = t * iSampleRate;
+    float env = exp(-t * 30.0);  // 全音符で使うなら 10.0 じゃなくて 3.0 くらいの方がいいかも
+    float v = 0.2 * env * (2.3 * noise2(i) + 0.5 * sin(30.0 * i));
+    return vec2(v);
+}
+
+vec2 noisefeedin(float note, float t) {
+    float i = t * iSampleRate;
+    float env = exp(-t * 1.0);  // 全音符で使うなら 10.0 じゃなくて 3.0 くらいの方がいいかも
+    float v = 0.05 * env * (3.3 * noise2(i) + 0.5 * sin(30.0 * i));
+    return vec2(v);
+}
+
+vec2 sidechainnoise(float note, float t) {
+    float i = t * iSampleRate;
+    float env = exp(-t * 3.0);  // 全音符で使うなら 10.0 じゃなくて 3.0 くらいの方がいいかも
+    float v = 0.03 * env * (3.3 * noise2(i) + 0.3 * sin(20.0 * i));
     return vec2(v);
 }
 
@@ -365,7 +405,7 @@ vec2 kick1(float beat, float time) {
 #define KICK1_DEV_PAT 3
 
 // 展開の長さ
-#define KICK1_DEV_LEN 16
+#define KICK1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -458,7 +498,7 @@ vec2 kick1(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[KICK1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1, 1);
+    int[KICK1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     SEQUENCER(beat, time, KICK1_BEAT_LEN, KICK1_DEV_PAT, KICK1_DEV_LEN, notes, development, kick)
 
@@ -469,7 +509,7 @@ vec2 kick1(float beat, float time) {
     }
 
     if (beat < 64.0) {
-        sidechain2 = smoothstep(-0.1, 0.6, localTime);
+        sidechain2 = smoothstep(-0.1, 0.7, localTime);
     } else {
         sidechain2 = smoothstep(-0.2, 0.7, localTime);
     }
@@ -478,6 +518,18 @@ vec2 kick1(float beat, float time) {
         sidechain3 = smoothstep(-0.0, 0.9, localTime);
     } else {
         sidechain3 = smoothstep(-0.2, 0.7, localTime);
+    }
+
+    if (beat < 64.0) {
+        sidechain4 = smoothstep(-0.4, 0.6, localTime);
+    } else {
+        sidechain4 = smoothstep(-0.4, 0.6, localTime);
+    }
+
+    if (beat < 64.0) {
+        sidechain5 = smoothstep(0.0, 0.2, localTime);
+    } else {
+        sidechain5 = smoothstep(0.0, 0.2, localTime);
     }
 
     return ret;
@@ -491,7 +543,7 @@ vec2 crashcymbal1(float beat, float time) {
 #define CRASH1_DEV_PAT 3
 
 // 展開の長さ
-#define CRASH1_DEV_LEN 16
+#define CRASH1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -504,28 +556,10 @@ vec2 crashcymbal1(float beat, float time) {
         //
 
         // 1
-        F(1),
+        O(1),
 
         // 2
-        F(0),
-
-        // 3
-        F(0),
-
-        // 4
-        F(0),
-
-        // 5
-        F(0),
-
-        // 6
-        F(0),
-
-        // 7
-        F(0),
-
-        // 8
-        F(0),
+        O(0),
 
         //
         // 展開1（とりあえず今は展開0と同じ）
@@ -584,7 +618,7 @@ vec2 crashcymbal1(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[CRASH1_DEV_LEN] development = int[](0, 1, 1, 1, 0, 1, 2, 2, 0, 1, 1, 1, 0, 1, 1, 1);
+    int[CRASH1_DEV_LEN] development = int[](0, 1, 1, 1, 0, 1, 2, 2, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1);
 
     SEQUENCER(beat, time, CRASH1_BEAT_LEN, CRASH1_DEV_PAT, CRASH1_DEV_LEN, notes, development, crash1)
 
@@ -599,7 +633,7 @@ vec2 crashcymbal2(float beat, float time) {
 #define CRASH1_DEV_PAT 3
 
 // 展開の長さ
-#define CRASH1_DEV_LEN 16
+#define CRASH1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -612,28 +646,10 @@ vec2 crashcymbal2(float beat, float time) {
         //
 
         // 1
-        F(1),
+        O(1),
 
         // 2
-        F(0),
-
-        // 3
-        F(0),
-
-        // 4
-        F(0),
-
-        // 5
-        F(0),
-
-        // 6
-        F(0),
-
-        // 7
-        F(0),
-
-        // 8
-        F(0),
+        O(0),
 
         //
         // 展開1（とりあえず今は展開0と同じ）
@@ -692,7 +708,7 @@ vec2 crashcymbal2(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[CRASH1_DEV_LEN] development = int[](1, 1, 0, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[CRASH1_DEV_LEN] development = int[](1, 1, 0, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     SEQUENCER(beat, time, CRASH1_BEAT_LEN, CRASH1_DEV_PAT, CRASH1_DEV_LEN, notes, development, crash1)
 
@@ -706,10 +722,10 @@ vec2 bass1(float beat, float time) {
 #define BASS1_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define BASS1_DEV_PAT 8
+#define BASS1_DEV_PAT 11
 
 // 展開の長さ
-#define BASS1_DEV_LEN 16
+#define BASS1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -939,10 +955,94 @@ vec2 bass1(float beat, float time) {
         S4(0, 43, 43, 43),
 
         // 8
-        S4(0, 55, 57, 69));
+        S4(0, 55, 57, 69),
+
+        //
+        // 展開8
+        //
+
+        // 1
+        E2(29, 29),
+
+        // 2
+        S4(0, 29, 29, 29),
+
+        // 3
+        S4(0, 29, 29, 29),
+
+        // 4
+        S4(0, 29, 29, 29),
+
+        // 5
+        E2(29, 29),
+
+        // 6
+        S4(0, 29, 29, 29),
+
+        // 7
+        S4(0, 29, 29, 29),
+
+        // 8
+        S4(0, 31, 31, 31),
+
+        //
+        // 展開9
+        //
+
+        // 1
+        E2(26, 26),
+
+        // 2
+        S4(0, 26, 26, 26),
+
+        // 3
+        S4(0, 26, 26, 26),
+
+        // 4
+        S4(0, 26, 26, 26),
+
+        // 5
+        E2(28, 28),
+
+        // 6
+        S4(0, 28, 28, 28),
+
+        // 7
+        S4(0, 28, 28, 28),
+
+        // 8
+        S4(0, 28, 28, 28),
+
+        //
+        // 展開10
+        //
+
+        // 1
+        E2(29, 29),
+
+        // 2
+        S4(0, 29, 29, 29),
+
+        // 3
+        S4(0, 29, 29, 29),
+
+        // 4
+        S4(0, 29, 29, 29),
+
+        // 5
+        E2(29, 29),
+
+        // 6
+        S4(0, 29, 29, 29),
+
+        // 7
+        S4(0, 31, 31, 31),
+
+        // 8
+        S4(0, 31, 31, 31));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[BASS1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 5, 6, 7);
+    int[BASS1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 5, 6, 7, 8, 1, 8, 9, 8, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     SEQUENCER(beat, time, BASS1_BEAT_LEN, BASS1_DEV_PAT, BASS1_DEV_LEN, notes, development, bass)
     return ret;
 }
@@ -952,10 +1052,10 @@ vec2 bass2(float beat, float time) {
 #define BASS2_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define BASS2_DEV_PAT 8
+#define BASS2_DEV_PAT 11
 
 // 展開の長さ
-#define BASS2_DEV_LEN 16
+#define BASS2_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1185,11 +1285,137 @@ vec2 bass2(float beat, float time) {
         S4(0, 43, 43, 43),
 
         // 8
-        S4(0, 55, 57, 69));
+        S4(0, 55, 57, 69),
+
+        //
+        // 展開8
+        //
+
+        // 1
+        E2(29, 29),
+
+        // 2
+        S4(0, 29, 29, 29),
+
+        // 3
+        S4(0, 29, 29, 29),
+
+        // 4
+        S4(0, 29, 29, 29),
+
+        // 5
+        E2(29, 29),
+
+        // 6
+        S4(0, 29, 29, 29),
+
+        // 7
+        S4(0, 29, 29, 29),
+
+        // 8
+        S4(0, 31, 31, 31),
+
+        //
+        // 展開9
+        //
+
+        // 1
+        E2(26, 26),
+
+        // 2
+        S4(0, 26, 26, 26),
+
+        // 3
+        S4(0, 26, 26, 26),
+
+        // 4
+        S4(0, 26, 26, 26),
+
+        // 5
+        E2(28, 28),
+
+        // 6
+        S4(0, 28, 28, 28),
+
+        // 7
+        S4(0, 28, 28, 28),
+
+        // 8
+        S4(0, 28, 28, 28),
+
+        //
+        // 展開10
+        //
+
+        // 1
+        E2(29, 29),
+
+        // 2
+        S4(0, 29, 29, 29),
+
+        // 3
+        S4(0, 29, 29, 29),
+
+        // 4
+        S4(0, 29, 29, 29),
+
+        // 5
+        E2(29, 29),
+
+        // 6
+        S4(0, 29, 29, 29),
+
+        // 7
+        S4(0, 31, 31, 31),
+
+        // 8
+        S4(0, 31, 31, 31));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[BASS2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7);
+    int[BASS2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7, 8, 1, 8, 9, 8, 1, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0);
     SEQUENCER(beat, time, BASS2_BEAT_LEN, BASS2_DEV_PAT, BASS2_DEV_LEN, notes, development, attackbass)
+    return ret;
+}
+
+vec2 bass3(float beat, float time) {
+// 1つの展開のビート数 ベースのアタック
+#define BASS3_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define BASS3_DEV_PAT 2
+
+// 展開の長さ
+#define BASS3_DEV_LEN 32
+
+    // ノート番号
+    // F: 4分音符
+    // E: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[BASS3_BEAT_LEN * NOTE_DIV * BASS3_DEV_PAT] notes = int[](
+        //
+        // 展開0
+        //
+
+        // 1
+        O(33),
+
+        // 2
+        O(33),
+
+        //
+        // 展開1
+        //
+
+        // 1
+        O(0),
+
+        // 2
+        O(0));
+
+    // 展開 #define KICK1_DEV_LEN 8　変える
+    int[BASS3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    SEQUENCER(beat, time, BASS3_BEAT_LEN, BASS3_DEV_PAT, BASS3_DEV_LEN, notes, development, basssaw3)
     return ret;
 }
 
@@ -1201,7 +1427,7 @@ vec2 sideSupersaw1(float beat, float time) {
 #define TAMESHI_DEV_PAT 8
 
 // 展開の長さ
-#define TAMESHI_DEV_LEN 16
+#define TAMESHI_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1434,7 +1660,7 @@ vec2 sideSupersaw1(float beat, float time) {
         S4(0, 0, 0, 0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[TAMESHI_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7);
+    int[TAMESHI_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, TAMESHI_BEAT_LEN, TAMESHI_DEV_PAT, TAMESHI_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -1448,7 +1674,7 @@ vec2 sideSupersaw2(float beat, float time) {
 #define TAMESHI_DEV_PAT 8
 
 // 展開の長さ
-#define TAMESHI_DEV_LEN 16
+#define TAMESHI_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1681,7 +1907,7 @@ vec2 sideSupersaw2(float beat, float time) {
         S4(0, 55, 57, 69));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[TAMESHI_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7);
+    int[TAMESHI_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     SEQUENCER(beat, time, TAMESHI_BEAT_LEN, TAMESHI_DEV_PAT, TAMESHI_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -1695,7 +1921,7 @@ vec2 tb303synth(float beat, float time) {
 #define TB303SYNTH1_DEV_PAT 2
 
 // 展開の長さ
-#define TB303SYNTH1_DEV_LEN 16
+#define TB303SYNTH1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1760,7 +1986,7 @@ vec2 tb303synth(float beat, float time) {
         S4(0, 33, 33, 33));
 
     // 展開
-    int[TB303SYNTH1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[TB303SYNTH1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     SEQUENCER(beat, time, TB303SYNTH1_BEAT_LEN, TB303SYNTH1_DEV_PAT, TB303SYNTH1_DEV_LEN, notes, development, synth)
     return ret;
@@ -1774,7 +2000,7 @@ vec2 arp0(float beat, float time) {
 #define ARP0_DEV_PAT 2
 
 // 展開の長さ
-#define ARP0_DEV_LEN 16
+#define ARP0_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1839,7 +2065,7 @@ vec2 arp0(float beat, float time) {
         F(0));
 
     // 展開
-    int[ARP0_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[ARP0_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, ARP0_BEAT_LEN, ARP0_DEV_PAT, ARP0_DEV_LEN, notes, development, arpsaw)
     return ret;
@@ -1853,7 +2079,7 @@ vec2 arp1(float beat, float time) {
 #define ARP1_DEV_PAT 2
 
 // 展開の長さ
-#define ARP1_DEV_LEN 16
+#define ARP1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1918,7 +2144,7 @@ vec2 arp1(float beat, float time) {
         S4(71, 0, 74, 0));
 
     // 展開
-    int[ARP1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[ARP1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
     return ret;
@@ -1932,7 +2158,7 @@ vec2 arp2(float beat, float time) {
 #define ARP2_DEV_PAT 2
 
 // 展開の長さ
-#define ARP2_DEV_LEN 16
+#define ARP2_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -1997,7 +2223,7 @@ vec2 arp2(float beat, float time) {
         S4(0, 83, 0, 86));
 
     // 展開
-    int[ARP2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[ARP2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, arp)
     return ret;
@@ -2011,7 +2237,7 @@ vec2 arp3(float beat, float time) {
 #define ARP3_DEV_PAT 2
 
 // 展開の長さ
-#define ARP3_DEV_LEN 16
+#define ARP3_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2076,7 +2302,7 @@ vec2 arp3(float beat, float time) {
         S4(0, 0, 0, 0));
 
     // 展開
-    int[ARP3_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[ARP3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, ARP3_BEAT_LEN, ARP3_DEV_PAT, ARP3_DEV_LEN, notes, development, arpsine)
     return ret;
@@ -2090,7 +2316,7 @@ vec2 arp4(float beat, float time) {
 #define ARP4_DEV_PAT 2
 
 // 展開の長さ
-#define ARP4_DEV_LEN 16
+#define ARP4_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2155,7 +2381,7 @@ vec2 arp4(float beat, float time) {
         S4(67, 60, 79, 62));
 
     // 展開
-    int[ARP4_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[ARP4_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, ARP4_BEAT_LEN, ARP4_DEV_PAT, ARP4_DEV_LEN, notes, development, arpsine)
     return ret;
@@ -2169,7 +2395,7 @@ vec2 arp5(float beat, float time) {
 #define ARP5_DEV_PAT 2
 
 // 展開の長さ
-#define ARP5_DEV_LEN 16
+#define ARP5_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2234,7 +2460,7 @@ vec2 arp5(float beat, float time) {
         S4(67, 0, 76, 0));
 
     // 展開
-    int[ARP5_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[ARP5_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, ARP5_BEAT_LEN, ARP5_DEV_PAT, ARP5_DEV_LEN, notes, development, arpsine2)
     return ret;
@@ -2245,10 +2471,10 @@ vec2 hihat33(float beat, float time) {
 #define HIHAT3_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define HIHAT3_DEV_PAT 2
+#define HIHAT3_DEV_PAT 3
 
 // 展開の長さ
-#define HIHAT3_DEV_LEN 16
+#define HIHAT3_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2310,10 +2536,38 @@ vec2 hihat33(float beat, float time) {
         E2(0, 1),
 
         // 8
-        E2(0, 1));
+        E2(0, 1),
+
+        //
+        // 展開2（とりあえず今は展開0と同じ）
+        //
+
+        // 1
+        F(0),
+
+        // 2
+        F(0),
+
+        // 3
+        F(0),
+
+        // 4
+        F(0),
+
+        // 5
+        F(0),
+
+        // 6
+        F(0),
+
+        // 7
+        F(0),
+
+        // 8
+        F(0));
 
     // 展開 #define CRASH1_DEV_LEN 8　変える
-    int[HIHAT3_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[HIHAT3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2);
 
     SEQUENCER(beat, time, HIHAT3_BEAT_LEN, HIHAT3_DEV_PAT, HIHAT3_DEV_LEN, notes, development, hihat3)
 
@@ -2328,7 +2582,7 @@ vec2 subbass1(float beat, float time) {
 #define SUB1_DEV_PAT 2
 
 // 展開の長さ
-#define SUB1_DEV_LEN 16
+#define SUB1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2393,7 +2647,7 @@ vec2 subbass1(float beat, float time) {
         F(33));
 
     // 展開 #define SUB1_DEV_LEN 8　変える
-    int[SUB1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[SUB1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     SEQUENCER(beat, time, SUB1_BEAT_LEN, SUB1_DEV_PAT, SUB1_DEV_LEN, notes, development, subbass)
     return ret;
@@ -2408,10 +2662,10 @@ vec2 testhihat2(float beat, float time) {
 #define HIHAT2_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define HIHAT2_DEV_PAT 2
+#define HIHAT2_DEV_PAT 3
 
 // 展開の長さ
-#define HIHAT2_DEV_LEN 16
+#define HIHAT2_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2473,10 +2727,38 @@ vec2 testhihat2(float beat, float time) {
         S4(0, 1, 1, 1),
 
         // 8
-        S4(0, 1, 1, 1));
+        S4(0, 1, 1, 1),
+
+        //
+        // 展開2（とりあえず今は展開0と同じ）
+        //
+
+        // 1
+        F(0),
+
+        // 2
+        F(0),
+
+        // 3
+        F(0),
+
+        // 4
+        F(0),
+
+        // 5
+        F(0),
+
+        // 6
+        F(0),
+
+        // 7
+        F(0),
+
+        // 8
+        F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[HIHAT2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[HIHAT2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2);
 
     SEQUENCER(beat, time, KICK1_BEAT_LEN, KICK1_DEV_PAT, KICK1_DEV_LEN, notes, development, hihat2)
     return ret;
@@ -2494,7 +2776,7 @@ vec2 introSupersaw1(float beat, float time) {
 #define INTROSAW_DEV_PAT 3
 
 // 展開の長さ
-#define INTROSAW_DEV_LEN 16
+#define INTROSAW_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2587,7 +2869,7 @@ vec2 introSupersaw1(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[INTROSAW_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2);
+    int[INTROSAW_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
 
     SEQUENCER(beat, time, INTROSAW_BEAT_LEN, INTROSAW_DEV_PAT, INTROSAW_DEV_LEN, notes, development, basssaw1)
     return ret;
@@ -2601,7 +2883,7 @@ vec2 introSupersaw2(float beat, float time) {
 #define INTROSAW_DEV_PAT 3
 
 // 展開の長さ
-#define INTROSAW_DEV_LEN 16
+#define INTROSAW_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2694,7 +2976,7 @@ vec2 introSupersaw2(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[INTROSAW_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2);
+    int[INTROSAW_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
 
     SEQUENCER(beat, time, INTROSAW_BEAT_LEN, INTROSAW_DEV_PAT, INTROSAW_DEV_LEN, notes, development, basssaw2)
     return ret;
@@ -2712,7 +2994,7 @@ vec2 chordSupersaw1(float beat, float time) {
 #define CHORD1_DEV_PAT 4
 
 // 展開の長さ
-#define CHORD1_DEV_LEN 16
+#define CHORD1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2753,28 +3035,10 @@ vec2 chordSupersaw1(float beat, float time) {
         //
 
         // 1
-        F(69),
+        O(69),
 
         // 2
-        F(69),
-
-        // 3
-        F(69),
-
-        // 4
-        F(69),
-
-        // 5
-        F(69),
-
-        // 6
-        F(69),
-
-        // 7
-        F(69),
-
-        // 8
-        F(69),
+        O(69),
 
         //
         // 展開2
@@ -2833,7 +3097,7 @@ vec2 chordSupersaw1(float beat, float time) {
         F(62));
 
     // 展開 #define CHORD1_DEV_LEN 8　変える
-    int[CHORD1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3);
+    int[CHORD1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, CHORD1_BEAT_LEN, CHORD1_DEV_PAT, CHORD1_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -2847,7 +3111,7 @@ vec2 chordSupersaw2(float beat, float time) {
 #define CHORD2_DEV_PAT 4
 
 // 展開の長さ
-#define CHORD2_DEV_LEN 16
+#define CHORD2_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -2888,28 +3152,10 @@ vec2 chordSupersaw2(float beat, float time) {
         //
 
         // 1
-        F(72),
+        O(72),
 
         // 2
-        F(72),
-
-        // 3
-        F(72),
-
-        // 4
-        F(72),
-
-        // 5
-        F(72),
-
-        // 6
-        F(72),
-
-        // 7
-        F(72),
-
-        // 8
-        F(72),
+        O(72),
 
         //
         // 展開2
@@ -2968,7 +3214,7 @@ vec2 chordSupersaw2(float beat, float time) {
         F(57));
 
     // 展開 #define CHORD2_DEV_LEN 8　変える
-    int[CHORD2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3);
+    int[CHORD2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     SEQUENCER(beat, time, CHORD2_BEAT_LEN, CHORD2_DEV_PAT, CHORD2_DEV_LEN, notes, development, chordsaw1)
     return ret;
 }
@@ -2981,7 +3227,7 @@ vec2 chordSupersaw3(float beat, float time) {
 #define CHORD3_DEV_PAT 4
 
 // 展開の長さ
-#define CHORD3_DEV_LEN 16
+#define CHORD3_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -3022,28 +3268,10 @@ vec2 chordSupersaw3(float beat, float time) {
         //
 
         // 1
-        F(74),
+        O(74),
 
         // 2
-        F(74),
-
-        // 3
-        F(74),
-
-        // 4
-        F(74),
-
-        // 5
-        F(74),
-
-        // 6
-        F(74),
-
-        // 7
-        F(74),
-
-        // 8
-        F(74),
+        O(74),
 
         //
         // 展開2
@@ -3102,7 +3330,7 @@ vec2 chordSupersaw3(float beat, float time) {
         F(54));
 
     // 展開 #define CHORD3_DEV_LEN 8　変える
-    int[CHORD3_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3);
+    int[CHORD3_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, CHORD3_BEAT_LEN, CHORD3_DEV_PAT, CHORD3_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -3116,7 +3344,7 @@ vec2 chordSupersaw4(float beat, float time) {
 #define CHORD4_DEV_PAT 4
 
 // 展開の長さ
-#define CHORD4_DEV_LEN 16
+#define CHORD4_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -3157,28 +3385,10 @@ vec2 chordSupersaw4(float beat, float time) {
         //
 
         // 1
-        F(79),
+        O(79),
 
         // 2
-        F(79),
-
-        // 3
-        F(79),
-
-        // 4
-        F(79),
-
-        // 5
-        F(79),
-
-        // 6
-        F(79),
-
-        // 7
-        F(79),
-
-        // 8
-        F(79),
+        O(79),
 
         //
         // 展開2
@@ -3237,7 +3447,7 @@ vec2 chordSupersaw4(float beat, float time) {
         F(49));
 
     // 展開 #define CHORD4_DEV_LEN 8　変える
-    int[CHORD4_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3);
+    int[CHORD4_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     SEQUENCER(beat, time, CHORD4_BEAT_LEN, CHORD4_DEV_PAT, CHORD4_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -3251,7 +3461,7 @@ vec2 chordSquare1(float beat, float time) {
 #define SQUARE1_DEV_PAT 4
 
 // 展開の長さ
-#define SQUARE1_DEV_LEN 16
+#define SQUARE1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -3372,7 +3582,7 @@ vec2 chordSquare1(float beat, float time) {
         S4(0, 0, 72, 72));
 
     // 展開 #define SQUARE1_DEV_LEN 8　変える
-    int[SQUARE1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3);
+    int[SQUARE1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     SEQUENCER(beat, time, SQUARE1_BEAT_LEN, SQUARE1_DEV_PAT, SQUARE1_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -3385,7 +3595,7 @@ vec2 chordSquare2(float beat, float time) {
 #define SQUARE2_DEV_PAT 4
 
 // 展開の長さ
-#define SQUARE2_DEV_LEN 16
+#define SQUARE2_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -3506,7 +3716,7 @@ vec2 chordSquare2(float beat, float time) {
         S4(0, 0, 67, 67));
 
     // 展開 #define SQUARE2_DEV_LEN 8　変える
-    int[SQUARE2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3);
+    int[SQUARE2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     SEQUENCER(beat, time, SQUARE2_BEAT_LEN, SQUARE2_DEV_PAT, SQUARE2_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -3519,7 +3729,7 @@ vec2 chordSquare3(float beat, float time) {
 #define SQUARE3_DEV_PAT 4
 
 // 展開の長さ
-#define SQUARE3_DEV_LEN 16
+#define SQUARE3_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -3640,7 +3850,7 @@ vec2 chordSquare3(float beat, float time) {
         S4(0, 0, 57, 57));
 
     // 展開 #define SQUARE3_DEV_LEN 8　変える
-    int[SQUARE3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3);
+    int[SQUARE3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     SEQUENCER(beat, time, SQUARE3_BEAT_LEN, SQUARE3_DEV_PAT, SQUARE3_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -3650,10 +3860,10 @@ vec2 snare1(float beat, float time) {
 #define SNARE1_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define SNARE1_DEV_PAT 4
+#define SNARE1_DEV_PAT 2
 
 // 展開の長さ
-#define SNARE1_DEV_LEN 16
+#define SNARE1_DEV_LEN 32
 
     // ノート番号
     // F: 4分音符
@@ -3694,56 +3904,157 @@ vec2 snare1(float beat, float time) {
         //
 
         // 1
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 2
-        S4(1, 0, 1, 1),
+        E2(1, 0),
 
         // 3
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 4
-        S4(1, 0, 1, 1),
+        E2(1, 0),
 
         // 5
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 6
-        S4(1, 0, 1, 1),
+        E2(1, 0),
 
         // 7
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 8
-        S4(1, 0, 72, 72),
+        E2(1, 0));
 
+    // 展開 #define SNARE1_DEV_LEN 8　変える
+    int[SNARE1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    SEQUENCER(beat, time, SNARE1_BEAT_LEN, SNARE1_DEV_PAT, SNARE1_DEV_LEN, notes, development, snare)
+    return ret;
+}
+
+vec2 snare2(float beat, float time) {
+// 1つの展開のビート数
+#define SNARE1_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define SNARE1_DEV_PAT 2
+
+// 展開の長さ
+#define SNARE1_DEV_LEN 32
+
+    // ノート番号
+    // F: 4分音符
+    // E: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[SNARE1_BEAT_LEN * NOTE_DIV * SNARE1_DEV_PAT] notes = int[](
         //
-        // 展開2
+        // 展開0
         //
 
         // 1
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 2
-        S4(1, 0, 1, 1),
+        F(0),
 
         // 3
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 4
-        S4(1, 0, 1, 1),
+        F(0),
 
         // 5
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 6
-        S4(1, 0, 1, 1),
+        F(0),
 
         // 7
-        S4(1, 1, 0, 1),
+        F(0),
 
         // 8
-        S4(0, 0, 1, 1),
+        F(0),
+
+        //
+        // 展開1（とりあえず今は展開0と同じ）
+        //
+
+        // 1
+        S4(1, 1, 1, 1),
+
+        // 2
+        S4(1, 1, 1, 1),
+
+        // 3
+        S4(1, 1, 1, 1),
+
+        // 4
+        S4(1, 1, 1, 1),
+
+        // 5
+        S4(1, 1, 1, 1),
+
+        // 6
+        S4(1, 1, 1, 1),
+
+        // 7
+        S4(1, 1, 1, 1),
+
+        // 8
+        S4(1, 1, 1, 1));
+
+    // 展開 #define SNARE1_DEV_LEN 8　変える
+    int[SNARE1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    SEQUENCER(beat, time, SNARE1_BEAT_LEN, SNARE1_DEV_PAT, SNARE1_DEV_LEN, notes, development, snarefill)
+    return ret;
+}
+
+vec2 noisefeed(float beat, float time) {
+// 1つの展開のビート数
+#define FEED_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define FEED_DEV_PAT 3
+
+// 展開の長さ
+#define FEED_DEV_LEN 32
+
+    // ノート番号
+    // F: 4分音符
+    // E: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[FEED_BEAT_LEN * NOTE_DIV * FEED_DEV_PAT] notes = int[](
+        //
+        // 展開0
+        //
+
+        // 1
+        O(0),
+
+        // 2
+        O(0),
+
+        //
+        // 展開1（とりあえず今は展開0と同じ）
+        //
+
+        // 1~4
+        O(0),
+
+        // 5
+        F(1),
+
+        // 6
+        F(1),
+
+        // 7
+        F(1),
+
+        // 8
+        F(1),
 
         //
         // 展開3
@@ -3752,27 +4063,78 @@ vec2 snare1(float beat, float time) {
         // 1
         O(1),
 
-        // 5
-        S4(1, 1, 0, 1),
-
-        // 6
-        S4(1, 0, 1, 1),
-
-        // 7
-        S4(1, 1, 0, 1),
-
-        // 8
-        S4(0, 0, 1, 1));
+        // 2
+        O(0));
 
     // 展開 #define SNARE1_DEV_LEN 8　変える
-    int[SNARE1_DEV_LEN] development = int[](2, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3);
-    SEQUENCER(beat, time, SNARE1_BEAT_LEN, SNARE1_DEV_PAT, SNARE1_DEV_LEN, notes, development, snare)
+    int[FEED_DEV_LEN] development = int[](2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    SEQUENCER(beat, time, FEED_BEAT_LEN, FEED_DEV_PAT, FEED_DEV_LEN, notes, development, noisefeedin)
+    return ret;
+}
+
+vec2 noisesidechain(float beat, float time) {
+// 1つの展開のビート数
+#define NOISESIDE_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define NOISESIDE_DEV_PAT 2
+
+// 展開の長さ
+#define NOISESIDE_DEV_LEN 32
+
+    // ノート番号
+    // F: 4分音符
+    // E: 8分音符
+    // S: 16分音符
+    // ノート番号0は休符
+    int[NOISESIDE_BEAT_LEN * NOTE_DIV * NOISESIDE_DEV_PAT] notes = int[](
+        //
+        // 展開0
+        //
+
+        // 1
+        O(0),
+
+        // 2
+        O(0),
+
+        //
+        // 展開1（とりあえず今は展開0と同じ）
+        //
+
+        // 1
+        F(1),
+
+        // 2
+        F(1),
+
+        // 3
+        F(1),
+
+        // 4
+        F(1),
+
+        // 5
+        F(1),
+
+        // 6
+        F(1),
+
+        // 7
+        F(1),
+
+        // 8
+        F(1));
+
+    // 展開 #define SNARE1_DEV_LEN 8　変える
+    int[NOISESIDE_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    SEQUENCER(beat, time, NOISESIDE_BEAT_LEN, NOISESIDE_DEV_PAT, NOISESIDE_DEV_LEN, notes, development, sidechainnoise)
     return ret;
 }
 
 vec2 mainSound(float time) {
-    // 編集用に時間を途中からすすめる
-    // time += 10.0;
+    //編集用に時間を途中からすすめる
+    time += 0.0;
 
     float beat = timeToBeat(time);
     vec2 ret = vec2(0.0);
@@ -3786,8 +4148,9 @@ vec2 mainSound(float time) {
     ret += vec2(0.0, 0.4) * sidechain * hihat33(beat, time);
     ret += vec2(0.3, 0.1) * sidechain * testhihat2(beat, time);
 
-    ret += vec2(0.3, 0.3) * bass1(beat, time);                        // L70 R0
-    ret += vec2(0.09, 0.09) * bass2(beat, time);                      // L70 R0
+    ret += vec2(0.3, 0.3) * sidechain4 * bass1(beat, time);    // L70 R0
+    ret += vec2(0.09, 0.09) * sidechain4 * bass2(beat, time);  // L70 R0
+    ret += vec2(0.01) * sidechain4 * bass3(beat, time);
     ret += vec2(0.1, 0.05) * sidechain2 * sideSupersaw1(beat, time);  // ベースの補強
     ret += vec2(0.05, 0.1) * sidechain2 * sideSupersaw2(beat, time);  // ベースの補強
     ret += vec2(0.05, 0.05) * sidechain * tb303synth(beat, time);     // ベースの補強
@@ -3803,10 +4166,11 @@ vec2 mainSound(float time) {
     ret += vec2(0.2, 0.2) * sidechain2 * chordSupersaw2(beat, time);   // コード
     ret += vec2(0.2, 0.02) * sidechain2 * chordSupersaw3(beat, time);  // コード
     ret += vec2(0.3, 0.1) * sidechain2 * chordSupersaw4(beat, time);   // コード
-    ret += vec2(0.3, 0.3) * sidechain * arp5(beat, time);              // アルペジオ中央
-    ret += vec2(0.1, 0.2) * sidechain2 * chordSquare1(beat, time);     //
-    ret += vec2(0.15, 0.15) * sidechain2 * chordSquare2(beat, time);   //
-    ret += vec2(0.2, 0.1) * sidechain2 * chordSquare3(beat, time);     //
+    ret += vec2(0.15, 0.15) * sidechain5 * noisesidechain(beat, time);
+    ret += vec2(0.3, 0.3) * sidechain * arp5(beat, time);  // アルペジオ中央
+    // ret += vec2(0.05, 0.1) * sidechain2 * chordSquare1(beat, time);     //
+    // ret += vec2(0.1, 0.1) * sidechain2 * chordSquare2(beat, time);   //
+    // ret += vec2(0.1, 0.05) * sidechain2 * chordSquare3(beat, time);     //
 
     // supersaw
     ret += vec2(0.02, 0.08) * sidechain * introSupersaw1(beat, time);
@@ -3816,7 +4180,9 @@ vec2 mainSound(float time) {
     // ret = vec2(0.0);
 
     // snare
-    ret += vec2(0.3, 0.3) * snare1(beat, time);
+    ret += vec2(0.1, 0.1) * snare1(beat, time);
+    ret += vec2(0.05, 0.05) * snare2(beat, time);
+    ret += vec2(0.15, 0.15) * sidechain2 * noisefeed(beat, time);
 
     return clamp(ret, -1.0, 1.0);
 }

@@ -5,20 +5,17 @@ import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from ".
 declare var PRODUCTION: boolean;
 
 export const chromatic = new Chromatic(
-    96,// デモの長さ（秒）
+    109.714285714,// デモの長さ（秒）
     require("./shaders/vertex.glsl").default,
+
+    // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
-        //require("./shaders/kaleidoscope.glsl").default,
         require("./shaders/raymarching-mandelbox.glsl").default,
         require("./shaders/post-effect.glsl").default,
-
-        //require("./shaders/kaleidoscope.glsl").default,
-        //require("./shaders/invert.glsl").default,
-        //require("./shaders/dot-matrix.glsl").default,
-        //require("./shaders/chromatic-aberration.glsl").default,
     ],
 
+    // Bloom
     1,
     5,
     require("./shaders/bloom-prefilter.glsl").default,
@@ -26,16 +23,22 @@ export const chromatic = new Chromatic(
     require("./shaders/bloom-upsample.glsl").default,
     require("./shaders/bloom-final.glsl").default,
 
+    // Sound Shader
     require("./shaders/sound-template.glsl").default,
+
+    // Text Texture
     gl => {
         const canvas = document.createElement("canvas");
         const textCtx = canvas.getContext("2d");
         // window.document.body.appendChild(canvas);
 
         const texts = [
-            "RE: SIMULATED",
+            "A 64k INTRO",
             "Graphics by gam0022",
-            "Music by saddakey",
+            "Music by sadakkey",
+            "RE: SIMULATED",
+            "REALITY",
+            "MERCURY",
             "FMS-Cat",
             "Ctrl-Alt-Test",
             "RGBA & TBC",
@@ -122,6 +125,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     });
 
     new Timeline(beat).then(8, t => {
+        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remap01(t, 0, 4));
         chromatic.uniforms.gTonemapExposure = 0.2;
 
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
@@ -267,73 +271,118 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
         chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
         chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
-    }).then(16, t => {
-        // Revisonロゴをズーム
+    }).then(8, t => {
+        // Revisonロゴ
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 1 + 0.003 * t * t).add(ball);
         target = ball.scale(1);
 
-        if (t >= 14) {
-            //chromatic.uniforms.gCameraFov = 6;
-        }
-
-        chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
+        chromatic.uniforms.gMandelboxScale = 1.32 - 0.04 * t;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gBallRadius = 0.1;
 
         chromatic.uniforms.gLogoIntensity = remap(t, 4, 8, 0.02, 2);
+        if (t >= 7) {
+            const a = Math.exp(-10 * (t - 7));
+            chromatic.uniforms.gShockDistortion = a;
+            chromatic.uniforms.gLogoIntensity += a;
+        }
+
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04 + 0.1 * saturate(Math.sin(Math.PI * 2 * t));
-
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.3;
+        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(8, t => {
-        // Revisonロゴ ズームアウト
+        // 不穏感
         ball.z = -10 - 0.2 * t;
-        camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(-0.2 - 0.1 * t, 0.2 + 0.02 * t, 1 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
+        chromatic.uniforms.gCameraFov = remap(t, 0, 8, 13, 20);
 
-        chromatic.uniforms.gMandelboxScale = 1;
-        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.01, 0.05);
+
+        if (t < 2) {
+            chromatic.uniforms.gBallDistortionFreq = 12;
+        } else if (t < 4) {
+            chromatic.uniforms.gBallDistortionFreq = 20;
+        } else if (t < 6) {
+            chromatic.uniforms.gBallDistortionFreq = 20 + t * 5;
+        } else {
+            chromatic.uniforms.gBallDistortionFreq = 30;
+        }
+
+        if (t >= 7) {
+            const a = Math.exp(-10 * (t - 7));
+            chromatic.uniforms.gShockDistortion = a;
+        }
+
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.3;
+
+        chromatic.uniforms.gMandelboxScale = 1.1;
         chromatic.uniforms.gBallRadius = 0.1;
-
-        chromatic.uniforms.gLogoIntensity = 1;
+        chromatic.uniforms.gLogoIntensity = 1.0 + Math.sin(t * Math.PI * 2);
         chromatic.uniforms.gF0 = 0;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
-
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
-    }).then(8, t => {
+        chromatic.uniforms.gEmissiveIntensity = 6;
+    }).then(16, t => {
         // 爆発とディストーション
         ball.z = -12 - 0.2 * t;
         const a = Math.exp(-t * 0.3);
         camera = new Vector3(0.3 * a, 0.3 * a, 2 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
+
+        const b = (t % 1);
+        chromatic.uniforms.gBallDistortion = 0.1 * Math.exp(-5 * b);
+        chromatic.uniforms.gBallDistortionFreq = remap(t, 0, 16, 25, 40);
+
+        if (t > 4) {
+            chromatic.uniforms.gBallDistortionFreq = t * 10;
+        }
+
+        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
+        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
+
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
 
-        chromatic.uniforms.gEmissiveHueShiftBeat = 1.0;
-        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
-        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 8));
-        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 7.5, 8));
+        chromatic.uniforms.gEmissiveHue = 0.01;
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0;
+        chromatic.uniforms.gEmissiveHueShiftZ = remap01(t, 4, 16);
+        chromatic.uniforms.gEmissiveHueShiftXY = remap01(t, 4, 16);
     }).then(32, t => {
-        // 宇宙
+        // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gPlanetId = 1;
         chromatic.uniforms.gSceneEps = 0.003;
-        chromatic.uniforms.gTonemapExposure = 1;
+        chromatic.uniforms.gTonemapExposure = 1;// あとで 1 に戻す
 
-        camera = new Vector3(-47.387196668554765, -0.8550687112306142, 12.429528339658154).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
+        camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         ball.z = 0;
-        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.005 * t);
+        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
 
         chromatic.uniforms.gBallRadius = 0;
-        chromatic.uniforms.gLogoIntensity = 0;
-        chromatic.uniforms.gF0 = 0.1094292903071209;
-        chromatic.uniforms.gBloomIntensity = 5.199888174447861;
-        chromatic.uniforms.gBloomThreshold = 0.7188785494628379;
+        chromatic.uniforms.gBloomIntensity = 5;
+        chromatic.uniforms.gBloomThreshold = 0.7;
+        chromatic.uniforms.gBlend = easeInOutCubic(remap(t, 0, 8, 1, 0));
+    }).then(32, t => {
+        // クレジット
+        chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gSceneEps = 0.005;
+        chromatic.uniforms.gTonemapExposure = 1;
+
+        camera = new Vector3(-47.38, -0.85, 12.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
+        target = new Vector3(0, 0, 0);
+        ball.z = 0;
+        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
+
+        chromatic.uniforms.gBallRadius = 0;
+        chromatic.uniforms.gBloomIntensity = 5;
+        chromatic.uniforms.gBloomThreshold = 0.7;
     }).over(t => {
         // 終わり(仮)
-        chromatic.uniforms.gTonemapExposure = 0;
+        chromatic.uniforms.gBlend = -1;
     });
 
     chromatic.uniforms.gBallZ = ball.z;

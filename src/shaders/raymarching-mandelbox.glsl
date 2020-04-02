@@ -114,9 +114,9 @@ float dStage(vec3 p) {
 
 uniform float gBallZ;               // 0 -100 100 ball
 uniform float gBallRadius;          // 0.1 0 0.2
-uniform float gBallDistortion;      // 0.0 0 0.1
-uniform float gBallDistortionFreq;  // 0 0 100
 uniform float gLogoIntensity;       // 0 0 4
+uniform float gBallDistortion;      // 0.0 0 0.1
+uniform float gBallDistortionFreq;  // 30 0 100
 
 float dBall(vec3 p) {
     return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
@@ -128,12 +128,11 @@ vec2 uvSphere(vec3 n) {
     return vec2(u, v);
 }
 
-float dEarth(vec3 p) { return dSphere(p, 1.0); }
-
-float dEarthDetail(vec3 p) {
+float dEarth(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
+    uv.x += 0.01 * beat;
     float h = fbm(uv, 10.0);
-    return dSphere(p, 1.0) + 0.07 * h;
+    return dSphere(p, 1.0) + 0.05 * h;
 }
 
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
@@ -212,6 +211,8 @@ uniform float gEmissiveHueShiftXY;    // 0 0 1
 uniform float gF0;  // 0.95 0 1 lighting
 float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
+uniform float gPlanetId;  // 0 0 10 planet
+
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
@@ -243,7 +244,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.reflectance = 1.0;
 
             if (gLogoIntensity > 0.0) {
-                intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 3.0 * clamp(beat - 174.0, -1000.0, 0.0));
+                float b = beat - 160.0;
+                float r = remap01(b, 0.0, 7.0);
+                r = r - 1.0;
+                intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
         } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
             vec3 n = normalize(p);
@@ -251,22 +255,28 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             uv.x += 0.01 * beat;
             float h = fbm(uv, 10.0);
 
-            if (h > 0.67) {
-                // land
-                intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
+            if (gPlanetId == 0.0) {
+                if (h > 0.67) {
+                    // land
+                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                } else {
+                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
+                    intersection.roughness = 0.1;
+                    intersection.metallic = 0.134;
+                    intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
+                }
+
+                float cloud = fbm(uv, 15.0);
+                intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
+            } else {
+                intersection.baseColor = vec3(1.0);
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.01;
-                intersection.normal = calcNormal(p, dEarthDetail, 0.01);
                 intersection.emission = vec3(0.0);
-            } else {
-                intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
-                intersection.roughness = 0.1;
-                intersection.metallic = 0.134;
-                intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
             }
-
-            float cloud = fbm(uv, 15.0);
-            intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
 
             intersection.transparent = false;
             intersection.refractiveIndex = 1.2;
@@ -286,9 +296,88 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     }
 }
 
+bool equals(float x, float y) { return abs(x - y) < 0.0001; }
+
+// http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
+bool intersectAABB(inout Intersection intersection, inout Ray ray, vec3 lb, vec3 rt) {
+    vec3 dirfrac;
+    dirfrac.x = 1.0 / ray.direction.x;
+    dirfrac.y = 1.0 / ray.direction.y;
+    dirfrac.z = 1.0 / ray.direction.z;
+
+    float t1 = (lb.x - ray.origin.x) * dirfrac.x;
+    float t2 = (rt.x - ray.origin.x) * dirfrac.x;
+    float t3 = (lb.y - ray.origin.y) * dirfrac.y;
+    float t4 = (rt.y - ray.origin.y) * dirfrac.y;
+    float t5 = (lb.z - ray.origin.z) * dirfrac.z;
+    float t6 = (rt.z - ray.origin.z) * dirfrac.z;
+
+    float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+    float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+    if (tmin <= tmax && 0.0 <= tmin && tmin < intersection.distance) {
+        intersection.hit = true;
+        intersection.position = ray.origin + ray.direction * (tmin > 0.0 ? tmin : tmax);
+        intersection.distance = tmin;
+
+        vec3 uvw = (intersection.position - lb) / (rt - lb);
+
+        // 交点座標から法線を求める
+        // 高速化のためにY軸から先に判定する
+        if (equals(intersection.position.y, rt.y)) {
+            intersection.normal = vec3(0.0, 1.0, 0.0);
+            intersection.uv = uvw.xz;
+        } else if (equals(intersection.position.y, lb.y)) {
+            intersection.normal = vec3(0.0, -1.0, 0.0);
+            intersection.uv = uvw.xz;
+        } else if (equals(intersection.position.x, lb.x)) {
+            intersection.normal = vec3(-1.0, 0.0, 0.0);
+            intersection.uv = uvw.zy;
+        } else if (equals(intersection.position.x, rt.x)) {
+            intersection.normal = vec3(1.0, 0.0, 0.0);
+            intersection.uv = uvw.zy;
+        } else if (equals(intersection.position.z, lb.z)) {
+            intersection.normal = vec3(0.0, 0.0, -1.0);
+            intersection.uv = uvw.xy;
+        } else if (equals(intersection.position.z, rt.z)) {
+            intersection.normal = vec3(0.0, 0.0, 1.0);
+            intersection.uv = uvw.xy;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
+    uv -= p;
+    uv /= scale;
+
+    float offset = 128.0 / 2048.0;
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
+    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
+
+    return uv;
+}
+
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
+
+    if (gSceneId == SCENE_UNIVERSE && beat > 200.0) {
+        Intersection textIntersection = intersection;
+        if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
+            vec2 uv = 2.0 * textIntersection.uv - 1.0;
+            float id = 5.0 + floor((beat - 200.0) / 4.0);
+            vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
+            // alpha test
+            if (length(t) > 0.01) {
+                intersection.emission = 0.5 * t;
+                intersection.hit = true;
+            }
+        }
+    }
 }
 
 #define FLT_EPS 5.960464478e-8
@@ -388,38 +477,86 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     }
 }
 
-vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
-    uv -= p;
-    uv /= scale;
-
-    float offset = 128.0 / 2048.0;
-    uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
-    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
-
-    return uv;
-}
-
-vec3 text(vec2 uv) {
-    float id = floor(beat / 4.0);
-    float scale = (id == 0.0) ? 3.0 : 2.0;
-    return texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), scale)).rgb;
-}
-
-uniform float gShockDistortion;    // 0 0 1  distortion
+uniform float gShockDistortion;    // 0 0 1 distortion
 uniform float gExplodeDistortion;  // 0 0 1
 
 vec2 distortion(vec2 uv) {
     float l = length(uv);
     // uv += 1.5 * uv * sin(l + beat * PIH);
 
-    float b = mod(beat, 4.0);
-    uv += -gShockDistortion * exp(-10.0 * b) * uv * cos(l);
+    uv += -gShockDistortion * uv * cos(l);
 
     float explode = 30.0 * gExplodeDistortion * exp(-2.0 * l);
     explode = mix(explode, 2.0 * sin(l + 10.0 * gExplodeDistortion), 10.0 * gExplodeDistortion);
     uv += explode * uv;
     return uv;
+}
+
+void text(vec2 uv, inout vec3 result) {
+    vec3 col = vec3(0.0);
+    float b = beat - 224.0;
+    float t4 = mod(b, 4.0) / 4.0;
+    float t8 = mod(b, 8.0) / 8.0;
+    float brightness = 1.0;
+
+    if (b < 0.0) {
+        // nop
+    } else if (b < 4.0) {
+        // 0-4 (4)
+        // A 64k INTRO
+        col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
+        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
+    } else if (b < 8.0) {
+        // 4-8 (4)
+        // gam0022 & sadakkey
+        col += texture(iTextTexture, textUv(uv, 1.0, vec2(0.0, 0.5), 1.5)).rgb;
+        col += texture(iTextTexture, textUv(uv, 2.0, vec2(0.0, -0.5), 1.5)).rgb;
+        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
+    } else if (b < 16.0) {
+        // 8-16 (8)
+        // RE: SIMULATED
+        col += texture(iTextTexture, textUv(uv, 3.0, vec2(0.0, 0.0), 3.0)).rgb;
+    } else if (b < 20.0) {
+        // 16-20 (4)
+        // RE: SIMULATED -> RE
+        float t = remap01(t4, 0.0, 1.0);
+        // t = easeInOutCubic(t);
+        // t = pow(t4, 2.0);
+
+        float glitch = 0.0;
+        float fade = uv.x - remap(t, 0.0, 1.0, 1.6, -0.78);
+        if (fade > 0.0) {
+            glitch = fade * hash11(uv.x);
+            fade = saturate(0.8 - fade) * saturate(0.8 - abs(uv.y));
+        } else {
+            fade = 1.0;
+        }
+
+        col += fade * texture(iTextTexture, textUv(uv, 3.0 + glitch, vec2(0.0, 0.0), 3.0)).rgb;
+    } else if (b < 24.0) {
+        // 20-24 (4)
+        // RE
+        col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
+        if (uv.x > -0.78) {
+            col *= 0.0;
+        }
+        brightness = remap(t4, 0.0, 1.0, 1.0, 0.5);
+    } else {
+        // 24-32 (8)
+        // REALITY
+        col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
+        float t = remap01(t8, 0.5, 0.75);
+        // t = easeInOutCubic(t);
+        t = pow(t, 4.0);
+        if (uv.x > remap(t, 0.0, 1.0, -0.78, 1.0)) {
+            col *= 0.0;
+        }
+        col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
+        brightness = remap(t8, 0.0, 1.0, 0.5, 0.0);
+    }
+
+    result *= brightness;
+    result += 0.3 * col;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -462,7 +599,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         }
     }
 
-    color += text(uv);
+    text(uv, color);
 
     fragColor = vec4(color, 1.0);
 }

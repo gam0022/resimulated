@@ -44,6 +44,12 @@ float hash12(vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 
+vec2 hash23(vec3 p3) {
+    p3 = fract(p3 * vec3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.xx + p3.yz) * p3.zy);
+}
+
 // https://www.shadertoy.com/view/4dlGW2
 // Tileable Noise
 float hashScale(in vec2 p, in float scale) {

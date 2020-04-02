@@ -8,16 +8,21 @@ uniform float gVignetteRoundness;   // 1 0 1
 uniform float gTonemapExposure;  // 0.1 0.0 2
 uniform float gBlend;            // 0 -1 1
 
+uniform float gGlitchIntensity;  // 0.03 0 0.1
+
 vec3 chromaticAberration(vec2 uv) {
     vec2 d = abs(uv - 0.5);
     float f = mix(0.5, dot(d, d), gChromaticAberrationDistance);
     f *= f * gChromaticAberrationIntensity;
-    d = vec2(f);
+    vec2 shift = vec2(f);
+
+    vec2 grid = hash23(vec3(floor(vec2(uv.x * 8.0, uv.y * 32.0)), hash11(12321.0 * beat)));
+    shift += exp(-5.0 * fract(beat)) * gGlitchIntensity * grid;
 
     vec3 col;
-    col.r = texture(iPrevPass, uv + d).r;
+    col.r = texture(iPrevPass, uv + shift).r;
     col.g = texture(iPrevPass, uv).g;
-    col.b = texture(iPrevPass, uv - d).b;
+    col.b = texture(iPrevPass, uv - shift).b;
     return col;
 }
 

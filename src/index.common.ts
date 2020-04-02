@@ -39,7 +39,7 @@ export const chromatic = new Chromatic(
             "RE: SIMULATED",
             "REALITY",
             "MERCURY",
-            "FMS-Cat",
+            "FMS_Cat",
             "Ctrl-Alt-Test",
             "RGBA & TBC",
             "CNCD & Fairlight",

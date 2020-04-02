@@ -383,9 +383,10 @@ export class Chromatic {
 
             const initSound = () => {
                 // Sound
-                const audioBuffer = audio.createBuffer(2, audio.sampleRate * timeLength, audio.sampleRate);
+                const sampleLength = Math.ceil(audio.sampleRate * timeLength);
+                const audioBuffer = audio.createBuffer(2, sampleLength, audio.sampleRate);
                 const samples = SOUND_WIDTH * SOUND_HEIGHT;
-                const numBlocks = (audio.sampleRate * timeLength) / samples;
+                const numBlocks = sampleLength / samples;
                 const soundProgram = loadProgram(soundShader);
                 const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
                 for (let i = 0; i < numBlocks; i++) {

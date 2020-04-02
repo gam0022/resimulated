@@ -32,6 +32,7 @@ export const chromatic = new Chromatic(
         const textCtx = canvas.getContext("2d");
         // window.document.body.appendChild(canvas);
 
+        // MAX: 2048 / 128 = 16
         const texts = [
             /* 0 */ "A 64k INTRO",
             /* 1 */ "GRAPHICS",
@@ -48,6 +49,7 @@ export const chromatic = new Chromatic(
             /* 12 */ "0x4015 & YET1",
             /* 13 */ "kaneta\u{1F41B}",
             /* 14 */ "gaz",
+            /* 15 */ "EOF",
         ];
 
         canvas.width = 2048;

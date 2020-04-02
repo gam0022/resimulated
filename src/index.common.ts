@@ -332,11 +332,20 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         target = ball;
 
         const b = (t % 1);
-        chromatic.uniforms.gBallDistortion = 0.1 * Math.exp(-5 * b);
-        chromatic.uniforms.gBallDistortionFreq = remap(t, 0, 16, 25, 40);
+        chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.05, 0.1) * Math.exp(-5 * b);
 
-        if (t > 4) {
-            chromatic.uniforms.gBallDistortionFreq = t * 10;
+        if (t < 2) {
+            chromatic.uniforms.gBallDistortionFreq = 12;
+        } else if (t < 4) {
+            chromatic.uniforms.gBallDistortionFreq = 20;
+        } else if (t < 6) {
+            chromatic.uniforms.gBallDistortionFreq = 10 + t * 5;
+        } else {
+            chromatic.uniforms.gBallDistortionFreq = t * t;
+        }
+
+        if (t >= 4) {
+            chromatic.uniforms.gShockDistortion = 4.0 * Math.exp(-10 * (t - 4));
         }
 
         chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));

@@ -527,8 +527,8 @@ void text(vec2 uv, inout vec3 result) {
         float fade = uv.x - remap(t, 0.0, 1.0, 1.6, -0.78);
         if (fade > 0.0) {
             glitch = hash23(vec3(floor(vec2(uv.x * 32.0, uv.y * 8.0)), beat));
-            glitch.x = fade * remap(glitch.x, 0.0, 1.0, 0.0, 0.05);
-            glitch.y = fade * remap(glitch.y, 0.0, 1.0, -0.5, 0.0);
+            glitch.x = fade * fade * remap(glitch.x, 0.0, 1.0, 0.0, 0.05);
+            glitch.y = fade * fade * remap(glitch.y, 0.0, 1.0, -0.4, 0.0);
             fade = saturate(1.0 - fade) * saturate(1.0 - abs(glitch.y));
         } else {
             fade = 1.0;

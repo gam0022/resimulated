@@ -9,6 +9,7 @@ uniform float gTonemapExposure;  // 0.1 0.0 2
 uniform float gBlend;            // 0 -1 1
 
 uniform float gGlitchIntensity;  // 0 0 0.1
+uniform float gInvertRate;       // 0 0 1
 
 vec3 chromaticAberration(vec2 uv) {
     vec2 d = abs(uv - 0.5);
@@ -44,6 +45,14 @@ vec3 acesFilm(const vec3 x) {
     return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
+vec3 invert(vec3 c, vec2 uv) {
+    if (hash12(vec2(floor(uv.y * gInvertRate * 32.0), beat)) < gInvertRate) {
+        return vec3(1.0) - c;
+    } else {
+        return c;
+    }
+}
+
 vec3 blend(vec3 c) {
     c = mix(c, vec3(1.0), saturate(gBlend));
     c = mix(c, vec3(0.0), saturate(-gBlend));
@@ -56,6 +65,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     col *= vignette(uv);
     col = acesFilm(col * gTonemapExposure);
     col = pow(col, vec3(1.0 / 2.2));
+    col = invert(col, uv);
     col = blend(col);
     fragColor = vec4(col, 1.0);
 }

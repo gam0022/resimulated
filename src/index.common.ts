@@ -310,6 +310,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gBallDistortionFreq = 30;
         }
 
+        if (t >= 4) {
+            chromatic.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
+        }
+
         if (t >= 7) {
             const a = Math.exp(-10 * (t - 7));
             chromatic.uniforms.gShockDistortion = a;
@@ -344,7 +348,12 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         }
 
         if (t >= 4) {
-            chromatic.uniforms.gShockDistortion = 4.0 * Math.exp(-10 * (t - 4));
+            chromatic.uniforms.gShockDistortion = 4 * Math.exp(-10 * (t - 4));
+            chromatic.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
+        }
+
+        if (t >= 8) {
+            chromatic.uniforms.gInvertRate = Math.exp(-20 * (t - 8));
         }
 
         chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remapFrom(t, 4, 16));

@@ -8,7 +8,7 @@ uniform float gVignetteRoundness;   // 1 0 1
 uniform float gTonemapExposure;  // 0.1 0.0 2
 uniform float gBlend;            // 0 -1 1
 
-uniform float gGlitchIntensity;  // 0.03 0 0.1
+uniform float gGlitchIntensity;  // 0 0 0.1
 
 vec3 chromaticAberration(vec2 uv) {
     vec2 d = abs(uv - 0.5);

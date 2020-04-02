@@ -371,6 +371,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
 
+        if ((t % 4) > 3) {
+            chromatic.uniforms.gGlitchIntensity = 0.05;
+        }
+
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
@@ -385,6 +389,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         target = new Vector3(0, 0, 0);
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
+
+        if ((3 <= t && t < 4) || (10 <= t && t < 12) || (30 <= t && t < 32)) {
+            chromatic.uniforms.gGlitchIntensity = 0.05;
+        }
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;

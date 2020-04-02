@@ -245,7 +245,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             if (gLogoIntensity > 0.0) {
                 float b = beat - 160.0;
-                float r = remap01(b, 0.0, 7.0);
+                float r = remapFrom(b, 0.0, 7.0);
                 r = r - 1.0;
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
@@ -258,15 +258,15 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             if (gPlanetId == 0.0) {
                 if (h > 0.67) {
                     // land
-                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remap01(h, 0.72, 0.99));
+                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
                 } else {
-                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remap01(h, 0.0, 0.6));
+                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
                     intersection.roughness = 0.1;
                     intersection.metallic = 0.134;
-                    intersection.emission = vec3(0.1, 0.3, 1.0) * remap01(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
+                    intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
                 }
 
                 float cloud = fbm(uv, 15.0);
@@ -519,7 +519,7 @@ void text(vec2 uv, inout vec3 result) {
     } else if (b < 20.0) {
         // 16-20 (4)
         // RE: SIMULATED -> RE
-        float t = remap01(t4, 0.0, 1.0);
+        float t = remapFrom(t4, 0.0, 1.0);
         // t = easeInOutCubic(t);
         t = pow(t4, 2.0);
 
@@ -550,7 +550,7 @@ void text(vec2 uv, inout vec3 result) {
         // 24-32 (8)
         // REALITY
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        float t = remap01(t8, 0.5, 0.75);
+        float t = remapFrom(t8, 0.5, 0.75);
         // t = easeInOutCubic(t);
         t = pow(t, 4.0);
         if (uv.x > remap(t, 0.0, 1.0, -0.78, 1.0)) {

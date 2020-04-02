@@ -26,7 +26,7 @@ uniform sampler2D iPrevPass;
 // https://www.shadertoy.com/view/3tX3R4
 float clamp2(float x, float min, float max) { return (min < max) ? clamp(x, min, max) : clamp(x, max, min); }
 float remap(float val, float im, float ix, float om, float ox) { return clamp2(om + (val - im) * (ox - om) / (ix - im), om, ox); }
-float remap01(float val, float im, float ix) { return remap(val, im, ix, 0.0, 1.0); }  // TODO: optimize
+float remapFrom(float val, float im, float ix) { return remap(val, im, ix, 0.0, 1.0); }  // TODO: optimize
 float easeInOutCubic(float t) { return t < 0.5 ? 4.0 * t * t * t : (t - 1.0) * (2.0 * t - 2.0) * (2.0 * t - 2.0) + 1.0; }
 
 // noise

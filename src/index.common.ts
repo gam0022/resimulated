@@ -11,7 +11,7 @@ export const chromatic = new Chromatic(
     // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
-        require("./shaders/raymarching-mandelbox.glsl").default,
+        require("./shaders/raymarching-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
     ],
 

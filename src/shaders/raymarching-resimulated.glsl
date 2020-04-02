@@ -262,12 +262,15 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
+                    intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
                 } else {
                     intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
                     intersection.roughness = 0.1;
                     intersection.metallic = 0.134;
-                    intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67) * fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
+                    intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67);
                 }
+
+                intersection.emission *= fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
 
                 float cloud = fbm(uv, 15.0);
                 intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));

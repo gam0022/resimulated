@@ -194,7 +194,6 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         // Ballをズームするカット
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 0.2 + 0.003 * t * t).add(ball).add(Vector3.fbm(t).scale(0.001));
-        // camera = new Vector3(0, 0, remap01(easeInOutCubic(t / 16), -9.8, -9));
         target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);

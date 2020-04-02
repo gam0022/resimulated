@@ -523,16 +523,21 @@ void text(vec2 uv, inout vec3 result) {
         // t = easeInOutCubic(t);
         // t = pow(t4, 2.0);
 
-        float glitch = 0.0;
+        vec2 glitch = vec2(0.0);
         float fade = uv.x - remap(t, 0.0, 1.0, 1.6, -0.78);
         if (fade > 0.0) {
-            glitch = fade * hash11(uv.x);
+            glitch = hash23(vec3(floor(vec2(uv.x * 8.0, uv.y * 8.0)), beat));
+            glitch = 2.0 * glitch - 1.0;
+            glitch *= 0.1;
             fade = saturate(0.8 - fade) * saturate(0.8 - abs(uv.y));
         } else {
             fade = 1.0;
         }
 
-        col += fade * texture(iTextTexture, textUv(uv, 3.0 + glitch, vec2(0.0, 0.0), 3.0)).rgb;
+        float a = saturate(cos(fract(b * TAU * 4.0)));
+        col.r += fade * texture(iTextTexture, textUv(uv + glitch * mix(0.5, 1.0, a), 3.0, vec2(0.0, 0.0), 3.0)).r;
+        col.g += fade * texture(iTextTexture, textUv(uv + glitch * mix(1.5, 1.0, a), 3.0, vec2(0.0, 0.0), 3.0)).g;
+        col.b += fade * texture(iTextTexture, textUv(uv + glitch * mix(2.0, 1.0, a), 3.0, vec2(0.0, 0.0), 3.0)).b;
     } else if (b < 24.0) {
         // 20-24 (4)
         // RE

@@ -1383,25 +1383,7 @@ vec2 bass2(float beat, float time) {
 
 vec2 bass3(float beat, float time) {
     if (beat < 64.0) return vec2(0.0);
-
-// 1つの展開のビート数 ベースのアタック
-#define BASS3_BEAT_LEN 4
-
-// 展開のパターンの種類
-#define BASS3_DEV_PAT 1
-
-// 展開の長さ
-#define BASS3_DEV_LEN 8
-
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
-    int[BASS3_BEAT_LEN * NOTE_DIV * BASS3_DEV_PAT] notes = int[](O(33));
-    int[BASS3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0));
-    SEQUENCER(beat, time, BASS3_BEAT_LEN, BASS3_DEV_PAT, BASS3_DEV_LEN, notes, development, basssaw3)
-    return ret;
+    return basssaw3(33.0, beatToTime(mod(beat, 4.0)));
 }
 
 vec2 sideSupersaw1(float beat, float time) {

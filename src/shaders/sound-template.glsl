@@ -2611,14 +2611,16 @@ vec2 testhihat2(float beat, float time) {
 //  CHORD  //
 
 vec2 introSupersaw1(float beat, float time) {
+    if (beat >= 64.0) return vec2(0.0);
+
 // 1つの展開のビート数
 #define INTROSAW_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define INTROSAW_DEV_PAT 3
+#define INTROSAW_DEV_PAT 2
 
 // 展開の長さ
-#define INTROSAW_DEV_LEN 32
+#define INTROSAW_DEV_LEN 8
 
     // ノート番号
     // F: 4分音符
@@ -2680,34 +2682,17 @@ vec2 introSupersaw1(float beat, float time) {
         F(45),
 
         // 8
-        F(45),
-
-        //
-        // 展開2
-        //
-
-        // 1
-        O(0),
-
-        // 2
-        O(0));
+        F(45));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[INTROSAW_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2));
+    int[INTROSAW_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, INTROSAW_BEAT_LEN, INTROSAW_DEV_PAT, INTROSAW_DEV_LEN, notes, development, basssaw1)
     return ret;
 }
 
 vec2 introSupersaw2(float beat, float time) {
-// 1つの展開のビート数
-#define INTROSAW_BEAT_LEN 8
-
-// 展開のパターンの種類
-#define INTROSAW_DEV_PAT 3
-
-// 展開の長さ
-#define INTROSAW_DEV_LEN 32
+    if (beat >= 64.0) return vec2(0.0);
 
     // ノート番号
     // F: 4分音符
@@ -2769,38 +2754,10 @@ vec2 introSupersaw2(float beat, float time) {
         F(0),
 
         // 8
-        F(57),
-
-        //
-        // 展開2
-        //
-
-        // 1
-        F(0),
-
-        // 2
-        F(0),
-
-        // 3
-        E2(0, 0),
-
-        // 4
-        F(0),
-
-        // 5
-        E2(0, 0),
-
-        // 6
-        F(0),
-
-        // 7
-        F(0),
-
-        // 8
-        F(0));
+        F(57));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[INTROSAW_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2));
+    int[INTROSAW_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, INTROSAW_BEAT_LEN, INTROSAW_DEV_PAT, INTROSAW_DEV_LEN, notes, development, basssaw2)
     return ret;
@@ -4112,9 +4069,6 @@ vec2 mainSound(float time) {
     ret += vec2(0.1, 0.1) * snare1(beat, time);
     ret += vec2(0.05, 0.05) * snare2(beat, time);
     ret += vec2(0.3, 0.3) * sidechain2 * noisefeed(beat, time);
-
-    ret *= 0.0;
-    ret += vec2(0.3, 0.3) * sidechain * arp5(beat, time);  // アルペジオ中央
 
     return clamp(ret, -1.0, 1.0);
 }

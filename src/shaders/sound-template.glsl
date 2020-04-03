@@ -2293,33 +2293,24 @@ vec2 arp4(float beat, float time) {
 }
 
 vec2 arp5(float beat, float time) {
+    if (beat < 64.0 || beat >= 192.0) return vec2(0.0);
 // 1つの展開のビート数
 #define ARP5_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define ARP5_DEV_PAT 2
+#define ARP5_DEV_PAT 1
 
 // 展開の長さ
-#define ARP5_DEV_LEN 32
+#define ARP5_DEV_LEN 8
 
     // ノート番号
     // F: 4分音符
     // E: 8分音符
     // S: 16分音符
     // ノート番号0は休符
-    int[ARP4_BEAT_LEN * NOTE_DIV * ARP4_DEV_PAT] notes = int[](
+    int[ARP5_BEAT_LEN * NOTE_DIV * ARP5_DEV_PAT] notes = int[](
         //
         // 展開0
-        //
-
-        // 1
-        O(0),
-
-        // 2
-        O(0),
-
-        //
-        // 展開1（とりあえず今は展開0と同じ）
         //
 
         // 1
@@ -2347,7 +2338,7 @@ vec2 arp5(float beat, float time) {
         S4(67, 0, 76, 0));
 
     // 展開
-    int[ARP5_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
+    int[ARP5_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP5_BEAT_LEN, ARP5_DEV_PAT, ARP5_DEV_LEN, notes, development, arpsine2)
     return ret;
@@ -4121,6 +4112,9 @@ vec2 mainSound(float time) {
     ret += vec2(0.1, 0.1) * snare1(beat, time);
     ret += vec2(0.05, 0.05) * snare2(beat, time);
     ret += vec2(0.3, 0.3) * sidechain2 * noisefeed(beat, time);
+
+    ret *= 0.0;
+    ret += vec2(0.3, 0.3) * sidechain * arp5(beat, time);  // アルペジオ中央
 
     return clamp(ret, -1.0, 1.0);
 }

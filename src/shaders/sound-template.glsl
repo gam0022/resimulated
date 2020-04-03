@@ -405,7 +405,7 @@ vec2 sidechainnoise(float note, float t) {
 #define D8(a, b, c, d, e, f, g, h) (a) | (b << 4) | (c << 8) | (d << 12) | (e << 16) | (f << 20) | (g << 24) | (h << 28)
 
 #define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                     \
-    int indexOffset = development[int(mod(beat / float(beatLen / DEV_PACK), float(devLen / DEV_PACK)))]; \
+    int indexOffset = development[int(mod(beat / float(beatLen * DEV_PACK), float(devLen / DEV_PACK)))]; \
     indexOffset = (indexOffset >> (4 * int(mod(beat / float(beatLen), float(DEV_PACK))))) & 15;          \
     indexOffset *= beatLen * NOTE_VDIV;                                                                  \
                                                                                                          \

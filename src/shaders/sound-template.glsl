@@ -1385,7 +1385,7 @@ vec2 bass3(float beat, float time) {
     if (beat < 64.0) return vec2(0.0);
 
 // 1つの展開のビート数 ベースのアタック
-#define BASS3_BEAT_LEN 8
+#define BASS3_BEAT_LEN 4
 
 // 展開のパターンの種類
 #define BASS3_DEV_PAT 1
@@ -1398,18 +1398,7 @@ vec2 bass3(float beat, float time) {
     // E: 8分音符
     // S: 16分音符
     // ノート番号0は休符
-    int[BASS3_BEAT_LEN * NOTE_DIV * BASS3_DEV_PAT] notes = int[](
-        //
-        // 展開0
-        //
-
-        // 1
-        O(33),
-
-        // 2
-        O(33));
-
-    // 展開 #define KICK1_DEV_LEN 8　変える
+    int[BASS3_BEAT_LEN * NOTE_DIV * BASS3_DEV_PAT] notes = int[](O(33));
     int[BASS3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, BASS3_BEAT_LEN, BASS3_DEV_PAT, BASS3_DEV_LEN, notes, development, basssaw3)
     return ret;

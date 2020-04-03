@@ -396,6 +396,9 @@ vec2 sidechainnoise(float note, float t) {
 #define NOTE_VDIV 4
 #define DEV_PACK 8
 
+#define MAX_BEAT_LEN 8
+int[MAX_BEAT_LEN * NOTE_VDIV] tmpIndexes;
+
 #define O(a)                                                                                                                                                                                 \
     (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), \
         (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16)
@@ -409,14 +412,13 @@ vec2 sidechainnoise(float note, float t) {
     indexOffset = (indexOffset >> (4 * int(mod(beat / float(beatLen), float(DEV_PACK))))) & 15;          \
     indexOffset *= beatLen * NOTE_VDIV;                                                                  \
                                                                                                          \
-    int[beatLen * NOTE_VDIV] indexes;                                                                    \
     for (int i = 0; i < beatLen * NOTE_VDIV;) {                                                          \
         int index = i + indexOffset;                                                                     \
         int shift = (index % 2 == 1) ? 16 : 0;                                                           \
         int div = ((notes[index >> 1] >> shift) >> 8) & 255;                                             \
         int len = NOTE_VDIV * NOTE_VDIV / div;                                                           \
         for (int j = 0; j < len; j++) {                                                                  \
-            indexes[i + j] = i;                                                                          \
+            tmpIndexes[i + j] = i;                                                                       \
         }                                                                                                \
         i += len;                                                                                        \
     }                                                                                                    \
@@ -425,7 +427,7 @@ vec2 sidechainnoise(float note, float t) {
     int index = int(indexFloat);                                                                         \
     int shift = (index % 2 == 1) ? 16 : 0;                                                               \
     int note = (notes[(index + indexOffset) >> 1] >> shift) & 255;                                       \
-    float localTime = beatToTime((indexFloat - float(indexes[index])) / float(NOTE_VDIV));               \
+    float localTime = beatToTime((indexFloat - float(tmpIndexes[index])) / float(NOTE_VDIV));            \
     float amp = (note == 0) ? 0.0 : 1.0;                                                                 \
     vec2 ret = vec2(toneFunc(float(note), localTime) * amp);
 

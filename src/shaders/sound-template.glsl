@@ -1382,14 +1382,16 @@ vec2 bass2(float beat, float time) {
 }
 
 vec2 bass3(float beat, float time) {
+    if (beat < 64.0) return vec2(0.0);
+
 // 1つの展開のビート数 ベースのアタック
 #define BASS3_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define BASS3_DEV_PAT 2
+#define BASS3_DEV_PAT 1
 
 // 展開の長さ
-#define BASS3_DEV_LEN 32
+#define BASS3_DEV_LEN 8
 
     // ノート番号
     // F: 4分音符
@@ -1405,20 +1407,10 @@ vec2 bass3(float beat, float time) {
         O(33),
 
         // 2
-        O(33),
-
-        //
-        // 展開1
-        //
-
-        // 1
-        O(0),
-
-        // 2
-        O(0));
+        O(33));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[BASS3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
+    int[BASS3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, BASS3_BEAT_LEN, BASS3_DEV_PAT, BASS3_DEV_LEN, notes, development, basssaw3)
     return ret;
 }

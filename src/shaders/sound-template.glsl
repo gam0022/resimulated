@@ -406,7 +406,7 @@ vec2 sidechainnoise(float note, float t) {
 
 #define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                     \
     int indexOffset = development[int(mod(beat / float(beatLen / DEV_PACK), float(devLen / DEV_PACK)))]; \
-    indexOffset = (indexOffset >> (4 * int(mod(beat, float(DEV_PACK))))) & 15;                           \
+    indexOffset = (indexOffset >> (4 * (int(beat) % DEV_PACK))) & 15;                                    \
     indexOffset *= beatLen * NOTE_VDIV;                                                                  \
                                                                                                          \
     int[beatLen * NOTE_VDIV] indexes;                                                                    \

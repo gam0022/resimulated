@@ -391,9 +391,13 @@ vec2 sidechainnoise(float note, float t) {
     return vec2(v);
 }
 
-// 1ビートを最大何分割するか。16分音符に対応するなら2（本当なら4だが、16bitずつpaddingすることで2にした）
-#define NOTE_DIV 2
+// 1ビートを最大何分割するか。16分音符に対応するなら4
 #define NOTE_VDIV 4
+
+// 1ビートのpackingを考慮した分割数。32bitのintに16bitずつ詰めているので 4 / (32 / 16) = 2
+#define NOTE_DIV 2
+
+// 展開用の配列のpacking数。32bitのintに4bitずつ詰めているので 32 / 4 = 8
 #define DEV_PACK 8
 
 #define MAX_BEAT_LEN 8

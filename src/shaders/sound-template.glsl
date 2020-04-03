@@ -1924,14 +1924,16 @@ vec2 tb303synth(float beat, float time) {
 }
 
 vec2 arp0(float beat, float time) {
+    if (beat >= 64.0 && beat < 192.0) return vec2(0.0);
+
 // 1つの展開のビート数
 #define ARP0_BEAT_LEN 8
 
 // 展開のパターンの種類
-#define ARP0_DEV_PAT 2
+#define ARP0_DEV_PAT 1
 
 // 展開の長さ
-#define ARP0_DEV_LEN 32
+#define ARP0_DEV_LEN 8
 
     // ノート番号
     // F: 4分音符
@@ -1965,20 +1967,10 @@ vec2 arp0(float beat, float time) {
         S4(67, 67, 69, 69),
 
         // 8
-        S4(71, 71, 74, 74),
-
-        //
-        // 展開1（とりあえず今は展開0と同じ）
-        //
-
-        // 1
-        O(0),
-
-        // 2
-        O(0));
+        S4(71, 71, 74, 74));
 
     // 展開
-    int[ARP0_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
+    int[ARP0_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP0_BEAT_LEN, ARP0_DEV_PAT, ARP0_DEV_LEN, notes, development, arpsaw)
     return ret;

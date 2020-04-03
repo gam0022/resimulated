@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3, remap, remap01, easeInOutCubic } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remapFrom, easeInOutCubic } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -11,7 +11,7 @@ export const chromatic = new Chromatic(
     // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
-        require("./shaders/raymarching-mandelbox.glsl").default,
+        require("./shaders/raymarching-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
     ],
 
@@ -32,20 +32,24 @@ export const chromatic = new Chromatic(
         const textCtx = canvas.getContext("2d");
         // window.document.body.appendChild(canvas);
 
+        // MAX: 2048 / 128 = 16
         const texts = [
-            "A 64k INTRO",
-            "Graphics by gam0022",
-            "Music by sadakkey",
-            "RE: SIMULATED",
-            "REALITY",
-            "MERCURY",
-            "FMS-Cat",
-            "Ctrl-Alt-Test",
-            "RGBA & TBC",
-            "CNCD & Fairlight",
-            "0x4015 & YET1",
-            "kaneta\u{1F41B}",
-            "gaz",
+            /* 0 */ "A 64k INTRO",
+            /* 1 */ "GRAPHICS",
+            /* 2 */ "gam0022",
+            /* 3 */ "MUSIC",
+            /* 4 */ "sadakkey",
+            /* 5 */ "RE: SIMULATED",
+            /* 6 */ "REALITY",
+            /* 7 */ "MERCURY",
+            /* 8 */ "FMS_Cat",
+            /* 9 */ "Ctrl-Alt-Test",
+            /* 10 */ "RGBA & TBC",
+            /* 11 */ "CNCD & Fairlight",
+            /* 12 */ "0x4015 & YET1",
+            /* 13 */ "kaneta\u{1F41B}",
+            /* 14 */ "gaz",
+            /* 15 */ "EOF",
         ];
 
         canvas.width = 2048;
@@ -125,7 +129,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     });
 
     new Timeline(beat).then(8, t => {
-        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remap01(t, 0, 4));
+        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remapFrom(t, 0, 4));
         chromatic.uniforms.gTonemapExposure = 0.2;
 
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
@@ -194,7 +198,6 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         // Ballをズームするカット
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 0.2 + 0.003 * t * t).add(ball).add(Vector3.fbm(t).scale(0.001));
-        // camera = new Vector3(0, 0, remap01(easeInOutCubic(t / 16), -9.8, -9));
         target = ball;
 
         chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);
@@ -311,6 +314,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gBallDistortionFreq = 30;
         }
 
+        if (t >= 4) {
+            chromatic.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
+        }
+
         if (t >= 7) {
             const a = Math.exp(-10 * (t - 7));
             chromatic.uniforms.gShockDistortion = a;
@@ -332,15 +339,29 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         target = ball;
 
         const b = (t % 1);
-        chromatic.uniforms.gBallDistortion = 0.1 * Math.exp(-5 * b);
-        chromatic.uniforms.gBallDistortionFreq = remap(t, 0, 16, 25, 40);
+        chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.05, 0.1) * Math.exp(-5 * b);
 
-        if (t > 4) {
-            chromatic.uniforms.gBallDistortionFreq = t * 10;
+        if (t < 2) {
+            chromatic.uniforms.gBallDistortionFreq = 12;
+        } else if (t < 4) {
+            chromatic.uniforms.gBallDistortionFreq = 20;
+        } else if (t < 6) {
+            chromatic.uniforms.gBallDistortionFreq = 10 + t * 5;
+        } else {
+            chromatic.uniforms.gBallDistortionFreq = t * t;
         }
 
-        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remap01(t, 4, 16));
-        chromatic.uniforms.gBlend = easeInOutCubic(remap01(t, 13, 16));
+        if (t >= 4) {
+            chromatic.uniforms.gShockDistortion = 4 * Math.exp(-10 * (t - 4));
+            chromatic.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
+        }
+
+        if (t >= 8) {
+            chromatic.uniforms.gInvertRate = Math.exp(-20 * (t - 8));
+        }
+
+        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remapFrom(t, 4, 16));
+        chromatic.uniforms.gBlend = easeInOutCubic(remapFrom(t, 13, 16));
 
         chromatic.uniforms.gMandelboxScale = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 6;
@@ -348,8 +369,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
 
         chromatic.uniforms.gEmissiveHue = 0.01;
         chromatic.uniforms.gEmissiveHueShiftBeat = 0;
-        chromatic.uniforms.gEmissiveHueShiftZ = remap01(t, 4, 16);
-        chromatic.uniforms.gEmissiveHueShiftXY = remap01(t, 4, 16);
+        chromatic.uniforms.gEmissiveHueShiftZ = remapFrom(t, 4, 16);
+        chromatic.uniforms.gEmissiveHueShiftXY = remapFrom(t, 4, 16);
     }).then(32, t => {
         // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;
@@ -361,6 +382,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         target = new Vector3(0, 0, 0);
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
+
+        if ((t % 4) > 3) {
+            chromatic.uniforms.gGlitchIntensity = 0.05;
+        }
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
@@ -376,6 +401,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         target = new Vector3(0, 0, 0);
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
+
+        if ((2 <= t && t < 4) || (10 <= t && t < 12) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
+            chromatic.uniforms.gGlitchIntensity = 0.05;
+        }
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;

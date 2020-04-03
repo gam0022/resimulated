@@ -8,16 +8,24 @@ uniform float gVignetteRoundness;   // 1 0 1
 uniform float gTonemapExposure;  // 0.1 0.0 2
 uniform float gBlend;            // 0 -1 1
 
+uniform float gGlitchIntensity;  // 0 0 0.1
+uniform float gInvertRate;       // 0 0 1
+
 vec3 chromaticAberration(vec2 uv) {
     vec2 d = abs(uv - 0.5);
     float f = mix(0.5, dot(d, d), gChromaticAberrationDistance);
     f *= f * gChromaticAberrationIntensity;
-    d = vec2(f);
+    vec2 shift = vec2(f);
+
+    float a = 2.0 * hash11(beat) - 1.0;
+    vec2 grid = hash23(vec3(floor(vec2(uv.x * (4.0 + 8.0 * a), (uv.y + a) * 32.0)), beat));
+    grid = 2.0 * grid - 1.0;
+    shift += exp(-5.0 * fract(beat)) * gGlitchIntensity * grid;
 
     vec3 col;
-    col.r = texture(iPrevPass, uv + d).r;
+    col.r = texture(iPrevPass, uv + shift).r;
     col.g = texture(iPrevPass, uv).g;
-    col.b = texture(iPrevPass, uv - d).b;
+    col.b = texture(iPrevPass, uv - shift).b;
     return col;
 }
 
@@ -37,6 +45,14 @@ vec3 acesFilm(const vec3 x) {
     return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
+vec3 invert(vec3 c, vec2 uv) {
+    if (hash12(vec2(floor(uv.y * gInvertRate * 32.0), beat)) < gInvertRate) {
+        return vec3(1.0) - c;
+    } else {
+        return c;
+    }
+}
+
 vec3 blend(vec3 c) {
     c = mix(c, vec3(1.0), saturate(gBlend));
     c = mix(c, vec3(0.0), saturate(-gBlend));
@@ -49,6 +65,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     col *= vignette(uv);
     col = acesFilm(col * gTonemapExposure);
     col = pow(col, vec3(1.0 / 2.2));
+    col = invert(col, uv);
     col = blend(col);
     fragColor = vec4(col, 1.0);
 }

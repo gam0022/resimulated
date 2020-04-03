@@ -394,6 +394,7 @@ vec2 sidechainnoise(float note, float t) {
 // 1ビートを最大何分割するか。16分音符に対応するなら2（本当なら4だが、16bitずつpaddingすることで2にした）
 #define NOTE_DIV 2
 #define NOTE_VDIV 4
+#define DEV_PACK 8
 
 #define O(a)                                                                                                                                                                                 \
     (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), (a | 1 << 8) | ((a | 1 << 8) << 16), \
@@ -401,9 +402,12 @@ vec2 sidechainnoise(float note, float t) {
 #define F(a) (a | 4 << 8) | ((a | 4 << 8) << 16), (a | 4 << 8) | ((a | 4 << 8) << 16)
 #define E2(a, b) (a | 8 << 8) | ((a | 8 << 8) << 16), (b | 8 << 8) | ((b | 8 << 8) << 16)
 #define S4(a, b, c, d) (a | 16 << 8) | ((b | 16 << 8) << 16), (c | 16 << 8) | ((d | 16 << 8) << 16)
+#define D8(a, b, c, d, e, f, g, h) (a) | (b << 4) | (c << 8) | (d << 12) | (e << 16) | (f << 20) | (g << 24) | (h << 28)
 
 #define SEQUENCER(beat, time, beatLen, devPat, devLen, notes, development, toneFunc)                     \
-    int indexOffset = development[int(mod(beat / float(beatLen), float(devLen)))] * beatLen * NOTE_VDIV; \
+    int indexOffset = development[int(mod(beat / float(beatLen / DEV_PACK), float(devLen / DEV_PACK)))]; \
+    indexOffset = indexOffset >> int(mod(beat, float(DEV_PACK))) & 15;                                   \
+    indexOffset *= beatLen * NOTE_VDIV;                                                                  \
                                                                                                          \
     int[beatLen * NOTE_VDIV] indexes;                                                                    \
     for (int i = 0; i < beatLen * NOTE_VDIV;) {                                                          \
@@ -528,7 +532,7 @@ vec2 kick1(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[KICK1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[KICK1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 2, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, KICK1_BEAT_LEN, KICK1_DEV_PAT, KICK1_DEV_LEN, notes, development, kick)
 
@@ -630,7 +634,7 @@ vec2 crashcymbal1(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[CRASH1_DEV_LEN] development = int[](0, 1, 1, 1, 0, 1, 2, 2, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1);
+    int[CRASH1_DEV_LEN / DEV_PACK] development = int[](D8(0, 1, 1, 1, 0, 1, 2, 2), D8(0, 1, 1, 1, 0, 1, 1, 1), D8(0, 1, 1, 1, 0, 1, 1, 1), D8(0, 1, 1, 1, 0, 1, 1, 1));
 
     SEQUENCER(beat, time, CRASH1_BEAT_LEN, CRASH1_DEV_PAT, CRASH1_DEV_LEN, notes, development, crash1)
 
@@ -720,7 +724,7 @@ vec2 crashcymbal2(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[CRASH1_DEV_LEN] development = int[](1, 1, 0, 1, 1, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[CRASH1_DEV_LEN / DEV_PACK] development = int[](D8(1, 1, 0, 1, 1, 0, 2, 2), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, CRASH1_BEAT_LEN, CRASH1_DEV_PAT, CRASH1_DEV_LEN, notes, development, crash1)
 
@@ -1054,7 +1058,7 @@ vec2 bass1(float beat, float time) {
         S4(0, 31, 31, 31));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[BASS1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 4, 5, 6, 7, 8, 1, 8, 9, 8, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[BASS1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 3, 4, 5, 6, 7), D8(8, 1, 8, 9, 8, 1, 10, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
     SEQUENCER(beat, time, BASS1_BEAT_LEN, BASS1_DEV_PAT, BASS1_DEV_LEN, notes, development, bass)
     return ret;
 }
@@ -1366,7 +1370,7 @@ vec2 bass2(float beat, float time) {
         S4(0, 31, 31, 31));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[BASS2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7, 8, 1, 8, 9, 8, 1, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[BASS2_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 2, 4, 5, 6, 7), D8(8, 1, 8, 9, 8, 1, 10, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, BASS2_BEAT_LEN, BASS2_DEV_PAT, BASS2_DEV_LEN, notes, development, attackbass)
     return ret;
 }
@@ -1408,7 +1412,7 @@ vec2 bass3(float beat, float time) {
         O(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[BASS3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[BASS3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
     SEQUENCER(beat, time, BASS3_BEAT_LEN, BASS3_DEV_PAT, BASS3_DEV_LEN, notes, development, basssaw3)
     return ret;
 }
@@ -1636,7 +1640,7 @@ vec2 sideSupersaw1(float beat, float time) {
         S4(0, 0, 0, 0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[TAMESHI_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[TAMESHI_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 2, 4, 5, 6, 7), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, TAMESHI_BEAT_LEN, TAMESHI_DEV_PAT, TAMESHI_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -1865,7 +1869,7 @@ vec2 sideSupersaw2(float beat, float time) {
         S4(0, 55, 57, 69));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[TAMESHI_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 4, 5, 6, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[TAMESHI_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 2, 4, 5, 6, 7), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, TAMESHI_BEAT_LEN, TAMESHI_DEV_PAT, TAMESHI_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -1944,7 +1948,7 @@ vec2 tb303synth(float beat, float time) {
         S4(0, 33, 33, 33));
 
     // 展開
-    int[TB303SYNTH1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[TB303SYNTH1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, TB303SYNTH1_BEAT_LEN, TB303SYNTH1_DEV_PAT, TB303SYNTH1_DEV_LEN, notes, development, synth)
     return ret;
@@ -2005,7 +2009,7 @@ vec2 arp0(float beat, float time) {
         O(0));
 
     // 展開
-    int[ARP0_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[ARP0_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP0_BEAT_LEN, ARP0_DEV_PAT, ARP0_DEV_LEN, notes, development, arpsaw)
     return ret;
@@ -2084,7 +2088,7 @@ vec2 arp1(float beat, float time) {
         S4(71, 0, 74, 0));
 
     // 展開
-    int[ARP1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[ARP1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP1_BEAT_LEN, ARP1_DEV_PAT, ARP1_DEV_LEN, notes, development, arp)
     return ret;
@@ -2163,7 +2167,7 @@ vec2 arp2(float beat, float time) {
         S4(0, 83, 0, 86));
 
     // 展開
-    int[ARP2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[ARP2_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP2_BEAT_LEN, ARP2_DEV_PAT, ARP2_DEV_LEN, notes, development, arp)
     return ret;
@@ -2242,7 +2246,7 @@ vec2 arp3(float beat, float time) {
         S4(0, 0, 0, 0));
 
     // 展開
-    int[ARP3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[ARP3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP3_BEAT_LEN, ARP3_DEV_PAT, ARP3_DEV_LEN, notes, development, arpsine)
     return ret;
@@ -2321,7 +2325,7 @@ vec2 arp4(float beat, float time) {
         S4(67, 60, 79, 62));
 
     // 展開
-    int[ARP4_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[ARP4_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP4_BEAT_LEN, ARP4_DEV_PAT, ARP4_DEV_LEN, notes, development, arpsine)
     return ret;
@@ -2382,7 +2386,7 @@ vec2 arp5(float beat, float time) {
         S4(67, 0, 76, 0));
 
     // 展開
-    int[ARP5_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[ARP5_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, ARP5_BEAT_LEN, ARP5_DEV_PAT, ARP5_DEV_LEN, notes, development, arpsine2)
     return ret;
@@ -2471,7 +2475,7 @@ vec2 hihat33(float beat, float time) {
         O(0));
 
     // 展開 #define CRASH1_DEV_LEN 8　変える
-    int[HIHAT3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2);
+    int[HIHAT3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 2, 2, 2, 2));
 
     SEQUENCER(beat, time, HIHAT3_BEAT_LEN, HIHAT3_DEV_PAT, HIHAT3_DEV_LEN, notes, development, hihat3)
 
@@ -2551,7 +2555,7 @@ vec2 subbass1(float beat, float time) {
         F(33));
 
     // 展開 #define SUB1_DEV_LEN 8　変える
-    int[SUB1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    int[SUB1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1));
 
     SEQUENCER(beat, time, SUB1_BEAT_LEN, SUB1_DEV_PAT, SUB1_DEV_LEN, notes, development, subbass)
     return ret;
@@ -2644,7 +2648,7 @@ vec2 testhihat2(float beat, float time) {
         O(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[HIHAT2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2);
+    int[HIHAT2_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 2, 2, 2, 2));
 
     SEQUENCER(beat, time, KICK1_BEAT_LEN, KICK1_DEV_PAT, KICK1_DEV_LEN, notes, development, hihat2)
     return ret;
@@ -2737,7 +2741,7 @@ vec2 introSupersaw1(float beat, float time) {
         O(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[INTROSAW_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
+    int[INTROSAW_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2));
 
     SEQUENCER(beat, time, INTROSAW_BEAT_LEN, INTROSAW_DEV_PAT, INTROSAW_DEV_LEN, notes, development, basssaw1)
     return ret;
@@ -2844,7 +2848,7 @@ vec2 introSupersaw2(float beat, float time) {
         F(0));
 
     // 展開 #define KICK1_DEV_LEN 8　変える
-    int[INTROSAW_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
+    int[INTROSAW_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2), D8(2, 2, 2, 2, 2, 2, 2, 2));
 
     SEQUENCER(beat, time, INTROSAW_BEAT_LEN, INTROSAW_DEV_PAT, INTROSAW_DEV_LEN, notes, development, basssaw2)
     return ret;
@@ -2947,7 +2951,7 @@ vec2 chordSupersaw1(float beat, float time) {
         F(62));
 
     // 展開 #define CHORD1_DEV_LEN 8　変える
-    int[CHORD1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[CHORD1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 3, 3, 3, 3), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, CHORD1_BEAT_LEN, CHORD1_DEV_PAT, CHORD1_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -3046,7 +3050,7 @@ vec2 chordSupersaw2(float beat, float time) {
         F(57));
 
     // 展開 #define CHORD2_DEV_LEN 8　変える
-    int[CHORD2_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[CHORD2_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 3, 3, 3, 3), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, CHORD2_BEAT_LEN, CHORD2_DEV_PAT, CHORD2_DEV_LEN, notes, development, chordsaw1)
     return ret;
 }
@@ -3144,7 +3148,7 @@ vec2 chordSupersaw3(float beat, float time) {
         F(54));
 
     // 展開 #define CHORD3_DEV_LEN 8　変える
-    int[CHORD3_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[CHORD3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 3, 3, 3, 3), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, CHORD3_BEAT_LEN, CHORD3_DEV_PAT, CHORD3_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -3243,7 +3247,7 @@ vec2 chordSupersaw4(float beat, float time) {
         F(49));
 
     // 展開 #define CHORD4_DEV_LEN 8　変える
-    int[CHORD4_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[CHORD4_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(2, 2, 2, 2, 3, 3, 3, 3), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
 
     SEQUENCER(beat, time, CHORD4_BEAT_LEN, CHORD4_DEV_PAT, CHORD4_DEV_LEN, notes, development, chordsaw1)
     return ret;
@@ -3360,7 +3364,7 @@ vec2 chordSquare1(float beat, float time) {
         S4(0, 0, 0, 0));
 
     // 展開 #define SQUARE1_DEV_LEN 8　変える
-    int[SQUARE1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[SQUARE1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 1, 2, 2, 2), D8(3, 3, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SQUARE1_BEAT_LEN, SQUARE1_DEV_PAT, SQUARE1_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -3476,7 +3480,7 @@ vec2 chordSquare2(float beat, float time) {
         S4(0, 0, 72, 72));
 
     // 展開 #define SQUARE2_DEV_LEN 8　変える
-    int[SQUARE2_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[SQUARE2_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 1, 2, 3, 3), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SQUARE2_BEAT_LEN, SQUARE2_DEV_PAT, SQUARE2_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -3592,7 +3596,7 @@ vec2 chordSquare3(float beat, float time) {
         S4(0, 0, 67, 0));
 
     // 展開 #define SQUARE3_DEV_LEN 8　変える
-    int[SQUARE3_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[SQUARE3_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 1, 2, 2, 2), D8(3, 3, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SQUARE3_BEAT_LEN, SQUARE3_DEV_PAT, SQUARE3_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -3652,7 +3656,7 @@ vec2 snare1(float beat, float time) {
         E2(1, 0));
 
     // 展開 #define SNARE1_DEV_LEN 8　変える
-    int[SNARE1_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[SNARE1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SNARE1_BEAT_LEN, SNARE1_DEV_PAT, SNARE1_DEV_LEN, notes, development, snare)
     return ret;
 }
@@ -3740,7 +3744,7 @@ vec2 hookSupersaw1(float beat, float time) {
         S4(79, 79, 79, 79));
 
     // 展開 #define HOOK1_DEV_LEN 8　変える
-    int[HOOK1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[HOOK1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, HOOK1_BEAT_LEN, HOOK1_DEV_PAT, HOOK1_DEV_LEN, notes, development, chordsaw2)
     return ret;
 }
@@ -3828,7 +3832,7 @@ vec2 hookSupersaw2(float beat, float time) {
         S4(86, 86, 86, 86));
 
     // 展開 #define HOOK1_DEV_LEN 8　変える
-    int[HOOK1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[HOOK1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 2, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, HOOK1_BEAT_LEN, HOOK1_DEV_PAT, HOOK1_DEV_LEN, notes, development, chordsaw2)
     return ret;
 }
@@ -3916,7 +3920,7 @@ vec2 hookSupersaw3(float beat, float time) {
         S4(83, 83, 83, 83));
 
     // 展開 #define HOOK1_DEV_LEN 8　変える
-    int[HOOK1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[HOOK1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 2, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, HOOK1_BEAT_LEN, HOOK1_DEV_PAT, HOOK1_DEV_LEN, notes, development, chordsaw2)
     return ret;
 }
@@ -3976,7 +3980,7 @@ vec2 snare2(float beat, float time) {
         S4(1, 1, 1, 1));
 
     // 展開 #define SNARE1_DEV_LEN 8　変える
-    int[SNARE1_DEV_LEN] development = int[](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[SNARE1_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 0, 0, 0, 0), D8(0, 0, 0, 0, 0, 0, 1, 1), D8(0, 0, 0, 0, 0, 0, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SNARE1_BEAT_LEN, SNARE1_DEV_PAT, SNARE1_DEV_LEN, notes, development, snarefill)
     return ret;
 }
@@ -4037,7 +4041,7 @@ vec2 noisefeed(float beat, float time) {
         O(0));
 
     // 展開 #define SNARE1_DEV_LEN 8　変える
-    int[FEED_DEV_LEN] development = int[](2, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0);
+    int[FEED_DEV_LEN / DEV_PACK] development = int[](D8(2, 0, 2, 0, 2, 0, 0, 0), D8(2, 0, 0, 0, 2, 0, 0, 1), D8(0, 0, 0, 0, 0, 0, 0, 1), D8(2, 0, 0, 0, 2, 0, 0, 0));
     SEQUENCER(beat, time, FEED_BEAT_LEN, FEED_DEV_PAT, FEED_DEV_LEN, notes, development, noisefeedin)
     return ret;
 }
@@ -4097,7 +4101,7 @@ vec2 noisesidechain(float beat, float time) {
         F(1));
 
     // 展開 #define SNARE1_DEV_LEN 8　変える
-    int[NOISESIDE_DEV_LEN] development = int[](0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+    int[NOISESIDE_DEV_LEN / DEV_PACK] development = int[](D8(0, 0, 0, 0, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0), D8(1, 1, 1, 1, 1, 1, 1, 1), D8(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, NOISESIDE_BEAT_LEN, NOISESIDE_DEV_PAT, NOISESIDE_DEV_LEN, notes, development, sidechainnoise)
     return ret;
 }

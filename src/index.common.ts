@@ -127,8 +127,9 @@ const Planets = {
     MERCURY: 0 as const,
     MIX_A: 1 as const,
     KANETA: 2 as const,
-    MIX_B: 3 as const,
-    EARTH: 4 as const,
+    FMSCAT: 3 as const,
+    MIX_B: 4 as const,
+    EARTH: 5 as const,
 }
 
 export const animateUniforms = (time: number, debugCamera: boolean, debugDisableReset: boolean) => {

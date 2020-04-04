@@ -138,8 +138,12 @@ uniform float gPlanetsId;  // 0 0 4 planets
 #define PLANETS_MERCURY 0.0
 #define PLANETS_MIX_A 1.0
 #define PLANETS_KANETA 2.0
-#define PLANETS_MIX_B 3.0
-#define PLANETS_EARTH 4.0
+#define PLANETS_FMSCAT 3.0
+#define PLANETS_MIX_B 4.0
+#define PLANETS_EARTH 5.0
+
+#define MIX_A_NUM 5
+vec3[MIX_A_NUM] MixACenters = vec3[](vec3(-10.0, 1.0, 3.0), vec3(-6.0, -1.0, 2.0), vec3(0.0, 0.0, 0.0), vec3(6.0, 0.0, 8.0), vec3(12.0, 31.0, 2.0));
 
 float dMercury(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
@@ -148,9 +152,6 @@ float dMercury(vec3 p) {
     // TODO: クレーター
     return sdSphere(p, 1.0) - 0.05 * h;
 }
-
-#define MIX_A_NUM 5
-vec3[MIX_A_NUM] MixACenters = vec3[](vec3(-10.0, 1.0, 3.0), vec3(-6.0, -1.0, 2.0), vec3(0.0, 0.0, 0.0), vec3(6.0, 0.0, 8.0), vec3(12.0, 31.0, 2.0));
 
 float dPlanetsMixA(vec3 p) {
     float d = INF;

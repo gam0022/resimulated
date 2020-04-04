@@ -543,7 +543,11 @@ export class Chromatic {
                     passIndex++;
                 }
 
-                const startTime = performance.now();
+                let startTime, endTime;
+
+                if (!PRODUCTION) {
+                    startTime = performance.now();
+                }
 
                 imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + shader),
@@ -552,9 +556,8 @@ export class Chromatic {
                     1
                 ));
 
-                const endTime = performance.now();
-
                 if (!PRODUCTION) {
+                    endTime = performance.now();
                     console.log(`compile ImageShader[${i}]: ${endTime - startTime} ms`);
                 }
 

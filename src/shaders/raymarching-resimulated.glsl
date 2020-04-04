@@ -128,6 +128,8 @@ vec2 uvSphere(vec3 n) {
     return vec2(u, v);
 }
 
+uniform float gPlanetId;  // 0 0 10 planet
+
 float dEarth(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
     uv.x += 0.01 * beat;
@@ -135,6 +137,17 @@ float dEarth(vec3 p) {
     return dSphere(p, 1.0) + 0.05 * h;
 }
 
+float dPlanets(vec3 p) {
+    float d = INF;
+
+    if (gPlanetId == 0.0) {
+        d = min(d, dEarth(p));
+    }
+
+    return d;
+}
+
+// unused
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
@@ -145,7 +158,7 @@ float map(vec3 p) {
     };
 
     if (gSceneId == SCENE_UNIVERSE) {
-        d = min(d, dEarth(p));
+        d = min(d, dPlanets(p));
     }
 
     if (gBallRadius > 0.0) {
@@ -208,10 +221,10 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
-uniform float gF0;  // 0.95 0 1 lighting
-float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
+uniform float gF0;                    // 0.95 0 1 lighting
+uniform float gCameraLightIntensity;  // 1 0 10
 
-uniform float gPlanetId;  // 0 0 10 planet
+float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
@@ -249,41 +262,43 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 r = r - 1.0;
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
-        } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
-            vec3 n = normalize(p);
-            vec2 uv = uvSphere(n);
-            uv.x += 0.01 * beat;
-            float h = fbm(uv, 10.0);
+        } else if (gSceneId == SCENE_UNIVERSE) {
+            if (abs(dPlanets(p)) < eps) {
+                vec3 n = normalize(p);
+                vec2 uv = uvSphere(n);
+                uv.x += 0.01 * beat;
+                float h = fbm(uv, 10.0);
 
-            if (gPlanetId == 0.0) {
-                if (h > 0.67) {
-                    // land
-                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
+                if (gPlanetId == 0.0) {
+                    if (h > 0.67) {
+                        // land
+                        intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
+                        intersection.roughness = 0.4;
+                        intersection.metallic = 0.01;
+                        intersection.emission = vec3(0.0);
+                        intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
+                    } else {
+                        intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
+                        intersection.roughness = 0.1;
+                        intersection.metallic = 0.134;
+                        intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67);
+                    }
+
+                    intersection.emission *= fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
+
+                    float cloud = fbm(uv, 15.0);
+                    intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
+                } else {
+                    intersection.baseColor = vec3(1.0);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
-                    intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
-                } else {
-                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
-                    intersection.roughness = 0.1;
-                    intersection.metallic = 0.134;
-                    intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67);
                 }
 
-                intersection.emission *= fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
-
-                float cloud = fbm(uv, 15.0);
-                intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
-            } else {
-                intersection.baseColor = vec3(1.0);
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = vec3(0.0);
+                intersection.transparent = false;
+                intersection.refractiveIndex = 1.2;
+                intersection.reflectance = 0.0;
             }
-
-            intersection.transparent = false;
-            intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 0.0;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
@@ -418,8 +433,6 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
     vec3 specular = ref * pow(max(0.0, dot(n, h)), m) * (m + 2.0) / (8.0 * PI);
     return (diffuse + specular) * radiance * max(0.0, dot(l, n));
 }
-
-uniform float gCameraLightIntensity;  // 1 0 10
 
 // http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
 float fractal(vec3 p, int n) {

@@ -523,8 +523,8 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
 
         for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
             vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-            if (intersectAABB(textIntersection, ray, center + vec3(-2.0, 0.0, 0.0), center + vec3(2.0, 4.0, 0.01))) {
-                vec2 uv = 2.0 * textIntersection.uv - 1.0;
+            if (intersectAABB(textIntersection, ray, center + vec3(-2.0, 1.5, 0.0), center + vec3(2.0, 2.5, 0.01))) {
+                vec2 uv = (2.0 * textIntersection.uv - 1.0) * vec2(1.0, 0.25);
                 float id = planetTextIds[int(gPlanetsId)] + float(i);
                 vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
                 // alpha test

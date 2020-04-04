@@ -225,11 +225,10 @@ vec2 thinkingFace(vec3 p) {
 }
 
 float dKaneta(vec3 p) {
-    // vec2 uv = uvSphere(normalize(p));
-    // uv.x += 0.01 * beat;
-    // float h = fbm(uv, 10.0);
-    // return sdSphere(p, 1.0) + 0.05 * h;
-    return thinkingFace(p).x;
+    p.xz = rotate(0.1 * (beat - 208.)) * p.xz;
+    vec2 uv = uvSphere(normalize(p));
+    float h = fbm(uv, 10.0);
+    return thinkingFace(p).x + 0.02 * h;
 }
 
 float dEarth(vec3 p) {
@@ -244,13 +243,9 @@ float dPlanets(vec3 p) {
 
     if (gPlanetsId == PLANETS_MERCURY) {
         d = min(d, dMercury(p));
-    }
-
-    if (gPlanetsId == PLANETS_KANETA_CAT) {
+    } else if (gPlanetsId == PLANETS_KANETA_CAT) {
         d = min(d, dKaneta(p));
-    }
-
-    if (gPlanetsId == PLANETS_EARTH) {
+    } else if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
     }
 
@@ -265,9 +260,7 @@ float map(vec3 p) {
 
     if (gSceneId == SCENE_MANDEL) {
         d = dStage(p);
-    }
-
-    if (gSceneId == SCENE_UNIVERSE) {
+    } else if (gSceneId == SCENE_UNIVERSE) {
         d = min(d, dPlanets(p));
     }
 
@@ -373,7 +366,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
         } else if (gSceneId == SCENE_UNIVERSE) {
-            if (abs(dPlanets(p)) < eps) {
+            if (dPlanets(p) < eps * 10.0) {
                 vec3 n = normalize(p);
                 vec2 uv = uvSphere(n);
                 uv.x += 0.01 * beat;
@@ -385,7 +378,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
                 } else if (gPlanetsId == PLANETS_KANETA_CAT) {
-                    intersection.baseColor = vec3(1.0);
+                    intersection.baseColor = vec3(1.0, 1.0, 0.5);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
@@ -398,6 +391,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                         intersection.emission = vec3(0.0);
                         intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
                     } else {
+                        // sea
                         intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
                         intersection.roughness = 0.1;
                         intersection.metallic = 0.134;

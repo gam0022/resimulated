@@ -32,7 +32,7 @@ export const chromatic = new Chromatic(
         const textCtx = canvas.getContext("2d");
         // window.document.body.appendChild(canvas);
 
-        // MAX: 2048 / 128 = 16
+        // MAX: 4096 / 128 = 32
         const texts = [
             /* 0 */ "A 64k INTRO",
             /* 1 */ "GRAPHICS",
@@ -41,19 +41,32 @@ export const chromatic = new Chromatic(
             /* 4 */ "sadakkey",
             /* 5 */ "RE: SIMULATED",
             /* 6 */ "REALITY",
-            /* 7 */ "MERCURY",
-            /* 8 */ "FMS_Cat",
-            /* 9 */ "Ctrl-Alt-Test",
-            /* 10 */ "RGBA & TBC",
-            /* 11 */ "CNCD & Fairlight",
-            /* 12 */ "0x4015 & YET1",
-            /* 13 */ "kaneta\u{1F41B}",
-            /* 14 */ "gaz",
-            /* 15 */ "EOF",
+
+            // 7
+            "MERCURY",
+
+            // 8-12
+            "Ctrl-Alt-Test",
+            "RGBA & TBC",
+            "Fairlight",
+            "logicoma",
+            "Poo-Brain",
+
+            // 13-14
+            "kaneta",
+            "FMS_Cat",
+
+            // 15-20
+            "0x4015 & YET1",
+            "Prismbeings",
+            "Conspiracy",
+            "½-bit Cheese",
+            "LJ & Alcatraz",
+            "Polarity",
         ];
 
         canvas.width = 2048;
-        canvas.height = 2048;
+        canvas.height = 4096;
         textCtx.font = "110px arial";
         textCtx.textAlign = "center";
         textCtx.textBaseline = "middle";

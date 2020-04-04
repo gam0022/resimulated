@@ -76,7 +76,13 @@ struct Intersection {
               vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
 
 // Distance Functions
-float dSphere(vec3 p, float r) { return length(p) - r; }
+float sdSphere(vec3 p, float r) { return length(p) - r; }
+
+float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
+    vec3 pa = p - a, ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    return length(pa - ba * h) - r;
+}
 
 mat2 rotate(float a) {
     float c = cos(a), s = sin(a);
@@ -113,13 +119,13 @@ float dStage(vec3 p) {
 }
 
 uniform float gBallZ;               // 0 -100 100 ball
-uniform float gBallRadius;          // 0.1 0 0.2
+uniform float gBallRadius;          // 0 0 0.2
 uniform float gLogoIntensity;       // 0 0 4
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 30 0 100
 
 float dBall(vec3 p) {
-    return dSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
+    return sdSphere(p - vec3(0, 0, gBallZ), gBallRadius) - gBallDistortion * sin(gBallDistortionFreq * p.x + beat) * sin(gBallDistortionFreq * p.y + beat) * sin(gBallDistortionFreq * p.z + beat);
 }
 
 vec2 uvSphere(vec3 n) {
@@ -128,13 +134,125 @@ vec2 uvSphere(vec3 n) {
     return vec2(u, v);
 }
 
+uniform float gPlanetsId;  // 0 0 4 planets
+#define PLANETS_MERCURY 0.0
+#define PLANETS_MIX_A 1.0
+#define PLANETS_KANETA_CAT 2.0
+#define PLANETS_MIX_B 3.0
+#define PLANETS_EARTH 4.0
+
+float dMercury(vec3 p) {
+    vec2 uv = uvSphere(normalize(p));
+    uv.x += 0.01 * beat;
+    float h = fbm(uv, 10.0);
+    // TODO: クレーター
+    return sdSphere(p, 1.0) + 0.05 * h;
+}
+
+vec2 opU(vec2 d1, vec2 d2) { return (d1.x < d2.x) ? d1 : d2; }
+
+vec2 opS(vec2 d1, vec2 d2) { return (-d1.x > d2.x) ? vec2(-d1.x, d1.y) : d2; }
+
+vec2 opSU(vec2 d1, vec2 d2, float k) {
+    float h = clamp(0.5 + 0.5 * (d2.x - d1.x) / k, 0.0, 1.0);
+    return vec2(mix(d2.x, d1.x, h) - k * h * (1.0 - h), d1.y);
+}
+
+mat2 rot(float th) {
+    vec2 a = sin(vec2(1.5707963, 0) + th);
+    return mat2(a, -a.y, a.x);
+}
+
+#define MAT_BODY 1.0
+#define MAT_FACE 2.0
+#define MAT_HAND 3.0
+#define MAT_BROW 4.0
+
+// https://www.shadertoy.com/view/wslSRr
+vec2 thinkingFace(vec3 p) {
+    vec2 face = vec2(sdSphere(p, 1.0), MAT_BODY);
+
+    vec3 q = p;
+    q.x = abs(q.x);
+    q.xz *= rot(-.3);
+    q.yz *= rot(-0.25 + 0.05 * step(0.0, p.x));
+    q.y *= 0.8;
+    q.z *= 2.0;
+    q.z -= 2.0;
+    vec2 eye = vec2(sdSphere(q, .11) * 0.5, MAT_FACE);
+
+    q = p;
+    q.x = abs(q.x);
+    q.xz *= rot(-.35);
+    q.yz *= rot(-0.62 + 0.26 * step(0.0, p.x) + pow(abs(q.x), 1.7) * 0.5);
+    q.z -= 1.0;
+    vec2 brow = vec2(sdCapsule(q, vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .05) * 0.5, MAT_BROW);
+
+    q = p;
+    q.yz *= rot(0.2 + pow(abs(p.x), 1.8));
+    q.xy *= rot(-0.25);
+    q.z -= 1.0;
+    vec2 mouth = vec2(sdCapsule(q, vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .045), MAT_BROW);
+
+    p -= vec3(-.25, -.73, 1.0);
+    p.xy *= rot(0.2);
+    q = p;
+    q = (q * vec3(1.2, 1.0, 2.0));
+    q -= vec3(0.0, 0.01, 0.0);
+    vec2 hand = vec2(sdSphere(q, .3) * 0.5, MAT_HAND);
+
+    q = p;
+
+    vec2 finger1 = vec2(sdCapsule(q - vec3(0.3, 0.2, 0.02), vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .07), MAT_HAND);
+    vec2 finger2 = vec2(sdCapsule(q * vec3(1.2, 1.0, .8) - vec3(0.2, 0.06, 0.02), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08), MAT_HAND);
+    vec2 finger3 = vec2(sdCapsule(q * vec3(1.2, 1.0, .8) - vec3(0.15, -0.08, 0.015), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08), MAT_HAND);
+    vec2 finger4 = vec2(sdCapsule(q * vec3(1.2, 1.0, .9) - vec3(0.1, -0.2, -0.01), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08), MAT_HAND);
+
+    p -= vec3(-0.1, 0.3, 0.0);
+    q = p;
+    q.x -= q.y * 0.7;
+
+    vec2 finger5 = vec2(sdCapsule(p, vec3(0.0, -0.2, 0.0) - q, vec3(0.0, 0.2, 0.0), .1 - p.y * 0.15), MAT_HAND);
+    vec2 finger = opU(finger1, opU(finger5, opSU(finger2, opSU(finger3, finger4, 0.035), 0.035)));
+
+    hand = opSU(hand, finger, 0.02);
+
+    vec2 d = opU(eye, face);
+    d = opU(brow, d);
+    d = opS(mouth, d);
+    d = opU(hand, d);
+    return d;
+}
+
+float dKaneta(vec3 p) {
+    p.xz = rotate(0.1 * (beat - 208.)) * p.xz;
+    vec2 uv = uvSphere(normalize(p));
+    float h = fbm(uv, 10.0);
+    return thinkingFace(p).x + 0.02 * h;
+}
+
 float dEarth(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
     uv.x += 0.01 * beat;
     float h = fbm(uv, 10.0);
-    return dSphere(p, 1.0) + 0.05 * h;
+    return sdSphere(p, 1.0) + 0.05 * h;
 }
 
+float dPlanets(vec3 p) {
+    float d = INF;
+
+    if (gPlanetsId == PLANETS_MERCURY) {
+        d = min(d, dMercury(p));
+    } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+        d = min(d, dKaneta(p));
+    } else if (gPlanetsId == PLANETS_EARTH) {
+        d = min(d, dEarth(p));
+    }
+
+    return d;
+}
+
+// unused
 vec3 opRep(vec3 p, vec3 c) { return mod(p, c) - 0.5 * c; }
 
 float map(vec3 p) {
@@ -142,10 +260,8 @@ float map(vec3 p) {
 
     if (gSceneId == SCENE_MANDEL) {
         d = dStage(p);
-    };
-
-    if (gSceneId == SCENE_UNIVERSE) {
-        d = min(d, dEarth(p));
+    } else if (gSceneId == SCENE_UNIVERSE) {
+        d = min(d, dPlanets(p));
     }
 
     if (gBallRadius > 0.0) {
@@ -208,10 +324,10 @@ uniform float gEmissiveHueShiftBeat;  // 0 0 1
 uniform float gEmissiveHueShiftZ;     // 0 0 1
 uniform float gEmissiveHueShiftXY;    // 0 0 1
 
-uniform float gF0;  // 0.95 0 1 lighting
-float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
+uniform float gF0;                    // 0.95 0 1 lighting
+uniform float gCameraLightIntensity;  // 1 0 10
 
-uniform float gPlanetId;  // 0 0 10 planet
+float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
 void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
@@ -249,41 +365,49 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 r = r - 1.0;
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
-        } else if (gSceneId == SCENE_UNIVERSE && abs(dEarth(p)) < eps) {
-            vec3 n = normalize(p);
-            vec2 uv = uvSphere(n);
-            uv.x += 0.01 * beat;
-            float h = fbm(uv, 10.0);
+        } else if (gSceneId == SCENE_UNIVERSE) {
+            if (dPlanets(p) < eps * 10.0) {
+                vec3 n = normalize(p);
+                vec2 uv = uvSphere(n);
+                uv.x += 0.01 * beat;
+                float h = fbm(uv, 10.0);
 
-            if (gPlanetId == 0.0) {
-                if (h > 0.67) {
-                    // land
-                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
+                if (gPlanetsId == PLANETS_MERCURY) {
+                    intersection.baseColor = vec3(1.0);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
-                    intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
-                } else {
-                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
-                    intersection.roughness = 0.1;
-                    intersection.metallic = 0.134;
-                    intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67);
+                } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+                    intersection.baseColor = vec3(1.0, 1.0, 0.5);
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                } else if (gPlanetsId == PLANETS_EARTH) {
+                    if (h > 0.67) {
+                        // land
+                        intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
+                        intersection.roughness = 0.4;
+                        intersection.metallic = 0.01;
+                        intersection.emission = vec3(0.0);
+                        intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
+                    } else {
+                        // sea
+                        intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
+                        intersection.roughness = 0.1;
+                        intersection.metallic = 0.134;
+                        intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67);
+                    }
+
+                    intersection.emission *= fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
+
+                    float cloud = fbm(uv, 15.0);
+                    intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
                 }
 
-                intersection.emission *= fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
-
-                float cloud = fbm(uv, 15.0);
-                intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
-            } else {
-                intersection.baseColor = vec3(1.0);
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = vec3(0.0);
+                intersection.transparent = false;
+                intersection.refractiveIndex = 1.2;
+                intersection.reflectance = 0.0;
             }
-
-            intersection.transparent = false;
-            intersection.refractiveIndex = 1.2;
-            intersection.reflectance = 0.0;
         } else if (gSceneId == SCENE_MANDEL) {
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
@@ -418,8 +542,6 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
     vec3 specular = ref * pow(max(0.0, dot(n, h)), m) * (m + 2.0) / (8.0 * PI);
     return (diffuse + specular) * radiance * max(0.0, dot(l, n));
 }
-
-uniform float gCameraLightIntensity;  // 1 0 10
 
 // http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
 float fractal(vec3 p, int n) {

@@ -6,7 +6,7 @@ declare var PRODUCTION: boolean;
 
 export const chromatic = new Chromatic(
     109.714285714,// デモの長さ（秒）
-    require("./shaders/vertex.glsl").default,
+    require("./shaders/build-in/vertex.glsl").default,
 
     // Image Shaders
     require("./shaders/common-header.glsl").default,
@@ -18,10 +18,10 @@ export const chromatic = new Chromatic(
     // Bloom
     1,
     5,
-    require("./shaders/bloom/prefilter.glsl").default,
-    require("./shaders/bloom/downsample.glsl").default,
-    require("./shaders/bloom/upsample.glsl").default,
-    require("./shaders/bloom/final.glsl").default,
+    require("./shaders/build-in/bloom/prefilter.glsl").default,
+    require("./shaders/build-in/bloom/downsample.glsl").default,
+    require("./shaders/build-in/bloom/upsample.glsl").default,
+    require("./shaders/build-in/bloom/final.glsl").default,
 
     // Sound Shader
     require("./shaders/sound-template.glsl").default,

@@ -113,7 +113,7 @@ float dStage(vec3 p) {
 }
 
 uniform float gBallZ;               // 0 -100 100 ball
-uniform float gBallRadius;          // 0.1 0 0.2
+uniform float gBallRadius;          // 0 0 0.2
 uniform float gLogoIntensity;       // 0 0 4
 uniform float gBallDistortion;      // 0.0 0 0.1
 uniform float gBallDistortionFreq;  // 30 0 100

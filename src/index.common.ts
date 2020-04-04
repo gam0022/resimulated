@@ -377,6 +377,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBlend = easeInOutCubic(remapFrom(t, 13, 16));
 
         chromatic.uniforms.gMandelboxScale = 1.2;
+        chromatic.uniforms.gBallRadius = 0.1;
         chromatic.uniforms.gEmissiveIntensity = 6;
         chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
 

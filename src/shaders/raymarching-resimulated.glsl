@@ -159,6 +159,20 @@ vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
     // EARTH
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
 
+vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetColors = vec3[](
+    // MERCURY
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // MIX_A
+    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.0),
+    // KANETA
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // PLANETS_FMSCAT
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // MIX_B
+    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.7, 0.2, 0.7),
+    // EARTH
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
+
 int[PLANETS_PAT_MAX] planetNums = int[](1, 5, 1, 1, 6, 1);
 float[PLANETS_PAT_MAX] planetTextIds = float[](7.0, 8.0, 13.0, 14.0, 15.0, 0.0);
 
@@ -419,12 +433,23 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 float h = fbm(uv, 10.0);
 
                 if (gPlanetsId == PLANETS_MERCURY) {
-                    intersection.baseColor = vec3(1.0);
+                    intersection.baseColor = vec3(0.7);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
                 } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
-                    intersection.baseColor = vec3(1.0, 1.0, 1.0);
+                    int id;
+
+                    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
+                        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+                        float d = sdSphere(p - center, 1.0);
+                        if (d < eps * 10.0) {
+                            id = i;
+                            break;
+                        }
+                    }
+
+                    intersection.baseColor = planetColors[PLANETS_NUM_MAX * int(gPlanetsId) + id];
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);

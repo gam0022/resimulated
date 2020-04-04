@@ -400,20 +400,26 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.002;
         chromatic.uniforms.gTonemapExposure = 1;
 
-        if (t < 8) {
-            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
-        } else if (t < 16) {
-            chromatic.uniforms.gPlanetsId = Planets.MIX_A;
-        } else if (t < 24) {
-            chromatic.uniforms.gPlanetsId = Planets.KANETA;
-        } else {
-            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
-        }
-
         camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
-        ball.z = 0;
-        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
+        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 8));
+
+        if (t < 8) {
+            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+        } else if (t < 12) {
+            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+            chromatic.uniforms.gCameraFov = 10;
+        } else if (t < 16) {
+            chromatic.uniforms.gPlanetsId = Planets.MIX_A;
+        } else if (t < 20) {
+            chromatic.uniforms.gPlanetsId = Planets.KANETA;
+        } else if (t < 24) {
+            // FMS_Cat
+            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+        } else {
+            // MIX_B
+            chromatic.uniforms.gPlanetsId = Planets.MIX_A;
+        }
 
         if ((t % 4) > 3) {
             chromatic.uniforms.gGlitchIntensity = 0.05;

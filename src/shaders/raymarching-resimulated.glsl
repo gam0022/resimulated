@@ -512,13 +512,15 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
 
-    if (gSceneId == SCENE_UNIVERSE && beat > 200.0) {
+    if (gSceneId == SCENE_UNIVERSE) {
         Intersection textIntersection = intersection;
+
+        float[4] ids = float[](7.0, 8.0, 13.0, 15.0);
 
         if (gPlanetsId == PLANETS_MERCURY || gPlanetsId == PLANETS_KANETA) {
             if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
                 vec2 uv = 2.0 * textIntersection.uv - 1.0;
-                float id = 7.0 + floor((beat - 200.0) / 2.0);
+                float id = ids[int(gPlanetsId)];
                 vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
                 // alpha test
                 if (length(t) > 0.01) {
@@ -530,7 +532,7 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
             for (int i = 0; i < MIX_A_NUM; i++) {
                 if (intersectAABB(textIntersection, ray, MixACenters[i] + vec3(-2.0, 0.0, 0.0), MixACenters[i] + vec3(2.0, 4.0, 0.01))) {
                     vec2 uv = 2.0 * textIntersection.uv - 1.0;
-                    float id = 7.0 + floor((beat - 200.0) / 2.0) + float(i);
+                    float id = ids[int(gPlanetsId)] + float(i);
                     vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
                     // alpha test
                     if (length(t) > 0.01) {

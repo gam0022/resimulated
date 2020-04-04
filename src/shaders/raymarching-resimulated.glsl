@@ -151,16 +151,15 @@ float dMercury(vec3 p) {
 
 float dPlanetsMixA(vec3 p) {
 #define MIX_A_NUM 5
-    vec3[MIX_A_NUM] center = vec3[](vec3(-5.0, 0.0, 0.0), vec3(-3.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(3.0, 0.0, 0.0), vec3(5.0, 0.0, 0.0));
+    vec3[MIX_A_NUM] center = vec3[](vec3(-10.0, 0.0, 0.0), vec3(-6.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(6.0, 0.0, 0.0), vec3(10.0, 0.0, 0.0));
 
     float d = INF;
 
     for (int i = 0; i < MIX_A_NUM; i++) {
-        vec2 uv = uvSphere(normalize(p));
+        vec2 uv = uvSphere(normalize(p - center[i]));
         uv.x += 0.01 * beat;
-        float h = fbm(uv, 10.0);
-
-        d = min(d, sdSphere(p - center[i], 1.0));
+        float h = 0.0;  // fbm(uv, 10.0);
+        d = min(d, sdSphere(p - center[i], 1.0)) - 0.05 * h;
     }
 
     return d;

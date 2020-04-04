@@ -543,12 +543,20 @@ export class Chromatic {
                     passIndex++;
                 }
 
+                const startTime = performance.now();
+
                 imagePasses.push(initPass(
                     loadProgram(imageCommonHeaderShader + shader),
                     passIndex,
                     i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
                     1
                 ));
+
+                const endTime = performance.now();
+
+                if (!PRODUCTION) {
+                    console.log(`compile ImageShader[${i}]: ${endTime - startTime} ms`);
+                }
 
                 passIndex++;
             })

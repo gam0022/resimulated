@@ -514,14 +514,31 @@ void intersectScene(inout Intersection intersection, inout Ray ray) {
 
     if (gSceneId == SCENE_UNIVERSE && beat > 200.0) {
         Intersection textIntersection = intersection;
-        if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
-            vec2 uv = 2.0 * textIntersection.uv - 1.0;
-            float id = 7.0 + floor((beat - 200.0) / 2.0);
-            vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
-            // alpha test
-            if (length(t) > 0.01) {
-                intersection.emission = 0.5 * t;
-                intersection.hit = true;
+
+        if (gPlanetsId == PLANETS_MERCURY || gPlanetsId == PLANETS_KANETA) {
+            if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
+                vec2 uv = 2.0 * textIntersection.uv - 1.0;
+                float id = 7.0 + floor((beat - 200.0) / 2.0);
+                vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
+                // alpha test
+                if (length(t) > 0.01) {
+                    intersection.emission = 0.5 * t;
+                    intersection.hit = true;
+                }
+            }
+        } else if (gPlanetsId == PLANETS_MIX_A) {
+            for (int i = 0; i < MIX_A_NUM; i++) {
+                if (intersectAABB(textIntersection, ray, MixACenters[i] + vec3(-2.0, 0.0, 0.0), MixACenters[i] + vec3(2.0, 4.0, 0.01))) {
+                    vec2 uv = 2.0 * textIntersection.uv - 1.0;
+                    float id = 7.0 + floor((beat - 200.0) / 2.0) + float(i);
+                    vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
+                    // alpha test
+                    if (length(t) > 0.01) {
+                        intersection.emission = 0.5 * t;
+                        intersection.hit = true;
+                        break;
+                    }
+                }
             }
         }
     }

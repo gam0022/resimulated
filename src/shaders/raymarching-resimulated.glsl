@@ -137,7 +137,7 @@ vec2 uvSphere(vec3 n) {
 uniform float gPlanetsId;  // 0 0 4 planets
 #define PLANETS_MERCURY 0.0
 #define PLANETS_MIX_A 1.0
-#define PLANETS_KANETA_CAT 2.0
+#define PLANETS_KANETA 2.0
 #define PLANETS_MIX_B 3.0
 #define PLANETS_EARTH 4.0
 
@@ -244,7 +244,7 @@ float dPlanets(vec3 p) {
 
     if (gPlanetsId == PLANETS_MERCURY) {
         d = min(d, dMercury(p));
-    } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+    } else if (gPlanetsId == PLANETS_KANETA) {
         d = min(d, dKaneta(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
@@ -384,7 +384,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
-                } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+                } else if (gPlanetsId == PLANETS_KANETA) {
                     intersection.baseColor = vec3(1.0, 1.0, 0.5);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;

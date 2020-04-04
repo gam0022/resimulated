@@ -126,7 +126,7 @@ class Timeline {
 const Planets = {
     MERCURY: 0 as const,
     MIX_A: 1 as const,
-    KANETA_CAT: 2 as const,
+    KANETA: 2 as const,
     MIX_B: 3 as const,
     EARTH: 4 as const,
 }
@@ -400,10 +400,14 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.002;
         chromatic.uniforms.gTonemapExposure = 1;
 
-        chromatic.uniforms.gPlanetsId = Planets.MERCURY;
-
-        if (t >= 16 && t < 24) {
-            chromatic.uniforms.gPlanetsId = Planets.KANETA_CAT;
+        if (t < 8) {
+            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+        } else if (t < 16) {
+            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+        } else if (t < 24) {
+            chromatic.uniforms.gPlanetsId = Planets.KANETA;
+        } else {
+            chromatic.uniforms.gPlanetsId = Planets.KANETA;
         }
 
         camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));

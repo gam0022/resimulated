@@ -288,8 +288,12 @@ float dKaneta(vec3 p) {
     p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
     vec2 uv = uvSphere(normalize(p));
     float h = fbm(uv, 10.0);
+
+#ifdef STRIP_FIXED
+    return sdSphere(p, 1.0) - 0.05 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
+#else
     return thinkingFace(p).x + 0.02 * h;
-    // return sdSphere(p, 1.0) - 0.05 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
+#endif
 }
 
 float dEarth(vec3 p) {

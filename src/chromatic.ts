@@ -571,7 +571,7 @@ export class Chromatic {
 
                 if (!PRODUCTION) {
                     endTime = performance.now();
-                    console.log(`compile ImageShader[${i}]: ${endTime - startTime} ms`);
+                    console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
                 }
 
                 passIndex++;

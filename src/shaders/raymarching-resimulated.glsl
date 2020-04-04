@@ -226,7 +226,8 @@ float dKaneta(vec3 p) {
     p.xz = rotate(0.1 * (beat - 208.)) * p.xz;
     vec2 uv = uvSphere(normalize(p));
     float h = fbm(uv, 10.0);
-    return thinkingFace(p).x + 0.02 * h;
+    // return thinkingFace(p).x + 0.02 * h;
+    return sdSphere(p, 1.0) + 0.05 * h;  // thinkingFace のコンパイルに時間がかかるので代用
 }
 
 float dEarth(vec3 p) {

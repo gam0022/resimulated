@@ -356,9 +356,10 @@ vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
     uv -= p;
     uv /= scale;
 
-    float offset = 128.0 / 2048.0;
+    float offset = 128.0 / 4096.0;
+    float aspect = 2048.0 / 4096.0;
     uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * (uv.y + 1.0 - offset);
+    uv.y = 0.5 - 0.5 * (aspect * uv.y + 1.0 - offset);
     uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
 
     return uv;

@@ -506,28 +506,8 @@ bool intersectAABB(inout Intersection intersection, inout Ray ray, vec3 lb, vec3
         intersection.distance = tmin;
 
         vec3 uvw = (intersection.position - lb) / (rt - lb);
-
-        // 交点座標から法線を求める
-        // 高速化のためにY軸から先に判定する
-        if (equals(intersection.position.y, rt.y)) {
-            intersection.normal = vec3(0.0, 1.0, 0.0);
-            intersection.uv = uvw.xz;
-        } else if (equals(intersection.position.y, lb.y)) {
-            intersection.normal = vec3(0.0, -1.0, 0.0);
-            intersection.uv = uvw.xz;
-        } else if (equals(intersection.position.x, lb.x)) {
-            intersection.normal = vec3(-1.0, 0.0, 0.0);
-            intersection.uv = uvw.zy;
-        } else if (equals(intersection.position.x, rt.x)) {
-            intersection.normal = vec3(1.0, 0.0, 0.0);
-            intersection.uv = uvw.zy;
-        } else if (equals(intersection.position.z, lb.z)) {
-            intersection.normal = vec3(0.0, 0.0, -1.0);
-            intersection.uv = uvw.xy;
-        } else if (equals(intersection.position.z, rt.z)) {
-            intersection.normal = vec3(0.0, 0.0, 1.0);
-            intersection.uv = uvw.xy;
-        }
+        intersection.normal = vec3(0.0, 0.0, 1.0);
+        intersection.uv = uvw.xy;
         return true;
     }
 

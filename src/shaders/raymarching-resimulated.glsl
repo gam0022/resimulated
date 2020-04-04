@@ -1,3 +1,5 @@
+#define STRIP_FIXED
+
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
 #define SCENE_MANDEL 0.0
@@ -258,14 +260,18 @@ float map(vec3 p) {
     float d = INF;
 
     if (gSceneId == SCENE_MANDEL) {
+#ifndef STRIP_FIXED
         d = dStage(p);
+#endif
     } else if (gSceneId == SCENE_UNIVERSE) {
         d = min(d, dPlanets(p));
     }
 
+#ifndef STRIP_FIXED
     if (gBallRadius > 0.0) {
         d = min(d, dBall(p));
     }
+#endif
 
     return d;
 }
@@ -350,6 +356,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.normal = calcNormal(p, map, gSceneEps);
 
         if (gBallRadius > 0.0 && abs(dBall(p)) < eps) {
+#ifndef STRIP_FIXED
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;
@@ -364,6 +371,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 r = r - 1.0;
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
+#endif
         } else if (gSceneId == SCENE_UNIVERSE) {
             if (dPlanets(p) < eps * 10.0) {
                 vec3 n = normalize(p);
@@ -408,6 +416,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.reflectance = 0.0;
             }
         } else if (gSceneId == SCENE_MANDEL) {
+#ifndef STRIP_FIXED
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
@@ -418,6 +427,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;
+#endif
         }
     }
 }

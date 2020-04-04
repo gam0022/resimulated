@@ -53,8 +53,10 @@ export const chromatic = new Chromatic(
             "logicoma",
             "Poo-Brain",
 
-            // 13-14
+            // 13
             "kaneta",
+
+            // 14
             "FMS_Cat",
 
             // 15-20
@@ -415,11 +417,9 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
         } else if (t < 24) {
-            // FMS_Cat
-            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+            chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
         } else {
-            // MIX_B
-            chromatic.uniforms.gPlanetsId = Planets.MIX_A;
+            chromatic.uniforms.gPlanetsId = Planets.MIX_B;
         }
 
         if ((t % 4) > 3) {

@@ -18,10 +18,10 @@ export const chromatic = new Chromatic(
     // Bloom
     1,
     5,
-    require("./shaders/bloom-prefilter.glsl").default,
-    require("./shaders/bloom-downsample.glsl").default,
-    require("./shaders/bloom-upsample.glsl").default,
-    require("./shaders/bloom-final.glsl").default,
+    require("./shaders/bloom/prefilter.glsl").default,
+    require("./shaders/bloom/downsample.glsl").default,
+    require("./shaders/bloom/upsample.glsl").default,
+    require("./shaders/bloom/final.glsl").default,
 
     // Sound Shader
     require("./shaders/sound-template.glsl").default,

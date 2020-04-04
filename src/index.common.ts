@@ -122,6 +122,14 @@ class Timeline {
     }
 }
 
+const Planets = {
+    MERCURY: 0 as const,
+    MIX_A: 1 as const,
+    KANETA_CAT: 2 as const,
+    MIX_B: 3 as const,
+    EARTH: 4 as const,
+}
+
 export const animateUniforms = (time: number, debugCamera: boolean, debugDisableReset: boolean) => {
     const bpm = 140;
     const beat = time * bpm / 60;
@@ -388,9 +396,14 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(32, t => {
         // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;
-        chromatic.uniforms.gPlanetsId = 0;
         chromatic.uniforms.gSceneEps = 0.003;
-        chromatic.uniforms.gTonemapExposure = 1;// あとで 1 に戻す
+        chromatic.uniforms.gTonemapExposure = 1;
+
+        chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+
+        if (t >= 16 && t < 24) {
+            chromatic.uniforms.gPlanetsId = Planets.KANETA_CAT;
+        }
 
         camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
@@ -408,7 +421,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;
-        chromatic.uniforms.gPlanetsId = 4;// Earth
+        chromatic.uniforms.gPlanetsId = Planets.EARTH;
         chromatic.uniforms.gSceneEps = 0.005;
         chromatic.uniforms.gTonemapExposure = 1;
 

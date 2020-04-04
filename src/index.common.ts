@@ -403,24 +403,31 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gSceneEps = 0.002;
         chromatic.uniforms.gTonemapExposure = 1;
 
-        camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 8));
 
         if (t < 8) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+            camera = new Vector3(-1.38, -0.8550687112306142, 47.4);
         } else if (t < 12) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
-            chromatic.uniforms.gCameraFov = 10;
+            camera = new Vector3(5, 1, 30);
+            chromatic.uniforms.gCameraFov = 13;
         } else if (t < 16) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
+            camera = new Vector3(15, 3, 50);
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
+            camera = new Vector3(15, 1, 20);
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
+            camera = new Vector3(15, 1, 20);
         } else {
             chromatic.uniforms.gPlanetsId = Planets.MIX_B;
+            camera = new Vector3(-15, -3, 50);
         }
+
+        camera = camera.scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
 
         if ((t % 4) > 3) {
             chromatic.uniforms.gGlitchIntensity = 0.05;

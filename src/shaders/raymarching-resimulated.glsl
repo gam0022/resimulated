@@ -265,7 +265,7 @@ float map(vec3 p) {
 
     if (gSceneId == SCENE_MANDEL) {
         d = dStage(p);
-    };
+    }
 
     if (gSceneId == SCENE_UNIVERSE) {
         d = min(d, dPlanets(p));
@@ -379,7 +379,17 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 uv.x += 0.01 * beat;
                 float h = fbm(uv, 10.0);
 
-                if (gPlanetsId == PLANETS_EARTH) {
+                if (gPlanetsId == PLANETS_MERCURY) {
+                    intersection.baseColor = vec3(1.0);
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+                    intersection.baseColor = vec3(1.0);
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                } else if (gPlanetsId == PLANETS_EARTH) {
                     if (h > 0.67) {
                         // land
                         intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
@@ -398,11 +408,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
                     float cloud = fbm(uv, 15.0);
                     intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
-                } else {
-                    intersection.baseColor = vec3(1.0);
-                    intersection.roughness = 0.4;
-                    intersection.metallic = 0.01;
-                    intersection.emission = vec3(0.0);
                 }
 
                 intersection.transparent = false;

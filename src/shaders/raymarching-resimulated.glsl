@@ -378,7 +378,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
                 } else if (gPlanetsId == PLANETS_KANETA_CAT) {
-                    intersection.baseColor = vec3(1.0, 1.0, 0.0);
+                    intersection.baseColor = vec3(1.0, 1.0, 0.5);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);

@@ -19,8 +19,6 @@ uniform float gBaseColor;        // 0.5
 uniform float gRoughness;        // 0.1
 uniform float gMetallic;         // 0.4
 
-uniform sampler2D iTextTexture;
-
 // consts
 const float INF = 1e+10;
 const float OFFSET = 0.1;
@@ -476,19 +474,6 @@ bool intersectAABB(inout Intersection intersection, inout Ray ray, vec3 lb, vec3
     return false;
 }
 
-vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
-    uv -= p;
-    uv /= scale;
-
-    float offset = 128.0 / 4096.0;
-    float aspect = 2048.0 / 4096.0;
-    uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * (aspect * uv.y + 1.0 - offset);
-    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
-
-    return uv;
-}
-
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
@@ -618,82 +603,6 @@ vec2 distortion(vec2 uv) {
     return uv;
 }
 
-void text(vec2 uv, inout vec3 result) {
-    vec3 col = vec3(0.0);
-    float b = beat - 224.0;
-    float t4 = mod(b, 4.0) / 4.0;
-    float t8 = mod(b, 8.0) / 8.0;
-    float brightness = 1.0;
-
-    if (b < 0.0) {
-        // nop
-    } else if (b < 4.0) {
-        // 0-4 (4)
-        // A 64k INTRO
-        col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
-        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 8.0) {
-        // 4-8 (4)
-        // gam0022 & sadakkey
-        col += texture(iTextTexture, textUv(uv, 1.0, vec2(-1.0, 0.1), 1.0)).rgb;
-        col += texture(iTextTexture, textUv(uv, 2.0, vec2(-1.0, -0.1), 1.0)).rgb;
-
-        col += texture(iTextTexture, textUv(uv, 3.0, vec2(1.0, 0.1), 1.0)).rgb;
-        col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
-        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 16.0) {
-        // 8-16 (8)
-        // RE: SIMULATED
-        col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
-        col *= remap(t8, 0.25, 1.0, 0.0, 1.0);
-    } else if (b < 20.0) {
-        // 16-20 (4)
-        // RE: SIMULATED -> RE
-        float t = remapFrom(t4, 0.5, 1.0);
-        // t = easeInOutCubic(t);
-        t = pow(t4, 2.0);
-
-        vec2 glitch = vec2(0.0);
-        float fade = uv.x - remapTo(t, 1.6, -0.78);
-        if (fade > 0.0) {
-            glitch = hash23(vec3(floor(vec2(uv.x * 32.0, uv.y * 8.0)), beat));
-            glitch.x = fade * fade * remapTo(glitch.x, 0.0, 0.05);
-            glitch.y = fade * fade * remapTo(glitch.y, -0.4, 0.0);
-            fade = saturate(1.0 - fade) * saturate(1.0 - abs(glitch.y));
-        } else {
-            fade = 1.0;
-        }
-
-        float a = saturate(cos(fract(b * TAU * 4.0)));
-        col.r += fade * texture(iTextTexture, textUv(uv + glitch * mix(0.5, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).r;
-        col.g += fade * texture(iTextTexture, textUv(uv + glitch * mix(1.5, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).g;
-        col.b += fade * texture(iTextTexture, textUv(uv + glitch * mix(2.0, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).b;
-    } else if (b < 24.0) {
-        // 20-24 (4)
-        // RE
-        col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        if (uv.x > -0.78) {
-            col *= 0.0;
-        }
-        brightness = remapTo(t4, 1.0, 0.5);
-    } else {
-        // 24-32 (8)
-        // REALITY
-        col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        float t = remapFrom(t8, 0.5, 0.75);
-        // t = easeInOutCubic(t);
-        t = pow(t, 4.0);
-        if (uv.x > remapTo(t, -0.78, 1.0)) {
-            col *= 0.0;
-        }
-        col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
-        brightness = remapTo(t8, 0.5, 0.0);
-    }
-
-    result *= brightness;
-    result += 0.3 * col;
-}
-
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
     uv = distortion(uv);
@@ -733,8 +642,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             ray.direction = l;
         }
     }
-
-    text(uv, color);
 
     fragColor = vec4(color, 1.0);
 }

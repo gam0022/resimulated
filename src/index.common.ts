@@ -403,7 +403,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         if (t < 8) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
         } else if (t < 16) {
-            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+            chromatic.uniforms.gPlanetsId = Planets.MIX_A;
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
         } else {

@@ -146,7 +146,24 @@ float dMercury(vec3 p) {
     uv.x += 0.01 * beat;
     float h = fbm(uv, 10.0);
     // TODO: クレーター
-    return sdSphere(p, 1.0) + 0.05 * h;
+    return sdSphere(p, 1.0) - 0.05 * h;
+}
+
+float dPlanetsMixA(vec3 p) {
+#define MIX_A_NUM 5
+    vec3[MIX_A_NUM] center = vec3[](vec3(-5.0, 0.0, 0.0), vec3(-3.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(3.0, 0.0, 0.0), vec3(5.0, 0.0, 0.0));
+
+    float d = INF;
+
+    for (int i = 0; i < MIX_A_NUM; i++) {
+        vec2 uv = uvSphere(normalize(p));
+        uv.x += 0.01 * beat;
+        float h = fbm(uv, 10.0);
+
+        d = min(d, sdSphere(p - center[i], 1.0));
+    }
+
+    return d;
 }
 
 vec2 opU(vec2 d1, vec2 d2) { return (d1.x < d2.x) ? d1 : d2; }
@@ -229,7 +246,7 @@ float dKaneta(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
     float h = fbm(uv, 10.0);
     // return thinkingFace(p).x + 0.02 * h;
-    return sdSphere(p, 1.0) + 0.05 * h;  // thinkingFace のコンパイルに時間がかかるので代用
+    return sdSphere(p, 1.0) - 0.05 * h;  // thinkingFace のコンパイルに時間がかかるので代用
 }
 
 float dEarth(vec3 p) {
@@ -244,6 +261,8 @@ float dPlanets(vec3 p) {
 
     if (gPlanetsId == PLANETS_MERCURY) {
         d = min(d, dMercury(p));
+    } else if (gPlanetsId == PLANETS_MIX_A) {
+        d = min(d, dPlanetsMixA(p));
     } else if (gPlanetsId == PLANETS_KANETA) {
         d = min(d, dKaneta(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
@@ -381,6 +400,11 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
                 if (gPlanetsId == PLANETS_MERCURY) {
                     intersection.baseColor = vec3(1.0);
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                } else if (gPlanetsId == PLANETS_MIX_A) {
+                    intersection.baseColor = vec3(1.0, 1.0, 1.0);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);

@@ -407,7 +407,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
         } else {
-            chromatic.uniforms.gPlanetsId = Planets.KANETA;
+            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
         }
 
         camera = new Vector3(-1.38, -0.8550687112306142, 47.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
@@ -422,7 +422,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = easeInOutCubic(remap(t, 0, 8, 1, 0));
+        chromatic.uniforms.gBlend = easeInOutCubic(remap(t, 0, 4, 1, 0));
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;

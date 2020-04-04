@@ -388,7 +388,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(32, t => {
         // 惑星でグリーティング
         chromatic.uniforms.gSceneId = 1;
-        chromatic.uniforms.gPlanetsId = 1;
+        chromatic.uniforms.gPlanetsId = 0;
         chromatic.uniforms.gSceneEps = 0.003;
         chromatic.uniforms.gTonemapExposure = 1;// あとで 1 に戻す
 
@@ -408,6 +408,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;
+        chromatic.uniforms.gPlanetsId = 4;// Earth
         chromatic.uniforms.gSceneEps = 0.005;
         chromatic.uniforms.gTonemapExposure = 1;
 

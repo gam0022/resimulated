@@ -128,7 +128,12 @@ vec2 uvSphere(vec3 n) {
     return vec2(u, v);
 }
 
-uniform float gPlanetsId;  // 0 0 10 planet
+uniform float gPlanetsId;  // 0 0 4 planets
+#define PLANETS_MERCURY 0.0
+#define PLANETS_MIX_A 1.0
+#define PLANETS_KANETA_CAT 2.0
+#define PLANETS_MIX_B 3.0
+#define PLANETS_EARTH 4.0
 
 float dEarth(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
@@ -140,7 +145,11 @@ float dEarth(vec3 p) {
 float dPlanets(vec3 p) {
     float d = INF;
 
-    if (gPlanetsId == 0.0) {
+    if (gPlanetsId == PLANETS_MERCURY) {
+        d = min(d, dEarth(p));
+    }
+
+    if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
     }
 
@@ -269,7 +278,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 uv.x += 0.01 * beat;
                 float h = fbm(uv, 10.0);
 
-                if (gPlanetsId == 0.0) {
+                if (gPlanetsId == PLANETS_EARTH) {
                     if (h > 0.67) {
                         // land
                         intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));

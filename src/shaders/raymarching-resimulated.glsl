@@ -189,9 +189,20 @@ float dPlanetsMix(vec3 p) {
 
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
         vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+        d = min(d, sdSphere(p - center, 1.0));
+    }
+
+    return d;
+}
+
+float dPlanetsMixDetail(vec3 p) {
+    float d = INF;
+
+    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
+        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
         vec2 uv = uvSphere(normalize(p - center));
         uv.x += 0.01 * beat;
-        float h = 0.0;  // fbm(uv, 10.0);
+        float h = fbm(uv, 10.0);
         d = min(d, sdSphere(p - center, 1.0) - 0.05 * h);
     }
 
@@ -453,6 +464,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
+                    intersection.normal = calcNormal(p, dPlanetsMixDetail, 0.01);
                 } else if (gPlanetsId == PLANETS_KANETA) {
                     intersection.baseColor = vec3(1.0, 1.0, 0.5);
                     intersection.roughness = 0.4;

@@ -416,22 +416,24 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         } else if (t < 16) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
             camera = new Vector3(15, 3, 50);
+            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t % 8));
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);
+
+            if ((t % 4) > 3) {
+                chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-10 * (t % 4));
+            }
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
-            camera = new Vector3(15, 1, 20);
+            camera = new Vector3(-20, -2, 30);
         } else {
             chromatic.uniforms.gPlanetsId = Planets.MIX_B;
             camera = new Vector3(-15, -3, 50);
+            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t % 8));
         }
 
         camera = camera.scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
-
-        if ((t % 4) > 3) {
-            chromatic.uniforms.gGlitchIntensity = 0.05;
-        }
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;

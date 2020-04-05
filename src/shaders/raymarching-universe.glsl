@@ -161,6 +161,7 @@ float dMercury(vec3 p) {
     if (length(p) > 2.0) {
         return sdSphere(p, 1.0);
     } else {
+        p.xz = rotate(beat * 0.05) * p.xz;
         return sdSphere(p, 1.0) + 0.075 * fbmabs(p);
     }
 }
@@ -355,11 +356,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
-        vec3 n = normalize(p);
-        vec2 uv = uvSphere(n);
-        uv.x += 0.01 * beat;
-        float h = fbm(uv, 10.0);
-
         if (gPlanetsId == PLANETS_MERCURY) {
             intersection.baseColor = vec3(0.7);
             intersection.roughness = 0.4;
@@ -404,6 +400,11 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_EARTH) {
+            vec3 n = normalize(p);
+            vec2 uv = uvSphere(n);
+            uv.x += 0.01 * beat;
+            float h = fbm(uv, 10.0);
+
             if (h > 0.67) {
                 // land
                 intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));

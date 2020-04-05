@@ -154,10 +154,12 @@ uniform float gPlanetPatern3;  // 5 0 10
 uniform float gPlanetPatern4;  // 0.5 0 10
 
 float planetPattern(vec2 p, float seed) {
-    // test
-    p = p * vec2(1.0, gPlanetPatern2);
-    return fbm(p + gPlanetPatern1 * fbm(p, gPlanetPatern4 * gPlanetPatern3), gPlanetPatern3);
+    vec3 rand = hash31(seed);
+    p.y *= 4.0 * rand.x;
+    return fbm(p + 0.05 * rand.y * fbm(p, 32.0 * rand.z), 8.0);
 }
+
+vec3 pal(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) { return a + b * cos(TAU * (c * t + d)); }
 
 float dPlanetsMixDetail(vec3 p) {
     float d = INF;
@@ -165,8 +167,7 @@ float dPlanetsMixDetail(vec3 p) {
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
         vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
         vec2 uv = uvSphere(normalize(p - center));
-        uv.x += 0.01 * beat;
-        float h = planetPattern(uv, float(i));  // fbm(uv, 10.0);
+        float h = planetPattern(uv, float(i));
         d = min(d, sdSphere(p - center, 1.0) - 0.05 * h);
     }
 
@@ -327,17 +328,20 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
             int id;
+            vec2 uv;
 
             for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
                 vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
                 float d = sdSphere(p - center, 1.0);
                 if (d < eps * 10.0) {
                     id = i;
+                    uv = uvSphere(normalize(p - center));
                     break;
                 }
             }
 
-            intersection.baseColor = planetColors[PLANETS_NUM_MAX * int(gPlanetsId) + id];
+            float h = planetPattern(uv, 87.043 * gPlanetsId + 73.23 * float(id));
+            intersection.baseColor = pal(h, vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 0.7, 0.4), hash31(123.23 * gPlanetsId + 0.1 * float(id)));
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);

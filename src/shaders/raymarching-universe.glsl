@@ -297,13 +297,18 @@ float dKaneta(vec3 p) {
 #endif
 }
 
+float hEarth(vec3 p, out vec2 uv) {
+    uv = uvSphere(normalize(p));
+    uv.x += 0.01 * beat;
+    return fbm(uv, 10.0);
+}
+
 float dEarth(vec3 p) {
     if (dot(p, p) > 4.0) {
         return sdSphere(p, 1.0) - 0.05;
     } else {
-        vec2 uv = uvSphere(normalize(p));
-        uv.x += 0.01 * beat;
-        float h = fbm(uv, 10.0);
+        vec2 uv;
+        float h = hEarth(p, uv);
         return sdSphere(p, 1.0) - 0.05 * h;
     }
 }
@@ -408,10 +413,8 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_EARTH) {
-            vec3 n = normalize(p);
-            vec2 uv = uvSphere(n);
-            uv.x += 0.01 * beat;
-            float h = fbm(uv, 10.0);
+            vec2 uv;
+            float h = hEarth(p, uv);
 
             if (h > 0.67) {
                 // land

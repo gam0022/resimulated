@@ -160,7 +160,7 @@ float hMercury(vec3 p) {
 
 float dMercury(vec3 p) {
     if (dot(p, p) > 4.0) {
-        return sdSphere(p, 1.0);
+        return sdSphere(p, 1.5);
     } else {
         return sdSphere(p, 1.0) + 0.075 * hMercury(p);
     }
@@ -355,14 +355,14 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float eps = 0.02;
 
     for (float i = 0.0; i < 200.0; i++) {
-        d = abs(map(p));
+        d = map(p);
         distance += d;
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
-        if (abs(d) < eps) break;
+        if (d < eps) break;
     }
 
-    if (abs(d) < eps) {
+    if (d < eps) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;

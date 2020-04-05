@@ -25,7 +25,7 @@ void text(vec2 uv, inout vec3 result) {
         // 8-16 (8)
         // RE: SIMULATED
         col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
-        col *= remap(t8, 0.25, 1.0, 0.0, 1.0);
+        col *= remap(t8, 0.5, 1.0, 0.0, 1.0);
     } else if (b < 20.0) {
         // 16-20 (4)
         // RE: SIMULATED -> RE

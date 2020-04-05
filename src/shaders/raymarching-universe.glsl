@@ -117,7 +117,6 @@ int[PLANETS_PAT_MAX] planetNums = int[](1, 5, 1, 1, 6, 1);
 float[PLANETS_PAT_MAX] planetTextIds = float[](7.0, 8.0, 13.0, 14.0, 15.0, 0.0);
 
 float hash(in vec3 p) { return fract(sin(p.x * 15.32758341 + p.y * 39.786792357 + p.z * 59.4583127 + 7.5312) * 43758.236237153) - .5; }
-
 vec3 hash3(in vec3 p) { return vec3(hash(p), hash(p + 1.5), hash(p + 2.5)); }
 
 float voronoi(in vec3 p) {
@@ -149,10 +148,10 @@ float craters(vec3 p) {
     return sin(sqrt(v) * PI * 2.) * exp(-4. * v);
 }
 
-float stars(vec3 p) {
+/*float stars(vec3 p) {
     float v = voronoi(p);
     return pow(exp(.1 - 5. * v), 18.);
-}
+}*/
 
 float fbmabs(vec3 p) {
     float f = 1.2;
@@ -165,7 +164,7 @@ float fbmabs(vec3 p) {
     return r / 2.;
 }
 
-float fbm(vec3 p) {
+/*float fbm(vec3 p) {
     float f = 1.;
 
     float r = 0.0;
@@ -174,14 +173,14 @@ float fbm(vec3 p) {
         f *= 2.;
     }
     return r / 4.;
-}
+}*/
 
 float dMercury(vec3 p) {
-    vec2 uv = uvSphere(normalize(p));
-    uv.x += 0.01 * beat;
-    float h = fbm(uv, 10.0);
-    // TODO: クレーター
-    return 1.2 * fbmabs(p);
+    if (length(p) > 2.0) {
+        return sdSphere(p, 1.0);
+    } else {
+        return sdSphere(p, 1.0) + 0.15 * fbmabs(p);
+    }
 }
 
 float dPlanetsMix(vec3 p) {
@@ -325,7 +324,7 @@ float dPlanets(vec3 p) {
     } else if (gPlanetsId == PLANETS_KANETA) {
         d = min(d, dKaneta(p));
     } else if (gPlanetsId == PLANETS_FMSCAT) {
-        d = min(d, dMercury(p));
+        d = min(d, dEarth(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
     }
@@ -356,7 +355,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
     float eps = 0.02;
 
-    for (float i = 0.0; i < 100.0; i++) {
+    for (float i = 0.0; i < 200.0; i++) {
         d = abs(map(p));
         distance += d;
         p = ray.origin + distance * ray.direction;

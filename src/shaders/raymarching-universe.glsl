@@ -287,13 +287,6 @@ float map(vec3 p) {
     return d;
 }
 
-// color functions
-vec3 hsv2rgb(vec3 c) {
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, saturate(p - K.xxx), c.y);
-}
-
 uniform float gEmissiveIntensity;     // 6.0 0 20 emissive
 uniform float gEmissiveSpeed;         // 1 0 2
 uniform float gEmissiveHue;           // 0.33947042613522904 0 1

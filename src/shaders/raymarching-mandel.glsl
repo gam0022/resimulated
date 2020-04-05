@@ -136,13 +136,6 @@ float map(vec3 p) {
     return d;
 }
 
-// color functions
-vec3 hsv2rgb(vec3 c) {
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, saturate(p - K.xxx), c.y);
-}
-
 // https://www.shadertoy.com/view/lttGDn
 float calcEdge(vec3 p) {
     float edge = 0.0;

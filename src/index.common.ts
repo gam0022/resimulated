@@ -11,13 +11,14 @@ export const chromatic = new Chromatic(
     // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
-        require("./shaders/raymarching-resimulated.glsl").default,
+        require("./shaders/raymarching-mandel.glsl").default,
+        require("./shaders/raymarching-universe.glsl").default,
         require("./shaders/text-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
     ],
 
     // Bloom
-    2,
+    3,
     5,
     require("./shaders/build-in/bloom-prefilter.glsl").default,
     require("./shaders/build-in/bloom-downsample.glsl").default,

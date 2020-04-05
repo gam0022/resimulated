@@ -31,14 +31,14 @@ void text(vec2 uv, inout vec3 result) {
         // RE: SIMULATED -> RE
         float t = remapFrom(t4, 0.5, 1.0);
         // t = easeInOutCubic(t);
-        t = pow(t4, 2.0);
+        t = pow(t4, 1.4);
 
         vec2 glitch = vec2(0.0);
         float fade = uv.x - remapTo(t, 1.6, -0.78);
         if (fade > 0.0) {
             glitch = hash23(vec3(floor(vec2(uv.x * 32.0, uv.y * 8.0)), beat));
-            glitch.x = fade * fade * remapTo(glitch.x, 0.0, 0.05);
-            glitch.y = fade * fade * remapTo(glitch.y, -0.4, 0.0);
+            glitch.x = fade * fade * remapTo(glitch.x, 0.0 * t, 0.05 * t);
+            glitch.y = fade * fade * remapTo(glitch.y, -0.4 * t, 0.3 * t);
             fade = saturate(1.0 - fade) * saturate(1.0 - abs(glitch.y));
         } else {
             fade = 1.0;
@@ -60,7 +60,7 @@ void text(vec2 uv, inout vec3 result) {
         // 24-32 (8)
         // REALITY
         col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        float t = remapFrom(t8, 0.5, 0.75);
+        float t = remapFrom(t8, 0.75, 0.85);
         // t = easeInOutCubic(t);
         t = pow(t, 4.0);
         if (uv.x > remapTo(t, -0.78, 1.0)) {

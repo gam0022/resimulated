@@ -305,7 +305,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
     float eps = 0.02;
 
-    for (float i = 0.0; i < 300.0; i++) {
+    for (float i = 0.0; i < 100.0; i++) {
         d = abs(map(p));
         distance += d;
         p = ray.origin + distance * ray.direction;
@@ -313,7 +313,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         if (abs(d) < eps) break;
     }
 
-    if (distance < intersection.distance) {
+    if (abs(d) < eps) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;

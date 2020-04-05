@@ -290,10 +290,14 @@ float dKaneta(vec3 p) {
 }
 
 float dEarth(vec3 p) {
-    vec2 uv = uvSphere(normalize(p));
-    uv.x += 0.01 * beat;
-    float h = fbm(uv, 10.0);
-    return sdSphere(p, 1.0) + 0.05 * h;
+    if (length(p) > 2.0) {
+        return sdSphere(p, 1.0);
+    } else {
+        vec2 uv = uvSphere(normalize(p));
+        uv.x += 0.01 * beat;
+        float h = fbm(uv, 10.0);
+        return sdSphere(p, 1.0) + 0.05 * h;
+    }
 }
 
 float dPlanets(vec3 p) {

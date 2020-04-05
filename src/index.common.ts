@@ -405,27 +405,28 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gTonemapExposure = 1;
 
         target = new Vector3(0, 0, 0);
-        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 8));
+        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
 
-        if (t < 8) {
+        if (t < 12) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(-1.38, -0.8550687112306142, 47.4);
-        } else if (t < 12) {
+            chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
+        } else if (t < 16) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
             chromatic.uniforms.gCameraFov = 13;
-        } else if (t < 16) {
+        } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
             camera = new Vector3(15, 3, 50);
             chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t % 8));
-        } else if (t < 20) {
+        } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);
 
             if ((t % 4) > 3) {
                 chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-10 * (t % 4));
             }
-        } else if (t < 24) {
+        } else if (t < 28) {
             chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
             camera = new Vector3(-20, -2, 30);
         } else {
@@ -439,7 +440,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = remap(t, 0, 6, 1, 0);
+        chromatic.uniforms.gBlend = remap(t, 0, 8, 1, 0);
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;

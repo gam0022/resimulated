@@ -274,7 +274,7 @@ vec2 thinkingFace(vec3 p) {
 }
 
 float hKaneta(inout vec3 p) {
-    p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
+    p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 212.0, 216.0)), -1.7, 0.7)) * p.xz;
     vec2 uv = uvSphere(normalize(p));
     return fbm(uv, 20.0);
 }

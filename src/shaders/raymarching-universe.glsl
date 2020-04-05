@@ -384,8 +384,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     }
 }
 
-bool equals(float x, float y) { return abs(x - y) < 0.0001; }
-
 // http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
 bool intersectAABB(inout Intersection intersection, inout Ray ray, vec3 lb, vec3 rt) {
     vec3 dirfrac;

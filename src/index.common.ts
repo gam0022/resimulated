@@ -439,7 +439,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = easeInOutCubic(remap(t, 0, 4, 1, 0));
+        chromatic.uniforms.gBlend = remap(t, 0, 6, 1, 0);
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;

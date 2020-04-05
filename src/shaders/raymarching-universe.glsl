@@ -1,4 +1,4 @@
-// #define STRIP_FIXED
+#define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -148,6 +148,17 @@ float dPlanetsMix(vec3 p) {
     return d;
 }
 
+uniform float gPlanetPatern1;  // 0 0 4
+uniform float gPlanetPatern2;  // 2 0 10
+uniform float gPlanetPatern3;  // 5 0 10
+uniform float gPlanetPatern4;  // 0.5 0 10
+
+float planetPattern(vec2 p, float seed) {
+    // test
+    p = p * vec2(1.0, gPlanetPatern2);
+    return fbm(p + gPlanetPatern1 * fbm(p, gPlanetPatern4 * gPlanetPatern3), gPlanetPatern3);
+}
+
 float dPlanetsMixDetail(vec3 p) {
     float d = INF;
 
@@ -155,7 +166,7 @@ float dPlanetsMixDetail(vec3 p) {
         vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
         vec2 uv = uvSphere(normalize(p - center));
         uv.x += 0.01 * beat;
-        float h = fbm(uv, 10.0);
+        float h = planetPattern(uv, float(i));  // fbm(uv, 10.0);
         d = min(d, sdSphere(p - center, 1.0) - 0.05 * h);
     }
 

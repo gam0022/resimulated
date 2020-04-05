@@ -273,13 +273,17 @@ vec2 thinkingFace(vec3 p) {
     return d;
 }
 
+float hKaneta(inout vec3 p) {
+    p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
+    vec2 uv = uvSphere(normalize(p));
+    return fbm(uv, 20.0);
+}
+
 float dKaneta(vec3 p) {
     float h = 0.0;
 
     if (dot(p, p) <= 4.0) {
-        p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
-        vec2 uv = uvSphere(normalize(p));
-        h = fbm(uv, 10.0);
+        h = hKaneta(p);
     }
 
 #ifdef STRIP_FIXED
@@ -393,7 +397,8 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
             }
         } else if (gPlanetsId == PLANETS_KANETA) {
-            intersection.baseColor = vec3(1.0, 1.0, 0.5);
+            float h = hKaneta(p);
+            intersection.baseColor = mix(vec3(0.8, 0.5, 0.2), vec3(0.9, 0.95, 0.5), h);
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);

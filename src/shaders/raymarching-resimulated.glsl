@@ -1,3 +1,5 @@
+// #define STRIP_FIXED
+
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
 #define SCENE_MANDEL 0.0
@@ -18,8 +20,6 @@ uniform float gEdgePower;        // 1 0.1 10
 uniform float gBaseColor;        // 0.5
 uniform float gRoughness;        // 0.1
 uniform float gMetallic;         // 0.4
-
-uniform sampler2D iTextTexture;
 
 // consts
 const float INF = 1e+10;
@@ -137,16 +137,76 @@ vec2 uvSphere(vec3 n) {
 uniform float gPlanetsId;  // 0 0 4 planets
 #define PLANETS_MERCURY 0.0
 #define PLANETS_MIX_A 1.0
-#define PLANETS_KANETA_CAT 2.0
-#define PLANETS_MIX_B 3.0
-#define PLANETS_EARTH 4.0
+#define PLANETS_KANETA 2.0
+#define PLANETS_FMSCAT 3.0
+#define PLANETS_MIX_B 4.0
+#define PLANETS_EARTH 5.0
+
+#define PLANETS_PAT_MAX 6
+#define PLANETS_NUM_MAX 6
+
+vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
+    // MERCURY
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // MIX_A
+    vec3(-10.0, 1.0, 3.0), vec3(-6.0, -1.0, 2.0), vec3(0.0, 0.0, 0.0), vec3(6.0, 0.0, 8.0), vec3(8.0, 3.0, 2.0), vec3(0.0),
+    // KANETA
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // PLANETS_FMSCAT
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // MIX_B
+    vec3(-7.0, 1.0, 3.0), vec3(-3.0, -3.5, 2.0), vec3(0.0, 0.0, 0.0), vec3(6.0, 0.0, 8.0), vec3(6.0, -3.0, 2.0), vec3(6.0, 5.0, -3.0),
+    // EARTH
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
+
+vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetColors = vec3[](
+    // MERCURY
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // MIX_A
+    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.0),
+    // KANETA
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // PLANETS_FMSCAT
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
+    // MIX_B
+    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.7, 0.2, 0.7),
+    // EARTH
+    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
+
+int[PLANETS_PAT_MAX] planetNums = int[](1, 5, 1, 1, 6, 1);
+float[PLANETS_PAT_MAX] planetTextIds = float[](7.0, 8.0, 13.0, 14.0, 15.0, 0.0);
 
 float dMercury(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
     uv.x += 0.01 * beat;
     float h = fbm(uv, 10.0);
     // TODO: クレーター
-    return sdSphere(p, 1.0) + 0.05 * h;
+    return sdSphere(p, 1.0) - 0.05 * h;
+}
+
+float dPlanetsMix(vec3 p) {
+    float d = INF;
+
+    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
+        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+        d = min(d, sdSphere(p - center, 1.0));
+    }
+
+    return d;
+}
+
+float dPlanetsMixDetail(vec3 p) {
+    float d = INF;
+
+    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
+        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+        vec2 uv = uvSphere(normalize(p - center));
+        uv.x += 0.01 * beat;
+        float h = fbm(uv, 10.0);
+        d = min(d, sdSphere(p - center, 1.0) - 0.05 * h);
+    }
+
+    return d;
 }
 
 vec2 opU(vec2 d1, vec2 d2) { return (d1.x < d2.x) ? d1 : d2; }
@@ -225,10 +285,15 @@ vec2 thinkingFace(vec3 p) {
 }
 
 float dKaneta(vec3 p) {
-    p.xz = rotate(0.1 * (beat - 208.)) * p.xz;
+    p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
     vec2 uv = uvSphere(normalize(p));
     float h = fbm(uv, 10.0);
+
+#ifdef STRIP_FIXED
+    return sdSphere(p, 1.0) - 0.05 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
+#else
     return thinkingFace(p).x + 0.02 * h;
+#endif
 }
 
 float dEarth(vec3 p) {
@@ -243,8 +308,12 @@ float dPlanets(vec3 p) {
 
     if (gPlanetsId == PLANETS_MERCURY) {
         d = min(d, dMercury(p));
-    } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+    } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
+        d = min(d, dPlanetsMix(p));
+    } else if (gPlanetsId == PLANETS_KANETA) {
         d = min(d, dKaneta(p));
+    } else if (gPlanetsId == PLANETS_FMSCAT) {
+        d = min(d, dMercury(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
     }
@@ -259,14 +328,18 @@ float map(vec3 p) {
     float d = INF;
 
     if (gSceneId == SCENE_MANDEL) {
+#ifndef STRIP_FIXED
         d = dStage(p);
+#endif
     } else if (gSceneId == SCENE_UNIVERSE) {
         d = min(d, dPlanets(p));
     }
 
+#ifndef STRIP_FIXED
     if (gBallRadius > 0.0) {
         d = min(d, dBall(p));
     }
+#endif
 
     return d;
 }
@@ -351,6 +424,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.normal = calcNormal(p, map, gSceneEps);
 
         if (gBallRadius > 0.0 && abs(dBall(p)) < eps) {
+#ifndef STRIP_FIXED
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;
@@ -365,6 +439,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 r = r - 1.0;
                 intersection.emission = vec3(gLogoIntensity) * revisionLogo(intersection.normal.xy * 0.6, 8.0 * r);
             }
+#endif
         } else if (gSceneId == SCENE_UNIVERSE) {
             if (dPlanets(p) < eps * 10.0) {
                 vec3 n = normalize(p);
@@ -373,12 +448,34 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 float h = fbm(uv, 10.0);
 
                 if (gPlanetsId == PLANETS_MERCURY) {
-                    intersection.baseColor = vec3(1.0);
+                    intersection.baseColor = vec3(0.7);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
-                } else if (gPlanetsId == PLANETS_KANETA_CAT) {
+                } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
+                    int id;
+
+                    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
+                        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+                        float d = sdSphere(p - center, 1.0);
+                        if (d < eps * 10.0) {
+                            id = i;
+                            break;
+                        }
+                    }
+
+                    intersection.baseColor = planetColors[PLANETS_NUM_MAX * int(gPlanetsId) + id];
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                    intersection.normal = calcNormal(p, dPlanetsMixDetail, 0.01);
+                } else if (gPlanetsId == PLANETS_KANETA) {
                     intersection.baseColor = vec3(1.0, 1.0, 0.5);
+                    intersection.roughness = 0.4;
+                    intersection.metallic = 0.01;
+                    intersection.emission = vec3(0.0);
+                } else if (gPlanetsId == PLANETS_FMSCAT) {
+                    intersection.baseColor = vec3(1.0, 1.0, 1.0);
                     intersection.roughness = 0.4;
                     intersection.metallic = 0.01;
                     intersection.emission = vec3(0.0);
@@ -409,6 +506,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.reflectance = 0.0;
             }
         } else if (gSceneId == SCENE_MANDEL) {
+#ifndef STRIP_FIXED
             intersection.baseColor = vec3(gBaseColor);
             intersection.roughness = gRoughness;
             intersection.metallic = gMetallic;
@@ -419,6 +517,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             intersection.transparent = false;
             intersection.reflectance = 0.0;
+#endif
         }
     }
 }
@@ -448,61 +547,33 @@ bool intersectAABB(inout Intersection intersection, inout Ray ray, vec3 lb, vec3
         intersection.distance = tmin;
 
         vec3 uvw = (intersection.position - lb) / (rt - lb);
-
-        // 交点座標から法線を求める
-        // 高速化のためにY軸から先に判定する
-        if (equals(intersection.position.y, rt.y)) {
-            intersection.normal = vec3(0.0, 1.0, 0.0);
-            intersection.uv = uvw.xz;
-        } else if (equals(intersection.position.y, lb.y)) {
-            intersection.normal = vec3(0.0, -1.0, 0.0);
-            intersection.uv = uvw.xz;
-        } else if (equals(intersection.position.x, lb.x)) {
-            intersection.normal = vec3(-1.0, 0.0, 0.0);
-            intersection.uv = uvw.zy;
-        } else if (equals(intersection.position.x, rt.x)) {
-            intersection.normal = vec3(1.0, 0.0, 0.0);
-            intersection.uv = uvw.zy;
-        } else if (equals(intersection.position.z, lb.z)) {
-            intersection.normal = vec3(0.0, 0.0, -1.0);
-            intersection.uv = uvw.xy;
-        } else if (equals(intersection.position.z, rt.z)) {
-            intersection.normal = vec3(0.0, 0.0, 1.0);
-            intersection.uv = uvw.xy;
-        }
+        intersection.normal = vec3(0.0, 0.0, 1.0);
+        intersection.uv = uvw.xy;
         return true;
     }
 
     return false;
 }
 
-vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
-    uv -= p;
-    uv /= scale;
-
-    float offset = 128.0 / 4096.0;
-    float aspect = 2048.0 / 4096.0;
-    uv.x = 0.5 + 0.5 * uv.x;
-    uv.y = 0.5 - 0.5 * (aspect * uv.y + 1.0 - offset);
-    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
-
-    return uv;
-}
-
 void intersectScene(inout Intersection intersection, inout Ray ray) {
     intersection.distance = INF;
     intersectObjects(intersection, ray);
 
-    if (gSceneId == SCENE_UNIVERSE && beat > 200.0) {
+    if (gSceneId == SCENE_UNIVERSE && beat < 224.0) {
         Intersection textIntersection = intersection;
-        if (intersectAABB(textIntersection, ray, vec3(-2.0, 0.0, 0.0), vec3(2.0, 4.0, 0.01))) {
-            vec2 uv = 2.0 * textIntersection.uv - 1.0;
-            float id = 7.0 + floor((beat - 200.0) / 2.0);
-            vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
-            // alpha test
-            if (length(t) > 0.01) {
-                intersection.emission = 0.5 * t;
-                intersection.hit = true;
+
+        for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
+            vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+            if (intersectAABB(textIntersection, ray, center + vec3(-2.0, 1.5, 0.0), center + vec3(2.0, 2.5, 0.01))) {
+                vec2 uv = (2.0 * textIntersection.uv - 1.0) * vec2(1.0, 0.25);
+                float id = planetTextIds[int(gPlanetsId)] + float(i);
+                vec3 t = texture(iTextTexture, textUv(uv, id, vec2(0.0, 0.0), 2.0)).rgb;
+                // alpha test
+                if (length(t) > 0.01) {
+                    intersection.emission = 0.5 * t;
+                    intersection.hit = true;
+                    break;
+                }
             }
         }
     }
@@ -618,82 +689,6 @@ vec2 distortion(vec2 uv) {
     return uv;
 }
 
-void text(vec2 uv, inout vec3 result) {
-    vec3 col = vec3(0.0);
-    float b = beat - 224.0;
-    float t4 = mod(b, 4.0) / 4.0;
-    float t8 = mod(b, 8.0) / 8.0;
-    float brightness = 1.0;
-
-    if (b < 0.0) {
-        // nop
-    } else if (b < 4.0) {
-        // 0-4 (4)
-        // A 64k INTRO
-        col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
-        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 8.0) {
-        // 4-8 (4)
-        // gam0022 & sadakkey
-        col += texture(iTextTexture, textUv(uv, 1.0, vec2(-1.0, 0.1), 1.0)).rgb;
-        col += texture(iTextTexture, textUv(uv, 2.0, vec2(-1.0, -0.1), 1.0)).rgb;
-
-        col += texture(iTextTexture, textUv(uv, 3.0, vec2(1.0, 0.1), 1.0)).rgb;
-        col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
-        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 16.0) {
-        // 8-16 (8)
-        // RE: SIMULATED
-        col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
-        col *= remap(t8, 0.25, 1.0, 0.0, 1.0);
-    } else if (b < 20.0) {
-        // 16-20 (4)
-        // RE: SIMULATED -> RE
-        float t = remapFrom(t4, 0.5, 1.0);
-        // t = easeInOutCubic(t);
-        t = pow(t4, 2.0);
-
-        vec2 glitch = vec2(0.0);
-        float fade = uv.x - remapTo(t, 1.6, -0.78);
-        if (fade > 0.0) {
-            glitch = hash23(vec3(floor(vec2(uv.x * 32.0, uv.y * 8.0)), beat));
-            glitch.x = fade * fade * remapTo(glitch.x, 0.0, 0.05);
-            glitch.y = fade * fade * remapTo(glitch.y, -0.4, 0.0);
-            fade = saturate(1.0 - fade) * saturate(1.0 - abs(glitch.y));
-        } else {
-            fade = 1.0;
-        }
-
-        float a = saturate(cos(fract(b * TAU * 4.0)));
-        col.r += fade * texture(iTextTexture, textUv(uv + glitch * mix(0.5, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).r;
-        col.g += fade * texture(iTextTexture, textUv(uv + glitch * mix(1.5, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).g;
-        col.b += fade * texture(iTextTexture, textUv(uv + glitch * mix(2.0, 1.0, a), 5.0, vec2(0.0, 0.0), 3.0)).b;
-    } else if (b < 24.0) {
-        // 20-24 (4)
-        // RE
-        col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        if (uv.x > -0.78) {
-            col *= 0.0;
-        }
-        brightness = remapTo(t4, 1.0, 0.5);
-    } else {
-        // 24-32 (8)
-        // REALITY
-        col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
-        float t = remapFrom(t8, 0.5, 0.75);
-        // t = easeInOutCubic(t);
-        t = pow(t, 4.0);
-        if (uv.x > remapTo(t, -0.78, 1.0)) {
-            col *= 0.0;
-        }
-        col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
-        brightness = remapTo(t8, 0.5, 0.0);
-    }
-
-    result *= brightness;
-    result += 0.3 * col;
-}
-
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
     uv = distortion(uv);
@@ -733,8 +728,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
             ray.direction = l;
         }
     }
-
-    text(uv, color);
 
     fragColor = vec4(color, 1.0);
 }

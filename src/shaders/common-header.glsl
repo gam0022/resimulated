@@ -22,6 +22,7 @@ const float PIH = 1.57079632679;
 uniform vec3 iResolution;
 uniform float iTime;
 uniform sampler2D iPrevPass;
+uniform sampler2D iTextTexture;
 
 // https://www.shadertoy.com/view/3tX3R4
 float clamp2(float x, float min, float max) { return (min < max) ? clamp(x, min, max) : clamp(x, max, min); }
@@ -122,6 +123,19 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texelSize) {
     s += texture(tex, uv + d.zw).rgb;
 
     return s * (1.0 / 4.0);
+}
+
+vec2 textUv(vec2 uv, float id, vec2 p, float scale) {
+    uv -= p;
+    uv /= scale;
+
+    float offset = 128.0 / 4096.0;
+    float aspect = 2048.0 / 4096.0;
+    uv.x = 0.5 + 0.5 * uv.x;
+    uv.y = 0.5 - 0.5 * (aspect * uv.y + 1.0 - offset);
+    uv.y = clamp(uv.y + offset * id, offset * id, offset * (id + 1.0));
+
+    return uv;
 }
 
 #define BPM 140.0

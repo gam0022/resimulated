@@ -436,7 +436,7 @@ export class Chromatic {
                     this.audioSource.buffer = audioBuffer;
                 }
 
-                this.audioSource.loop = true;
+                this.audioSource.loop = false;
                 this.audioSource.connect(audio.destination);
             }
 

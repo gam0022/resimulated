@@ -112,20 +112,6 @@ vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
     // EARTH
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
 
-vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetColors = vec3[](
-    // MERCURY
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
-    // MIX_A
-    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.0),
-    // KANETA
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
-    // PLANETS_FMSCAT
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
-    // MIX_B
-    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.7, 0.2, 0.7),
-    // EARTH
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
-
 int[PLANETS_PAT_MAX] planetNums = int[](1, 5, 1, 1, 6, 1);
 float[PLANETS_PAT_MAX] planetTextIds = float[](7.0, 8.0, 13.0, 14.0, 15.0, 0.0);
 
@@ -148,10 +134,10 @@ float dPlanetsMix(vec3 p) {
     return d;
 }
 
-uniform float gPlanetPatern1;  // 0 0 4
-uniform float gPlanetPatern2;  // 2 0 10
-uniform float gPlanetPatern3;  // 5 0 10
-uniform float gPlanetPatern4;  // 0.5 0 10
+uniform vec3 gPlanetPalA;  // 127 127 127
+uniform vec3 gPlanetPalB;  // 110 115 115
+uniform vec3 gPlanetPalC;  // 256 178 102
+uniform vec3 gPlanetPalD;  // 76 108 115
 
 float planetPattern(vec2 p, float seed) {
     vec3 rand = hash31(seed);
@@ -340,11 +326,12 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 }
             }
 
-            float seed = 87.043 * gPlanetsId + 73.23 * float(id);
+            float seed = 13.3443 * gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
             float h = planetPattern(uv, seed);
-            intersection.baseColor = pal(h, vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.5, 0.7, 0.4), hash31(seed));
+            vec3 rand = hash31(seed);
+            intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
             intersection.roughness = 0.4;
-            intersection.metallic = 0.01;
+            intersection.metallic = 0.8 * rand.x;
             intersection.emission = vec3(0.0);
             intersection.normal = calcNormal(p, dPlanetsMixDetail, 0.01);
         } else if (gPlanetsId == PLANETS_KANETA) {

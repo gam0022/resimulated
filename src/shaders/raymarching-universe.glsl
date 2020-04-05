@@ -137,7 +137,7 @@ float dPlanetsMix(vec3 p) {
 uniform vec3 gPlanetPalA;  // 127 127 127
 uniform vec3 gPlanetPalB;  // 110 115 115
 uniform vec3 gPlanetPalC;  // 256 178 102
-uniform vec3 gPlanetPalD;  // 76 108 115
+uniform vec3 gPlanetPalD;  // 10 21 25
 
 float planetPattern(vec2 p, float seed) {
     vec3 rand = hash31(seed);
@@ -326,7 +326,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 }
             }
 
-            float seed = 13.3443 * gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
+            float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
             float h = planetPattern(uv, seed);
             vec3 rand = hash31(seed);
             intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);

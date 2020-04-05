@@ -1,4 +1,4 @@
-#define STRIP_FIXED
+// #define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -158,23 +158,12 @@ float fbmabs(vec3 p) {
 }
 
 float dMercury(vec3 p) {
-    if (length(p) > 2.0) {
+    if (dot(p, p) > 4.0) {
         return sdSphere(p, 1.0);
     } else {
         p.xz = rotate(beat * 0.05) * p.xz;
         return sdSphere(p, 1.0) + 0.075 * fbmabs(p);
     }
-}
-
-float dPlanetsMix(vec3 p) {
-    float d = INF;
-
-    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
-        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-        d = min(d, sdSphere(p - center, 1.0));
-    }
-
-    return d;
 }
 
 uniform vec3 gPlanetPalA;  // 127 127 127
@@ -190,14 +179,20 @@ float planetPattern(vec2 p, float seed) {
 
 vec3 pal(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) { return a + b * cos(TAU * (c * t + d)); }
 
-float dPlanetsMixDetail(vec3 p) {
+float dPlanetsMix(vec3 p) {
     float d = INF;
 
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
         vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-        vec2 uv = uvSphere(normalize(p - center));
-        float h = planetPattern(uv, float(i));
-        d = min(d, sdSphere(p - center, 1.0) - 0.05 * h);
+        vec3 q = p - center;
+        if (dot(q, q) > 4.0) {
+            d = min(d, sdSphere(q, 1.0) - 0.05);
+        } else {
+            vec2 uv = uvSphere(normalize(q));
+            float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(i);
+            float h = planetPattern(uv, seed);
+            d = min(d, sdSphere(q, 1.0) - 0.05 * h);
+        }
     }
 
     return d;
@@ -279,25 +274,33 @@ vec2 thinkingFace(vec3 p) {
 }
 
 float dKaneta(vec3 p) {
-    p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
-    vec2 uv = uvSphere(normalize(p));
-    float h = fbm(uv, 10.0);
+    float h = 0.0;
+
+    if (dot(p, p) <= 4.0) {
+        p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
+        vec2 uv = uvSphere(normalize(p));
+        h = fbm(uv, 10.0);
+    }
 
 #ifdef STRIP_FIXED
-    return sdSphere(p, 1.0) - 0.05 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
+    return sdSphere(p, 1.0) - 0.02 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
 #else
-    return thinkingFace(p).x + 0.02 * h;
+    if (dot(p, p) <= 9.0) {
+        return thinkingFace(p).x - 0.02 * h;
+    } else {
+        return sdSphere(p, 1.5);
+    }
 #endif
 }
 
 float dEarth(vec3 p) {
-    if (length(p) > 2.0) {
-        return sdSphere(p, 1.0);
+    if (dot(p, p) > 4.0) {
+        return sdSphere(p, 1.0) - 0.05;
     } else {
         vec2 uv = uvSphere(normalize(p));
         uv.x += 0.01 * beat;
         float h = fbm(uv, 10.0);
-        return sdSphere(p, 1.0) + 0.05 * h;
+        return sdSphere(p, 1.0) - 0.05 * h;
     }
 }
 
@@ -369,7 +372,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
                 vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
                 float d = sdSphere(p - center, 1.0);
-                if (d < eps * 10.0) {
+                if (abs(d) < eps * 100.0) {
                     id = i;
                     dir = normalize(p - center);
                     uv = uvSphere(dir);
@@ -384,7 +387,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.roughness = 0.4;
             intersection.metallic = 0.8 * rand.x;
             intersection.emission = vec3(0.0);
-            intersection.normal = calcNormal(p, dPlanetsMixDetail, 0.01);
+            // intersection.normal = calcNormal(p, dPlanetsMix, 0.01);
 
             if (gPlanetsId == PLANETS_MIX_B && id == 4) {
                 intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);

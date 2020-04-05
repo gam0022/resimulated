@@ -171,7 +171,7 @@ uniform vec3 gPlanetPalB;  // 110 115 115
 uniform vec3 gPlanetPalC;  // 256 178 102
 uniform vec3 gPlanetPalD;  // 130 130 25
 
-float planetPattern(vec2 p, float seed) {
+float hPlanetsMix(vec2 p, float seed) {
     vec3 rand = hash31(seed);
     p.y *= 4.0 * rand.x;
     return fbm(p + 0.05 * rand.y * fbm(p, 32.0 * rand.z), 8.0);
@@ -190,7 +190,7 @@ float dPlanetsMix(vec3 p) {
         } else {
             vec2 uv = uvSphere(normalize(q));
             float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(i);
-            float h = planetPattern(uv, seed);
+            float h = hPlanetsMix(uv, seed);
             d = min(d, sdSphere(q, 1.0) - 0.05 * h);
         }
     }
@@ -390,7 +390,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             }
 
             float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
-            float h = planetPattern(uv, seed);
+            float h = hPlanetsMix(uv, seed);
             vec3 rand = hash31(seed);
             intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
             intersection.roughness = 0.4;

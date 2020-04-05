@@ -51,7 +51,7 @@ export const chromatic = new Chromatic(
             "Ctrl-Alt-Test",
             "RGBA & TBC",
             "Fairlight",
-            "logicoma",
+            "Conspiracy",
             "Poo-Brain",
 
             // 13
@@ -61,11 +61,11 @@ export const chromatic = new Chromatic(
             "FMS_Cat",
 
             // 15-20
-            "0x4015 & YET1",
-            "Prismbeings",
-            "Conspiracy",
-            "½-bit Cheese",
             "LJ & Alcatraz",
+            "Prismbeings",
+            "0x4015 & YET1",
+            "½-bit Cheese",
+            "logicoma",
             "Polarity",
         ];
 

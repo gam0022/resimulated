@@ -69,6 +69,7 @@ struct Intersection {
 
 // Distance Functions
 float sdSphere(vec3 p, float r) { return length(p) - r; }
+float sdCircle(vec2 p, float r) { return length(p) - r; }
 
 float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
     vec3 pa = p - a, ba = b - a;
@@ -277,6 +278,13 @@ float map(vec3 p) {
     return d;
 }
 
+float logicoma(vec2 uv) {
+    float d = sdCircle(uv - vec2(0.0, -0.5), 0.05);
+    d = min(d, sdCircle(uv - vec2(-0.5, 0.5), 0.05));
+    d = min(d, sdCircle(uv - vec2(0.5, 0.5), 0.05));
+    return d < 0.0 ? 1.0 : 0.0;
+}
+
 uniform float gF0;                    // 0.95 0 1 lighting
 uniform float gCameraLightIntensity;  // 1 0 10
 
@@ -315,13 +323,15 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
             int id;
             vec2 uv;
+            vec3 dir;
 
             for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
                 vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
                 float d = sdSphere(p - center, 1.0);
                 if (d < eps * 10.0) {
                     id = i;
-                    uv = uvSphere(normalize(p - center));
+                    dir = normalize(p - center);
+                    uv = uvSphere(dir);
                     break;
                 }
             }
@@ -334,6 +344,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.8 * rand.x;
             intersection.emission = vec3(0.0);
             intersection.normal = calcNormal(p, dPlanetsMixDetail, 0.01);
+
+            if (gPlanetsId == PLANETS_MIX_B && id == 4) {
+                intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
+            }
         } else if (gPlanetsId == PLANETS_KANETA) {
             intersection.baseColor = vec3(1.0, 1.0, 0.5);
             intersection.roughness = 0.4;

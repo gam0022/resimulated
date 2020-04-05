@@ -340,8 +340,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 }
             }
 
-            float h = planetPattern(uv, 87.043 * gPlanetsId + 73.23 * float(id));
-            intersection.baseColor = pal(h, vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 0.7, 0.4), hash31(123.23 * gPlanetsId + 0.1 * float(id)));
+            float seed = 87.043 * gPlanetsId + 73.23 * float(id);
+            float h = planetPattern(uv, seed);
+            intersection.baseColor = pal(h, vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.5, 0.7, 0.4), hash31(seed));
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);

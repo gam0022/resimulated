@@ -13,14 +13,6 @@ uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 uniform float gCameraFov;      // 13 0 180
 
-uniform float gMandelboxScale;   // 2.7 1 5 mandel
-uniform float gMandelboxRepeat;  // 10 1 100
-uniform float gEdgeEps;          // 0.0005 0.0001 0.01
-uniform float gEdgePower;        // 1 0.1 10
-uniform float gBaseColor;        // 0.5
-uniform float gRoughness;        // 0.1
-uniform float gMetallic;         // 0.4
-
 // consts
 const float INF = 1e+10;
 const float OFFSET = 0.1;
@@ -286,13 +278,6 @@ float map(vec3 p) {
     float d = dPlanets(p);
     return d;
 }
-
-uniform float gEmissiveIntensity;     // 6.0 0 20 emissive
-uniform float gEmissiveSpeed;         // 1 0 2
-uniform float gEmissiveHue;           // 0.33947042613522904 0 1
-uniform float gEmissiveHueShiftBeat;  // 0 0 1
-uniform float gEmissiveHueShiftZ;     // 0 0 1
-uniform float gEmissiveHueShiftXY;    // 0 0 1
 
 uniform float gF0;                    // 0.95 0 1 lighting
 uniform float gCameraLightIntensity;  // 1 0 10

@@ -146,7 +146,8 @@ float craters(vec3 p) {
     return sin(sqrt(v) * TAU) * exp(-4. * v);
 }
 
-float fbmabs(vec3 p) {
+float hMercury(vec3 p) {
+    p.xz = rotate(beat * 0.05) * p.xz;
     float f = 1.2;
 
     float r = 0.0;
@@ -161,8 +162,7 @@ float dMercury(vec3 p) {
     if (dot(p, p) > 4.0) {
         return sdSphere(p, 1.0);
     } else {
-        p.xz = rotate(beat * 0.05) * p.xz;
-        return sdSphere(p, 1.0) + 0.075 * fbmabs(p);
+        return sdSphere(p, 1.0) + 0.075 * hMercury(p);
     }
 }
 

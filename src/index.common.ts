@@ -51,7 +51,7 @@ export const chromatic = new Chromatic(
             "Ctrl-Alt-Test",
             "RGBA & TBC",
             "Fairlight",
-            "logicoma",
+            "Conspiracy",
             "Poo-Brain",
 
             // 13
@@ -61,11 +61,11 @@ export const chromatic = new Chromatic(
             "FMS_Cat",
 
             // 15-20
-            "0x4015 & YET1",
-            "Prismbeings",
-            "Conspiracy",
-            "½-bit Cheese",
             "LJ & Alcatraz",
+            "Prismbeings",
+            "0x4015 & YET1",
+            "½-bit Cheese",
+            "logicoma",
             "Polarity",
         ];
 
@@ -439,7 +439,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = easeInOutCubic(remap(t, 0, 4, 1, 0));
+        chromatic.uniforms.gBlend = remap(t, 0, 6, 1, 0);
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;

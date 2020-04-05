@@ -69,6 +69,7 @@ struct Intersection {
 
 // Distance Functions
 float sdSphere(vec3 p, float r) { return length(p) - r; }
+float sdCircle(vec2 p, float r) { return length(p) - r; }
 
 float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
     vec3 pa = p - a, ba = b - a;
@@ -112,51 +113,86 @@ vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
     // EARTH
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
 
-vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetColors = vec3[](
-    // MERCURY
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
-    // MIX_A
-    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.0),
-    // KANETA
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
-    // PLANETS_FMSCAT
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
-    // MIX_B
-    vec3(0.5, 0.5, 0.5), vec3(0.8, 0.3, 0.3), vec3(0.2, 0.6, 0.1), vec3(0.3, 0.3, 0.7), vec3(0.4, 0.5, 0.2), vec3(0.7, 0.2, 0.7),
-    // EARTH
-    vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
-
 int[PLANETS_PAT_MAX] planetNums = int[](1, 5, 1, 1, 6, 1);
 float[PLANETS_PAT_MAX] planetTextIds = float[](7.0, 8.0, 13.0, 14.0, 15.0, 0.0);
 
-float dMercury(vec3 p) {
-    vec2 uv = uvSphere(normalize(p));
-    uv.x += 0.01 * beat;
-    float h = fbm(uv, 10.0);
-    // TODO: クレーター
-    return sdSphere(p, 1.0) - 0.05 * h;
+float voronoi(in vec3 p) {
+    vec3 ip = floor(p);
+    vec3 fp = fract(p);
+    float rid = -1.;
+    vec2 r = vec2(2.);
+    for (int i = -1; i <= 0; i++)
+        for (int j = -1; j <= 0; j++)
+            for (int k = -1; k <= 0; k++) {
+                vec3 g = vec3(i, j, k);
+                // float h = hash(ip - g);
+                vec3 pp = fp + g + hash33(ip - g) * .6;
+                float d = dot(pp, pp);
+
+                if (d < r.x) {
+                    r.y = r.x;
+                    r.x = d;
+                    // rid = h +.5;
+                } else if (d < r.y) {
+                    r.y = d;
+                }
+            }
+    return r.x;
 }
+
+// https://www.shadertoy.com/view/llSGRw
+float craters(vec3 p) {
+    float v = voronoi(p);
+    return sin(sqrt(v) * TAU) * exp(-4. * v);
+}
+
+float hMercury(vec3 p) {
+    p.xz = rotate(beat * 0.05) * p.xz;
+    float f = 1.2;
+
+    float r = 0.0;
+    for (int i = 0; i < 5; i++) {
+        r += abs(craters(p * f)) / f;
+        f *= 2.7;
+    }
+    return r;
+}
+
+float dMercury(vec3 p) {
+    if (dot(p, p) > 4.0) {
+        return sdSphere(p, 1.0);
+    } else {
+        return sdSphere(p, 1.0) + 0.075 * hMercury(p);
+    }
+}
+
+uniform vec3 gPlanetPalA;  // 127 127 127
+uniform vec3 gPlanetPalB;  // 110 115 115
+uniform vec3 gPlanetPalC;  // 256 178 102
+uniform vec3 gPlanetPalD;  // 130 130 25
+
+float hPlanetsMix(vec2 p, float seed) {
+    vec3 rand = hash31(seed);
+    p.y *= 4.0 * rand.x;
+    return fbm(p + 0.05 * rand.y * fbm(p, 32.0 * rand.z), 8.0);
+}
+
+vec3 pal(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) { return a + b * cos(TAU * (c * t + d)); }
 
 float dPlanetsMix(vec3 p) {
     float d = INF;
 
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
         vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-        d = min(d, sdSphere(p - center, 1.0));
-    }
-
-    return d;
-}
-
-float dPlanetsMixDetail(vec3 p) {
-    float d = INF;
-
-    for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
-        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-        vec2 uv = uvSphere(normalize(p - center));
-        uv.x += 0.01 * beat;
-        float h = fbm(uv, 10.0);
-        d = min(d, sdSphere(p - center, 1.0) - 0.05 * h);
+        vec3 q = p - center;
+        if (dot(q, q) > 4.0) {
+            d = min(d, sdSphere(q, 1.0) - 0.05);
+        } else {
+            vec2 uv = uvSphere(normalize(q));
+            float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(i);
+            float h = hPlanetsMix(uv, seed);
+            d = min(d, sdSphere(q, 1.0) - 0.05 * h);
+        }
     }
 
     return d;
@@ -237,23 +273,44 @@ vec2 thinkingFace(vec3 p) {
     return d;
 }
 
-float dKaneta(vec3 p) {
+float hKaneta(inout vec3 p) {
     p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 208.0, 212.0)), -1.7, 0.7)) * p.xz;
     vec2 uv = uvSphere(normalize(p));
-    float h = fbm(uv, 10.0);
+    return fbm(uv, 20.0);
+}
+
+float dKaneta(vec3 p) {
+    float h = 0.0;
+
+    if (dot(p, p) <= 4.0) {
+        h = hKaneta(p);
+    }
 
 #ifdef STRIP_FIXED
-    return sdSphere(p, 1.0) - 0.05 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
+    return sdSphere(p, 1.0) - 0.02 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
 #else
-    return thinkingFace(p).x + 0.02 * h;
+    if (dot(p, p) <= 9.0) {
+        return thinkingFace(p).x - 0.02 * h;
+    } else {
+        return sdSphere(p, 1.5);
+    }
 #endif
 }
 
-float dEarth(vec3 p) {
-    vec2 uv = uvSphere(normalize(p));
+float hEarth(vec3 p, out vec2 uv) {
+    uv = uvSphere(normalize(p));
     uv.x += 0.01 * beat;
-    float h = fbm(uv, 10.0);
-    return sdSphere(p, 1.0) + 0.05 * h;
+    return fbm(uv, 10.0);
+}
+
+float dEarth(vec3 p) {
+    if (dot(p, p) > 4.0) {
+        return sdSphere(p, 1.0) - 0.05;
+    } else {
+        vec2 uv;
+        float h = hEarth(p, uv);
+        return sdSphere(p, 1.0) - 0.05 * h;
+    }
 }
 
 float dPlanets(vec3 p) {
@@ -266,7 +323,7 @@ float dPlanets(vec3 p) {
     } else if (gPlanetsId == PLANETS_KANETA) {
         d = min(d, dKaneta(p));
     } else if (gPlanetsId == PLANETS_FMSCAT) {
-        d = min(d, dMercury(p));
+        d = min(d, dEarth(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
     }
@@ -277,6 +334,13 @@ float dPlanets(vec3 p) {
 float map(vec3 p) {
     float d = dPlanets(p);
     return d;
+}
+
+float logicoma(vec2 uv) {
+    float d = sdCircle(uv - vec2(0.0, -0.5), 0.05);
+    d = min(d, sdCircle(uv - vec2(-0.5, 0.5), 0.05));
+    d = min(d, sdCircle(uv - vec2(0.5, 0.5), 0.05));
+    return d < 0.0 ? 1.0 : 0.0;
 }
 
 uniform float gF0;                    // 0.95 0 1 lighting
@@ -290,7 +354,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
     float eps = 0.02;
 
-    for (float i = 0.0; i < 100.0; i++) {
+    for (float i = 0.0; i < 200.0; i++) {
         d = abs(map(p));
         distance += d;
         p = ray.origin + distance * ray.direction;
@@ -304,11 +368,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
-        vec3 n = normalize(p);
-        vec2 uv = uvSphere(n);
-        uv.x += 0.01 * beat;
-        float h = fbm(uv, 10.0);
-
         if (gPlanetsId == PLANETS_MERCURY) {
             intersection.baseColor = vec3(0.7);
             intersection.roughness = 0.4;
@@ -316,23 +375,35 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
             int id;
+            vec2 uv;
+            vec3 dir;
 
             for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
                 vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
                 float d = sdSphere(p - center, 1.0);
-                if (d < eps * 10.0) {
+                if (abs(d) < eps * 100.0) {
                     id = i;
+                    dir = normalize(p - center);
+                    uv = uvSphere(dir);
                     break;
                 }
             }
 
-            intersection.baseColor = planetColors[PLANETS_NUM_MAX * int(gPlanetsId) + id];
+            float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
+            float h = hPlanetsMix(uv, seed);
+            vec3 rand = hash31(seed);
+            intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
             intersection.roughness = 0.4;
-            intersection.metallic = 0.01;
+            intersection.metallic = 0.8 * rand.x;
             intersection.emission = vec3(0.0);
-            intersection.normal = calcNormal(p, dPlanetsMixDetail, 0.01);
+            // intersection.normal = calcNormal(p, dPlanetsMix, 0.01);
+
+            if (gPlanetsId == PLANETS_MIX_B && id == 4) {
+                intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
+            }
         } else if (gPlanetsId == PLANETS_KANETA) {
-            intersection.baseColor = vec3(1.0, 1.0, 0.5);
+            float h = hKaneta(p);
+            intersection.baseColor = mix(vec3(0.8, 0.5, 0.2), vec3(0.9, 0.95, 0.5), h);
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);
@@ -342,6 +413,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_EARTH) {
+            vec2 uv;
+            float h = hEarth(p, uv);
+
             if (h > 0.67) {
                 // land
                 intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
@@ -500,7 +574,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
         // intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
 
-        vec3 sunColor = (gSceneId == SCENE_MANDEL) ? vec3(2.0, 1.0, 1.0) : vec3(1.0, 0.9, 0.8);
+        vec3 sunColor = vec3(1.0, 0.9, 0.8);
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
 
         // fog

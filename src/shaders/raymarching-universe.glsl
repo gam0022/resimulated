@@ -310,7 +310,7 @@ float sminCubic(float a, float b, float k) {
 
 float hFmsCat(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
-    vec2 grid = vec2(100.0, 50.0) * sin(remap(beat, 216.0, 220.0, 0.0, TAU));
+    vec2 grid = vec2(100.0, 50.0) * sin(remap(beat, 216.0, 220.0, 0.5, PI));
     uv = floor(uv * grid) / grid;
     return fbm(uv, 5.0);
 }

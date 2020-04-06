@@ -308,12 +308,22 @@ float sminCubic(float a, float b, float k) {
     return min(a, b) - h * h * h * k * (1.0 / 6.0);
 }
 
+float hFmsCat(vec3 p) {
+    vec2 uv = uvSphere(normalize(p));
+    return fbm(uv, 10.0);
+}
+
 float dFmsCat(vec3 p) {
     float d = sdSphere(p, 1.0);
     float k = 0.3;
     vec3 size = vec3(remap(p.y, -0.5, 1.5, 0.3, 0.5), 0.3 + 0.3 * abs(p.x), remap(p.y, 0.0, 1.3, 0.1, 0.0));
     d = sminCubic(d, sdBox(p - vec3(-0.5, 0.5, 0.0), size), k);
     d = sminCubic(d, sdBox(p - vec3(0.5, 0.5, 0.0), size), k);
+
+    if (d < 1.0) {
+        d -= 0.05 * hFmsCat(p);
+    }
+
     return d;
 }
 
@@ -428,7 +438,8 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_FMSCAT) {
-            intersection.baseColor = vec3(1.0, 1.0, 1.0);
+            float h = hFmsCat(p);
+            intersection.baseColor = pal(h * 3.0, vec3(0.8, 0.5, 0.4), vec3(0.2, 0.4, 0.2), vec3(2.0, 1.0, 1.0), vec3(0.0, 0.25, 0.25));
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);

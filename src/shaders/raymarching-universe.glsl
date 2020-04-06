@@ -311,10 +311,9 @@ float sminCubic(float a, float b, float k) {
 float dFmsCat(vec3 p) {
     float d = sdSphere(p, 1.0);
     float k = 0.3;
-    float a = remap(p.y, 0.0, 1.3, 0.1, 0.0);
-    float b = remap(p.y, -0.5, 1.5, 0.3, 0.5);
-    d = sminCubic(d, sdBox(p - vec3(-0.5, 0.5, 0.0), vec3(b, 0.3 + 0.3 * abs(p.x), a)), k);
-    d = sminCubic(d, sdBox(p - vec3(0.5, 0.5, 0.0), vec3(b, 0.3 + 0.3 * abs(p.x), a)), k);
+    vec3 size = vec3(remap(p.y, -0.5, 1.5, 0.3, 0.5), 0.3 + 0.3 * abs(p.x), remap(p.y, 0.0, 1.3, 0.1, 0.0));
+    d = sminCubic(d, sdBox(p - vec3(-0.5, 0.5, 0.0), size), k);
+    d = sminCubic(d, sdBox(p - vec3(0.5, 0.5, 0.0), size), k);
     return d;
 }
 

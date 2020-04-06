@@ -1,4 +1,4 @@
-// #define STRIP_FIXED
+#define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -69,12 +69,18 @@ struct Intersection {
 
 // Distance Functions
 float sdSphere(vec3 p, float r) { return length(p) - r; }
+
 float sdCircle(vec2 p, float r) { return length(p) - r; }
 
 float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
     vec3 pa = p - a, ba = b - a;
     float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
     return length(pa - ba * h) - r;
+}
+
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
 }
 
 mat2 rotate(float a) {
@@ -297,6 +303,13 @@ float dKaneta(vec3 p) {
 #endif
 }
 
+float dFmsCat(vec3 p) {
+    float d = sdSphere(p, 1.0);
+    d = min(d, sdBox(p - vec3(-0.5, 0.5, 0.0), vec3(0.5, 0.3 + 0.3 * abs(p.x), 0.1)));
+    d = min(d, sdBox(p - vec3(0.5, 0.5, 0.0), vec3(0.5, 0.3 + 0.3 * abs(p.x), 0.1)));
+    return d;
+}
+
 float hEarth(vec3 p, out vec2 uv) {
     uv = uvSphere(normalize(p));
     uv.x += 0.01 * beat;
@@ -323,7 +336,7 @@ float dPlanets(vec3 p) {
     } else if (gPlanetsId == PLANETS_KANETA) {
         d = min(d, dKaneta(p));
     } else if (gPlanetsId == PLANETS_FMSCAT) {
-        d = min(d, dEarth(p));
+        d = min(d, dFmsCat(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
         d = min(d, dEarth(p));
     }

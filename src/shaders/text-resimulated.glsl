@@ -29,9 +29,9 @@ void text(vec2 uv, inout vec3 result) {
     } else if (b < 20.0) {
         // 16-20 (4)
         // RE: SIMULATED -> RE
-        float t = remapFrom(t4, 0.5, 1.0);
+        float t = remapFrom(t4, 0.75, 1.0);
         // t = easeInOutCubic(t);
-        t = pow(t4, 1.4);
+        // t = pow(t4, 1.4);
 
         vec2 glitch = vec2(0.0);
         float fade = uv.x - remapTo(t, 1.6, -0.78);

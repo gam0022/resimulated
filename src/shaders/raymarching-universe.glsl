@@ -329,20 +329,23 @@ float dFmsCat(vec3 p) {
     return d;
 }
 
+void transformEarth(inout vec3 p) { p.xz = rotate(0.1 * beat) * p.xz; }
+
 float hEarth(vec3 p, out vec2 uv) {
     uv = uvSphere(normalize(p));
-    uv.x += 0.01 * beat;
     return fbm(uv, 10.0);
 }
 
 float dEarth(vec3 p) {
-    if (dot(p, p) > 4.0) {
-        return sdSphere(p, 1.0) - 0.05;
-    } else {
+    transformEarth(p);
+    float d = sdSphere(p, 1.0);
+
+    if (d < 1.0) {
         vec2 uv;
-        float h = hEarth(p, uv);
-        return sdSphere(p, 1.0) - 0.05 * h;
+        d -= 0.05 * hEarth(p, uv);
     }
+
+    return d;
 }
 
 float dPlanets(vec3 p) {
@@ -447,6 +450,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.01;
             intersection.emission = 0.2 * intersection.baseColor;
         } else if (gPlanetsId == PLANETS_EARTH) {
+            transformEarth(p);
             vec2 uv;
             float h = hEarth(p, uv);
 

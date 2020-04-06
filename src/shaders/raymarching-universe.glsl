@@ -444,7 +444,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.baseColor = pal(sin(h * remap(beat, 216.0, 220.0, 1.0, 5.0) + 0.25 * beat * TAU), vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 1.0, 1.0), vec3(0.0, 0.33, 0.67));
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
-            intersection.emission = vec3(0.0);
+            intersection.emission = 0.2 * intersection.baseColor;
         } else if (gPlanetsId == PLANETS_EARTH) {
             vec2 uv;
             float h = hEarth(p, uv);

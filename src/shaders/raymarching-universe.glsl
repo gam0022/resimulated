@@ -1,4 +1,4 @@
-// #define STRIP_FIXED
+#define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -310,6 +310,8 @@ float sminCubic(float a, float b, float k) {
 
 float hFmsCat(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
+    vec2 grid = vec2(100.0, 50.0) * sin(remap(beat, 216.0, 220.0, 0.0, TAU));
+    uv = floor(uv * grid) / grid;
     return fbm(uv, 5.0);
 }
 

@@ -165,11 +165,13 @@ float hMercury(vec3 p) {
 }
 
 float dMercury(vec3 p) {
-    if (dot(p, p) > 4.0) {
-        return sdSphere(p, 1.5);
-    } else {
-        return sdSphere(p, 1.0) + 0.075 * hMercury(p);
+    float d = sdSphere(p, 1.0);
+
+    if (d < 1.0) {
+        d += 0.075 * hMercury(p);
     }
+
+    return d;
 }
 
 uniform vec3 gPlanetPalA;  // 127 127 127

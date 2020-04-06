@@ -1,4 +1,4 @@
-#define STRIP_FIXED
+// #define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -310,7 +310,7 @@ float sminCubic(float a, float b, float k) {
 
 float hFmsCat(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
-    return fbm(uv, 10.0);
+    return fbm(uv, 5.0);
 }
 
 float dFmsCat(vec3 p) {
@@ -439,7 +439,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.emission = vec3(0.0);
         } else if (gPlanetsId == PLANETS_FMSCAT) {
             float h = hFmsCat(p);
-            intersection.baseColor = pal(h * 3.0, vec3(0.8, 0.5, 0.4), vec3(0.2, 0.4, 0.2), vec3(2.0, 1.0, 1.0), vec3(0.0, 0.25, 0.25));
+            intersection.baseColor = pal(sin(h * remap(beat, 216.0, 220.0, 1.0, 5.0) + 0.25 * beat * TAU), vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 1.0, 1.0), vec3(0.0, 0.33, 0.67));
             intersection.roughness = 0.4;
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);

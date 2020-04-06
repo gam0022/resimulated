@@ -378,6 +378,37 @@ float logicoma(vec2 uv) {
     return d < 0.0 ? 1.0 : 0.0;
 }
 
+float dMenger(vec3 z0, vec3 offset, float scale) {
+    vec4 z = vec4(z0, 1.0);
+    for (int n = 0; n < 4; n++) {
+        z = abs(z);
+
+        if (z.x < z.y) z.xy = z.yx;
+        if (z.x < z.z) z.xz = z.zx;
+        if (z.y < z.z) z.yz = z.zy;
+
+        z *= scale;
+        z.xyz -= offset * (scale - 1.0);
+
+        if (z.z < -0.5 * offset.z * (scale - 1.0)) {
+            z.z += offset.z * (scale - 1.0);
+        }
+    }
+    return (length(max(abs(z.xyz) - vec3(1.0, 1.0, 1.0), 0.0)) - 0.05) / z.w;
+}
+
+uniform float gYosshinX;   // 2.071136418317427 0 5
+uniform float gYosshinY;   // 1.1 0 5
+uniform float gYosshinZ;   // 0.8 0 5
+uniform float gYosshinS;   // 2.6 0 5
+uniform float gYosshinS2;  // 0.5050689006252655 0 5
+
+float yosshin(vec3 p) {
+    p /= gYosshinS2;
+    float d = dMenger(p, vec3(gYosshinX, gYosshinY, gYosshinZ), gYosshinS);
+    return d < 0.0 ? 1.0 : 0.0;
+}
+
 uniform float gF0;                    // 0.95 0 1 lighting
 uniform float gCameraLightIntensity;  // 1 0 10
 
@@ -412,13 +443,15 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             int id;
             vec2 uv;
             vec3 dir;
+            vec3 offset;
 
             for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
                 vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-                float d = sdSphere(p - center, 1.0);
+                offset = p - center;
+                float d = sdSphere(offset, 1.0);
                 if (abs(d) < eps * 100.0) {
                     id = i;
-                    dir = normalize(p - center);
+                    dir = normalize(offset);
                     uv = uvSphere(dir);
                     break;
                 }
@@ -435,6 +468,12 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             if (gPlanetsId == PLANETS_MIX_B && id == 4) {
                 intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
+            }
+
+            if (gPlanetsId == PLANETS_MIX_B && id == 2) {
+                intersection.baseColor = vec3(0.1);
+                intersection.emission = vec3(0.3, 0.3, 0.5) * yosshin(offset);
+                intersection.metallic = 0.5;
             }
         } else if (gPlanetsId == PLANETS_KANETA) {
             transformKaneta(p);

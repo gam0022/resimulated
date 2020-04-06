@@ -193,14 +193,13 @@ float dPlanetsMix(vec3 p) {
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
         vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
         vec3 q = p - center;
-        if (dot(q, q) > 4.0) {
-            d = min(d, sdSphere(q, 1.0) - 0.05);
-        } else {
+        float s = sdSphere(q, 1.0);
+        if (s < 1.0) {
             vec2 uv = uvSphere(normalize(q));
             float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(i);
-            float h = hPlanetsMix(uv, seed);
-            d = min(d, sdSphere(q, 1.0) - 0.05 * h);
+            s -= 0.05 * hPlanetsMix(uv, seed);
         }
+        d = min(d, s);
     }
 
     return d;

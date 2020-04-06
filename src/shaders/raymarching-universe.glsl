@@ -1,4 +1,4 @@
-#define STRIP_FIXED
+// #define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -279,28 +279,27 @@ vec2 thinkingFace(vec3 p) {
     return d;
 }
 
-float hKaneta(inout vec3 p) {
-    p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 212.0, 216.0)), -1.7, 0.7)) * p.xz;
+void transformKaneta(inout vec3 p) { p.xz = rotate(remapTo(easeInOutCubic(remapFrom(beat, 212.0, 216.0)), -1.7, 0.7)) * p.xz; }
+
+float hKaneta(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
     return fbm(uv, 20.0);
 }
 
 float dKaneta(vec3 p) {
-    float h = 0.0;
-
-    if (dot(p, p) <= 4.0) {
-        h = hKaneta(p);
-    }
+    transformKaneta(p);
 
 #ifdef STRIP_FIXED
-    return sdSphere(p, 1.0) - 0.02 * h;  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
+    float d = sdSphere(p, 1.0);  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
 #else
-    if (dot(p, p) <= 9.0) {
-        return thinkingFace(p).x - 0.02 * h;
-    } else {
-        return sdSphere(p, 1.5);
-    }
+    float d = thinkingFace(p).x;
 #endif
+
+    if (d < 1.0) {
+        d -= 0.02 * hKaneta(p);
+    }
+
+    return d;
 }
 
 float sminCubic(float a, float b, float k) {
@@ -434,6 +433,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
             }
         } else if (gPlanetsId == PLANETS_KANETA) {
+            transformKaneta(p);
             float h = hKaneta(p);
             intersection.baseColor = mix(vec3(0.8, 0.5, 0.2), vec3(0.9, 0.95, 0.5), h);
             intersection.roughness = 0.4;

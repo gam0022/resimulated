@@ -428,7 +428,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             }
         } else if (t < 28) {
             chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
-            camera = new Vector3(-20, -2, 30);
+            camera = new Vector3(-15, 3, 20);
         } else {
             chromatic.uniforms.gPlanetsId = Planets.MIX_B;
             camera = new Vector3(-15, -3, 50);

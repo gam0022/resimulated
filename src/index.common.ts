@@ -105,7 +105,7 @@ class Timeline {
             return this;
         }
 
-        if (this.input > this.begin + length) {
+        if (this.input >= this.begin + length) {
             this.begin += length;
             return this;
         }

@@ -310,7 +310,7 @@ float sminCubic(float a, float b, float k) {
 
 float hFmsCat(vec3 p) {
     vec2 uv = uvSphere(normalize(p));
-    vec2 grid = vec2(100.0, 50.0) * sin(remap(beat, 216.0, 220.0, 0.5, PI));
+    vec2 grid = vec2(100.0, 50.0) * sin(remap(beat, 216.0, 220.0, 0.5, PI - 0.01));
     uv = floor(uv * grid) / grid;
     return fbm(uv, 5.0);
 }
@@ -390,9 +390,7 @@ float dGomi(vec3 p) {
 
 float map(vec3 p) {
     float d = dPlanets(p);
-
     d = min(d, dGomi(p));
-
     return d;
 }
 

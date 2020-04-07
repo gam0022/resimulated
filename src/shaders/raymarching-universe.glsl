@@ -366,8 +366,6 @@ float dPlanets(vec3 p) {
     return d;
 }
 
-vec3 opRep(in vec3 p, in vec3 c) { return mod(p + 0.5 * c, c) - 0.5 * c; }
-
 float dGomi(vec3 p) {
     float d = 1.0;
 
@@ -375,7 +373,8 @@ float dGomi(vec3 p) {
     p = mod(p, 4.0) - 2.0;
 
     vec3 rand = hash33(g);
-    if (rand.x < 0.08) {
+    float rate = (gPlanetsId != PLANETS_EARTH) ? 0.08 : 0.01;
+    if (rand.x < rate) {
         p -= (rand - 0.5);
         d = sdSphere(p, 0.1 * rand.y);
     }
@@ -392,9 +391,7 @@ float dGomi(vec3 p) {
 float map(vec3 p) {
     float d = dPlanets(p);
 
-    if (gPlanetsId != PLANETS_EARTH) {
-        d = min(d, dGomi(p));
-    }
+    d = min(d, dGomi(p));
 
     return d;
 }

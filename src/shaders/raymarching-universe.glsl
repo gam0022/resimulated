@@ -693,16 +693,17 @@ void renderVolume(inout Intersection intersection, inout Ray ray) {
 
     vec4 sum = vec4(0., 0., 0., 1.);
 
-    vec3 pos = ray.origin + ray.direction;
+    float distance = 1.0;
+    vec3 p = ray.origin;
 
     for (int i = 0; i < MAX_STEPS; i++) {
-        if (sum.a < 0.1) {
-            break;
-        }
-        float d = densityMap(pos);
+        if (sum.a < 0.1 || distance > intersection.distance) break;
+        float d = densityMap(p);
+        distance += stepLength;
+        p = ray.origin + distance * ray.direction;
 
         if (d > 0.001) {
-            vec3 lpos = pos + light;
+            vec3 lpos = p + light;
             float shadow = 0.;
 
             for (int s = 0; s < SHADOW_STEPS; s++) {
@@ -716,9 +717,8 @@ void renderVolume(inout Intersection intersection, inout Ray ray) {
             sum.rgb += vec3(s * density) * vec3(1.1, 0.9, .5) * sum.a;
             sum.a *= 1. - density;
 
-            sum.rgb += exp(-densityMap(pos + vec3(0, 0.25, 0.0)) * .2) * density * vec3(0.15, 0.45, 1.1) * sum.a;
+            sum.rgb += exp(-densityMap(p + vec3(0, 0.25, 0.0)) * .2) * density * vec3(0.15, 0.45, 1.1) * sum.a;
         }
-        pos += ray.direction * stepLength;
     }
 
     intersection.color += saturate(sum.rgb);

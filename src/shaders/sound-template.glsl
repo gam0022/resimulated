@@ -479,7 +479,6 @@ vec2 kick1(float beat, float time) {
 // 展開の長さ
 #define KICK1_DEV_LEN 32
 
-    // ノート番号
     // F: 4分音符
     // E: 8分音符
     // S: 16分音符
@@ -608,11 +607,6 @@ vec2 crashcymbal1(float beat, float time) {
 // 展開の長さ
 #define CRASH1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[CRASH1_BEAT_LEN * NOTE_DIV * CRASH1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -680,11 +674,6 @@ vec2 crashcymbal2(float beat, float time) {
 // 展開の長さ
 #define CRASH1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[CRASH1_BEAT_LEN * NOTE_DIV * CRASH1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -754,11 +743,6 @@ vec2 bass1(float beat, float time) {
 // 展開の長さ
 #define BASS1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[BASS1_BEAT_LEN * NOTE_DIV * BASS1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -1084,11 +1068,6 @@ vec2 bass2(float beat, float time) {
 // 展開の長さ
 #define BASS2_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[BASS2_BEAT_LEN * NOTE_DIV * BASS2_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -1401,11 +1380,6 @@ vec2 sideSupersaw1(float beat, float time) {
 // 展開の長さ
 #define TAMESHI_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[TAMESHI_BEAT_LEN * NOTE_DIV * TAMESHI_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -1630,11 +1604,6 @@ vec2 sideSupersaw2(float beat, float time) {
 // 展開の長さ
 #define TAMESHI_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[TAMESHI_BEAT_LEN * NOTE_DIV * TAMESHI_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -1859,11 +1828,6 @@ vec2 tb303synth(float beat, float time) {
 // 展開の長さ
 #define TB303SYNTH1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[TB303SYNTH1_BEAT_LEN * NOTE_DIV * TB303SYNTH1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -1940,11 +1904,6 @@ vec2 arp0(float beat, float time) {
 // 展開の長さ
 #define ARP0_DEV_LEN 8
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[ARP0_BEAT_LEN * NOTE_DIV * ARP0_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -1991,11 +1950,6 @@ vec2 arp1(float beat, float time) {
 // 展開の長さ
 #define ARP1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[ARP1_BEAT_LEN * NOTE_DIV * ARP1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2070,11 +2024,6 @@ vec2 arp2(float beat, float time) {
 // 展開の長さ
 #define ARP2_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[ARP2_BEAT_LEN * NOTE_DIV * ARP2_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2149,11 +2098,6 @@ vec2 arp3(float beat, float time) {
 // 展開の長さ
 #define ARP3_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[ARP3_BEAT_LEN * NOTE_DIV * ARP3_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2228,11 +2172,6 @@ vec2 arp4(float beat, float time) {
 // 展開の長さ
 #define ARP4_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[ARP4_BEAT_LEN * NOTE_DIV * ARP4_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2308,11 +2247,6 @@ vec2 arp5(float beat, float time) {
 // 展開の長さ
 #define ARP5_DEV_LEN 8
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[ARP5_BEAT_LEN * NOTE_DIV * ARP5_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2359,11 +2293,6 @@ vec2 hihat33(float beat, float time) {
 // 展開の長さ
 #define HIHAT3_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HIHAT3_BEAT_LEN * NOTE_DIV * HIHAT3_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2449,11 +2378,6 @@ vec2 subbass1(float beat, float time) {
 // 展開の長さ
 #define SUB1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[SUB1_BEAT_LEN * NOTE_DIV * SUB1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2532,11 +2456,6 @@ vec2 testhihat2(float beat, float time) {
 // 展開の長さ
 #define HIHAT2_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HIHAT2_BEAT_LEN * NOTE_DIV * HIHAT2_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2627,11 +2546,6 @@ vec2 introSupersaw1(float beat, float time) {
 // 展開の長さ
 #define INTROSAW_DEV_LEN 8
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[INTROSAW_BEAT_LEN * NOTE_DIV * INTROSAW_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2699,11 +2613,6 @@ vec2 introSupersaw1(float beat, float time) {
 vec2 introSupersaw2(float beat, float time) {
     if (beat >= 64.0) return vec2(0.0);
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[INTROSAW_BEAT_LEN * NOTE_DIV * INTROSAW_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2782,11 +2691,6 @@ vec2 chordSupersaw1(float beat, float time) {
 // 展開の長さ
 #define CHORD1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[CHORD1_BEAT_LEN * NOTE_DIV * CHORD1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2881,11 +2785,6 @@ vec2 chordSupersaw2(float beat, float time) {
 // 展開の長さ
 #define CHORD2_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[CHORD2_BEAT_LEN * NOTE_DIV * CHORD2_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -2979,11 +2878,6 @@ vec2 chordSupersaw3(float beat, float time) {
 // 展開の長さ
 #define CHORD3_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[CHORD3_BEAT_LEN * NOTE_DIV * CHORD3_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3078,11 +2972,6 @@ vec2 chordSupersaw4(float beat, float time) {
 // 展開の長さ
 #define CHORD4_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[CHORD4_BEAT_LEN * NOTE_DIV * CHORD4_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3177,11 +3066,6 @@ vec2 chordSquare1(float beat, float time) {
 // 展開の長さ
 #define SQUARE1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[SQUARE1_BEAT_LEN * NOTE_DIV * SQUARE1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3293,11 +3177,6 @@ vec2 chordSquare2(float beat, float time) {
 // 展開の長さ
 #define SQUARE2_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[SQUARE2_BEAT_LEN * NOTE_DIV * SQUARE2_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3525,11 +3404,6 @@ vec2 snare1(float beat, float time) {
 // 展開の長さ
 #define SNARE1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[SNARE1_BEAT_LEN * NOTE_DIV * SNARE1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3589,11 +3463,6 @@ vec2 hookSupersaw1(float beat, float time) {
 // 展開の長さ
 #define HOOK1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HOOK1_BEAT_LEN * NOTE_DIV * HOOK1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3649,11 +3518,6 @@ vec2 hookSupersaw2(float beat, float time) {
 // 展開の長さ
 #define HOOK2_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HOOK2_BEAT_LEN * NOTE_DIV * HOOK2_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3765,11 +3629,6 @@ vec2 hookSupersaw3(float beat, float time) {
 // 展開の長さ
 #define HOOK3_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HOOK3_BEAT_LEN * NOTE_DIV * HOOK3_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -3993,11 +3852,6 @@ vec2 hookSupersaw4(float beat, float time) {
 // 展開の長さ
 #define HOOK4_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HOOK4_BEAT_LEN * NOTE_DIV * HOOK4_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -4165,11 +4019,6 @@ vec2 hookSupersaw5(float beat, float time) {
 // 展開の長さ
 #define HOOK3_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HOOK3_BEAT_LEN * NOTE_DIV * HOOK3_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -4393,11 +4242,6 @@ vec2 hookSupersaw6(float beat, float time) {
 // 展開の長さ
 #define HOOK3_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[HOOK3_BEAT_LEN * NOTE_DIV * HOOK3_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -4621,11 +4465,6 @@ vec2 snare2(float beat, float time) {
 // 展開の長さ
 #define SNARE1_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[SNARE1_BEAT_LEN * NOTE_DIV * SNARE1_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -4681,11 +4520,6 @@ vec2 noisefeed(float beat, float time) {
 // 展開の長さ
 #define FEED_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[FEED_BEAT_LEN * NOTE_DIV * FEED_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -4742,11 +4576,6 @@ vec2 noisesidechain1(float beat, float time) {
 // 展開の長さ
 #define NOISESIDE_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[NOISESIDE_BEAT_LEN * NOTE_DIV * NOISESIDE_DEV_PAT] notes = int[](
         //
         // 展開0
@@ -4802,11 +4631,6 @@ vec2 noisesidechain2(float beat, float time) {
 // 展開の長さ
 #define NOISESIDE_DEV_LEN 32
 
-    // ノート番号
-    // F: 4分音符
-    // E: 8分音符
-    // S: 16分音符
-    // ノート番号0は休符
     int[NOISESIDE_BEAT_LEN * NOTE_DIV * NOISESIDE_DEV_PAT] notes = int[](
         //
         // 展開0

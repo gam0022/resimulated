@@ -379,7 +379,7 @@ float dGomi(vec3 p) {
     if (s < 8.5) return 1.0;
     g.z = floor(p.y / s);
     p.y = mod(p.y, s) - s / 2.;
-    if (hash11(dot(g, vec3(5, 70, 1))) < 0.6) return 1.0;
+    if (hash11(dot(g, vec3(70, 70, 70))) < 0.6) return 1.0;
     float d = sdSphere(p, 0.01 * s);
 
     if (d < 1.0) {

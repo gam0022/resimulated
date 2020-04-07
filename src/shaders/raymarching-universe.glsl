@@ -369,13 +369,13 @@ float dPlanets(vec3 p) {
 vec3 opRep(in vec3 p, in vec3 c) { return mod(p + 0.5 * c, c) - 0.5 * c; }
 
 float dGomi(vec3 p) {
-    float d = INF;
+    float d = 1.0;
 
     vec3 g = vec3(floor(p / 4.0));
     p = mod(p, 4.0) - 2.0;
 
     vec3 rand = hash33(g);
-    if (rand.x < 0.5) {
+    if (rand.x < 0.08) {
         p -= (rand - 0.5);
         d = sdSphere(p, 0.1 * rand.y);
     }

@@ -514,7 +514,7 @@ vec2 kick1(float beat, float time) {
         F(1),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -625,7 +625,7 @@ vec2 crashcymbal1(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -635,7 +635,7 @@ vec2 crashcymbal1(float beat, float time) {
         O(0),
 
         //
-        // 展開2（とりあえず今は展開0と同じ）
+        // 展開2
         //
 
         // 1
@@ -697,7 +697,7 @@ vec2 crashcymbal2(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -707,7 +707,7 @@ vec2 crashcymbal2(float beat, float time) {
         O(0),
 
         //
-        // 展開2（とりあえず今は展開0と同じ）
+        // 展開2
         //
 
         // 1
@@ -1418,7 +1418,7 @@ vec2 sideSupersaw1(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -1446,7 +1446,7 @@ vec2 sideSupersaw1(float beat, float time) {
         S(0, 45, 45, 45),
 
         //
-        // 展開2（とりあえず今は展開0と同じ）
+        // 展開2
         //
 
         // 1
@@ -1647,7 +1647,7 @@ vec2 sideSupersaw2(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -1675,7 +1675,7 @@ vec2 sideSupersaw2(float beat, float time) {
         S(0, 33, 33, 33),
 
         //
-        // 展開2（とりあえず今は展開0と同じ）
+        // 展開2
         //
 
         // 1
@@ -1894,7 +1894,7 @@ vec2 tb303synth(float beat, float time) {
         F(33),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2026,7 +2026,7 @@ vec2 arp1(float beat, float time) {
         S(71, 0, 74, 0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2105,7 +2105,7 @@ vec2 arp2(float beat, float time) {
         S(0, 83, 0, 86),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2184,7 +2184,7 @@ vec2 arp3(float beat, float time) {
         S(0, 0, 0, 0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2263,7 +2263,7 @@ vec2 arp4(float beat, float time) {
         S(67, 60, 79, 62),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2394,7 +2394,7 @@ vec2 hihat33(float beat, float time) {
         F(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2422,7 +2422,7 @@ vec2 hihat33(float beat, float time) {
         E(0, 1),
 
         //
-        // 展開2（とりあえず今は展開0と同じ）
+        // 展開2
         //
 
         // 1
@@ -2484,7 +2484,7 @@ vec2 subbass1(float beat, float time) {
         F(33),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2567,7 +2567,7 @@ vec2 testhihat2(float beat, float time) {
         S(0, 1, 1, 1),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2595,7 +2595,7 @@ vec2 testhihat2(float beat, float time) {
         S(0, 1, 1, 1),
 
         //
-        // 展開2（とりあえず今は展開0と同じ）
+        // 展開2
         //
 
         // 1
@@ -2662,7 +2662,7 @@ vec2 introSupersaw1(float beat, float time) {
         F(45),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2734,7 +2734,7 @@ vec2 introSupersaw2(float beat, float time) {
         F(57),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2799,7 +2799,7 @@ vec2 chordSupersaw1(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2898,7 +2898,7 @@ vec2 chordSupersaw2(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -2996,7 +2996,7 @@ vec2 chordSupersaw3(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -3095,7 +3095,7 @@ vec2 chordSupersaw4(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -3194,7 +3194,7 @@ vec2 chordSquare1(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -3310,7 +3310,7 @@ vec2 chordSquare2(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -3426,7 +3426,7 @@ vec2 chordSquare3(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -3542,7 +3542,7 @@ vec2 snare1(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -4638,7 +4638,7 @@ vec2 snare2(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -4698,7 +4698,7 @@ vec2 noisefeed(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1~4
@@ -4759,7 +4759,7 @@ vec2 noisesidechain1(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -4819,7 +4819,7 @@ vec2 noisesidechain2(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1
@@ -4861,7 +4861,7 @@ vec2 noisesidechain3(float beat, float time) {
         O(0),
 
         //
-        // 展開1（とりあえず今は展開0と同じ）
+        // 展開1
         //
 
         // 1

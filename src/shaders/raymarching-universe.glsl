@@ -368,23 +368,22 @@ float dPlanets(vec3 p) {
 
 vec3 opRep(in vec3 p, in vec3 c) { return mod(p + 0.5 * c, c) - 0.5 * c; }
 
-// Rising Box by gaz
-// https://www.shadertoy.com/view/MtSBRw
 float dGomi(vec3 p) {
-    vec3 g = vec3(floor(p.xz / 4.0), 0);
-    p.xz = mod(p.xz, 4.0) - 2.0;
-    float n = max(0.5, hash11(dot(g.xy, vec2(10, 180))));
-    // p.y -= n * n * iTime * 7.;
-    float s = 10. * hash11(dot(g.xy, vec2(5, 10)));
-    if (s < 8.5) return 1.0;
-    g.z = floor(p.y / s);
-    p.y = mod(p.y, s) - s / 2.;
-    if (hash11(dot(g, vec3(70, 70, 70))) < 0.6) return 1.0;
-    float d = sdSphere(p, 0.01 * s);
+    float d = INF;
 
-    if (d < 1.0) {
+    vec3 g = vec3(floor(p / 4.0));
+    p = mod(p, 4.0) - 2.0;
+
+    vec3 rand = hash33(g);
+    if (rand.x < 0.5) {
+        p -= (rand - 0.5);
+        d = sdSphere(p, 0.1 * rand.y);
+    }
+
+    if (d < 0.5) {
         vec2 uv = uvSphere(normalize(p));
-        d -= 0.05 * fbm(uv, 10.0);
+        uv.x += dot(rand, vec3(1.0));
+        d -= remapTo(rand.z, 0.01, 0.08) * fbm(uv, 5.0);
     }
 
     return d;

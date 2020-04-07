@@ -673,16 +673,16 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
 uniform float gVolumeDensityPower;  // 13 0 20
 
 float densityMap(vec3 p) {
-    // vec3 q = p - vec3(0.0, 0.5, 1.0) * iTime;
-    float f = fbm(p);
-    // float s1 = 1.0 - length(p * vec3(0.5, 1.0, 0.5)) + f * 2.2;
-    return saturate(pow(f, gVolumeDensityPower));
+    vec3 q = p - vec3(0.0, -3.0, 0.0);
+    float f = fbm(q);
+    float s1 = 1.0 - length(q / vec3(10.1, 1.0, 10.0)) + f * 2.2;
+    return saturate(s1);
 }
 
 void renderVolume(inout Intersection intersection, inout Ray ray) {
 #define MAX_STEPS 48
 #define SHADOW_STEPS 8
-#define VOLUME_LENGTH 30.
+#define VOLUME_LENGTH 100.
 #define SHADOW_LENGTH 2.
 
     float density = 0.;
@@ -706,11 +706,11 @@ void renderVolume(inout Intersection intersection, inout Ray ray) {
             vec3 lpos = p + light;
             float shadow = 0.;
 
-            /*for (int s = 0; s < SHADOW_STEPS; s++) {
+            for (int s = 0; s < SHADOW_STEPS; s++) {
                 lpos += light * shadowStepLength;
                 float lsample = densityMap(lpos);
                 shadow += lsample;
-            }*/
+            }
 
             density = clamp((d / float(MAX_STEPS)) * 20.0, 0.0, 1.0);
             float s = exp((-shadow / float(SHADOW_STEPS)) * 3.);

@@ -352,6 +352,21 @@ export class Chromatic {
                 gl.useProgram(null);
             };
 
+            this.setSize = (width: number, height: number) => {
+                const canvas = gl.canvas;
+                canvas.width = width;
+                canvas.height = height;
+
+                gl.viewport(0, 0, width, height);
+
+                imagePasses.forEach(pass => {
+                    gl.deleteFramebuffer(pass.frameBuffer);
+                    gl.deleteTexture(pass.texture);
+                    pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
+                    setupFrameBuffer(pass);
+                });
+            }
+
             this.playSound = () => {
                 if (!PRODUCTION) {
                     const newAudioSource = this.audioContext.createBufferSource();
@@ -365,21 +380,6 @@ export class Chromatic {
             }
 
             if (!PRODUCTION) {
-                this.setSize = (width: number, height: number) => {
-                    const canvas = gl.canvas;
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    gl.viewport(0, 0, width, height);
-
-                    imagePasses.forEach(pass => {
-                        gl.deleteFramebuffer(pass.frameBuffer);
-                        gl.deleteTexture(pass.texture);
-                        pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
-                        setupFrameBuffer(pass);
-                    });
-                }
-
                 this.stopSound = () => {
                     this.audioSource.stop();
                 }

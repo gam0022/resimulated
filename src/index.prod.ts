@@ -5,9 +5,13 @@ window.addEventListener("load", ev => {
     style.innerText = require("../dist/style.prod.min.css").default;
     document.head.appendChild(style);
 
-    const button = document.createElement('p');
+    document.addEventListener("fullscreenchange", () => {
+        document.body.style.cursor = window.document.fullscreenElement ? "none" : "auto";
+    });
+
+    const button = document.createElement("p");
     document.body.appendChild(button);
-    button.innerHTML = 'click me!';
+    button.innerHTML = "click to start";
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
             chromatic.onRender = (time, timeDelta) => {
@@ -16,11 +20,8 @@ window.addEventListener("load", ev => {
 
             chromatic.init();
 
-            document.body.style.cursor = "none";
-            document.addEventListener("fullscreenchange", () => {
-                if (!window.document.fullscreenElement) {
-                    document.body.style.cursor = "auto";
-                }
+            window.addEventListener("resize", () => {
+                chromatic.setSize(window.innerWidth, window.innerHeight);
             });
 
             setTimeout(() => {

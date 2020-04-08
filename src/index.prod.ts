@@ -15,31 +15,33 @@ window.addEventListener("load", ev => {
 
     const button = document.createElement("p");
     container.appendChild(button);
-    button.innerHTML = "click to start";
+    button.innerHTML = "CLICK TO START";
     button.onclick = () => {
         button.remove();
 
         // loading animation
         const loading = document.createElement("p");
-        loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
+        loading.innerHTML = 'LOADING <div class="lds-facebook"><div></div><div></div><div></div></div>';
         container.appendChild(loading);
 
-        document.body.requestFullscreen().then(() => {
-            chromatic.onRender = (time, timeDelta) => {
-                animateUniforms(time, false, false);
-            }
+        setTimeout(() => {
+            document.body.requestFullscreen().then(() => {
+                chromatic.onRender = (time, timeDelta) => {
+                    animateUniforms(time, false, false);
+                }
 
-            chromatic.init();
+                chromatic.init();
 
-            window.addEventListener("resize", () => {
-                chromatic.setSize(window.innerWidth, window.innerHeight);
+                window.addEventListener("resize", () => {
+                    chromatic.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                setTimeout(() => {
+                    container.remove();
+                    chromatic.play();
+                    chromatic.playSound();
+                }, 1000);
             });
-
-            setTimeout(() => {
-                container.remove();
-                chromatic.play();
-                chromatic.playSound();
-            }, 1000);
-        });
+        }, 1000);
     }
 }, false);

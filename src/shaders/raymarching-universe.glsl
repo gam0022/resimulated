@@ -130,7 +130,7 @@ vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetFbmParams = vec4[](
     // PLANETS_FMSCAT
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_B
-    vec4(0.05, 10.0, 1.0, 0.2), vec4(0.0, 10.0, 1.0, 0.01), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 1.2), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 0.03),
+    vec4(0.0, 10.0, 1.0, 0.2), vec4(0.0, 10.0, 1.0, 0.01), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 00.2), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 0.03),
     // EARTH
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
 
@@ -471,6 +471,10 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
+        intersection.transparent = false;
+        intersection.refractiveIndex = 1.2;
+        intersection.reflectance = 0.0;
+
         if (dPlanets(p) < eps) {
             if (gPlanetsId == PLANETS_MERCURY) {
                 intersection.baseColor = vec3(0.7);
@@ -497,12 +501,23 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
                 float seed = float(id);
                 float h = hPlanetsMix(uv, id);
-                vec3 rand = hash31(seed);
+                vec3 rand = hash31(seed * 1.2332);
                 intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.8 * rand.x;
                 intersection.emission = vec3(0.0);
-                // intersection.normal = calcNormal(p, dPlanetsMix, 0.01);
+
+                if (id == int(PLANETS_MIX_A) * PLANETS_NUM_MAX + 1) {
+                    // intersection.baseColor = mix(vec3(1.0), vec3(0.5), remapFrom(h, 0.7, 0.95));
+                }
+
+                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX) {
+                    intersection.baseColor = vec3(0.1);
+                    intersection.emission = vec3(0.0);
+                    intersection.metallic = 0.9;
+                    intersection.reflectance = 0.7;
+                    intersection.roughness = 0.01;
+                }
 
                 if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 4) {
                     intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
@@ -558,10 +573,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.metallic = 0.01;
             intersection.emission = vec3(0.0);
         }
-
-        intersection.transparent = false;
-        intersection.refractiveIndex = 1.2;
-        intersection.reflectance = 0.0;
     }
 }
 

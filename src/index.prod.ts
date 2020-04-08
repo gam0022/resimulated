@@ -23,6 +23,11 @@ window.addEventListener("load", ev => {
                 }
             });
 
+            window.addEventListener("resize", () => {
+                const resolutionScale = 1.0;
+                chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+            });
+
             setTimeout(() => {
                 chromatic.play();
                 chromatic.playSound();

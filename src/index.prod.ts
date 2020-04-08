@@ -9,9 +9,9 @@ window.addEventListener("load", ev => {
         document.body.style.cursor = window.document.fullscreenElement ? "none" : "auto";
     });
 
-    const button = document.createElement('p');
+    const button = document.createElement("p");
     document.body.appendChild(button);
-    button.innerHTML = 'click to start';
+    button.innerHTML = "click to start";
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
             chromatic.onRender = (time, timeDelta) => {

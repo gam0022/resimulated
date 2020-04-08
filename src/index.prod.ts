@@ -15,13 +15,13 @@ window.addEventListener("load", ev => {
 
     const button = document.createElement("p");
     container.appendChild(button);
-    button.innerHTML = "Click to start";
+    button.innerHTML = "CLICK TO START";
     button.onclick = () => {
         button.remove();
 
         // loading animation
         const loading = document.createElement("p");
-        loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
+        loading.innerHTML = 'LOADING <div class="lds-facebook"><div></div><div></div><div></div></div>';
         container.appendChild(loading);
 
         setTimeout(() => {

@@ -124,7 +124,7 @@ vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetFbmParams = vec4[](
     // MERCURY
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_A
-    vec4(0.05, 10.0, 1.05, 0.0), vec4(0.3, 20.0, 1.0, 0.0), vec4(0.05, 10.0, 1.05, 0.01), vec4(0.05, 10.0, 4.05, 0.02), vec4(0.05, 10.0, 2.05, 00.1), vec4(0.0),
+    vec4(0.05, 10.0, 1.05, 0.0), vec4(0.3, 17.0, 1.0, 0.01), vec4(0.05, 10.0, 1.05, 0.01), vec4(0.05, 10.0, 4.05, 0.02), vec4(0.05, 10.0, 2.05, 00.1), vec4(0.0),
     // KANETA
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // PLANETS_FMSCAT
@@ -188,11 +188,6 @@ float dMercury(vec3 p) {
 
     return d;
 }
-
-uniform vec3 gPlanetPalA;  // 127 127 127
-uniform vec3 gPlanetPalB;  // 110 115 115
-uniform vec3 gPlanetPalC;  // 256 178 102
-uniform vec3 gPlanetPalD;  // 130 130 25
 
 float hPlanetsMix(vec2 p, int id) {
     p.y *= planetFbmParams[id].z;
@@ -434,6 +429,11 @@ float dMenger(vec3 z0, vec3 offset, float scale) {
     return (length(max(abs(z.xyz) - vec3(1.0, 1.0, 1.0), 0.0)) - 0.05) / z.w;
 }
 
+uniform vec3 gPlanetPalA;       // 127 127 127
+uniform vec3 gPlanetPalB;       // 110 115 115
+uniform vec3 gPlanetPalC;       // 256 178 102
+uniform float gPlanetPalScale;  // 1.2332 1.1 1.3
+
 uniform float gYosshinX;   // 2.071136418317427 0 5
 uniform float gYosshinY;   // 1.1 0 5
 uniform float gYosshinZ;   // 0.8 0 5
@@ -507,7 +507,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
                 float seed = float(id);
                 float h = hPlanetsMix(uv, id);
-                vec3 rand = hash31(seed * 1.2332);
+                vec3 rand = hash31(seed * gPlanetPalScale);
                 intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.8 * rand.x;

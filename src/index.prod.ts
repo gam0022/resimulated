@@ -16,6 +16,13 @@ window.addEventListener("load", ev => {
 
             chromatic.init();
 
+            document.body.style.cursor = "none";
+            document.addEventListener("fullscreenchange", () => {
+                if (!window.document.fullscreenElement) {
+                    document.body.style.cursor = "auto";
+                }
+            });
+
             setTimeout(() => {
                 chromatic.play();
                 chromatic.playSound();

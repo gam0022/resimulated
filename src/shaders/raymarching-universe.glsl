@@ -130,7 +130,7 @@ vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetFbmParams = vec4[](
     // PLANETS_FMSCAT
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_B
-    vec4(0.0, 10.0, 1.0, 0.2), vec4(0.0, 10.0, 1.0, 0.01), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 00.2), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 0.03),
+    vec4(0.0, 10.0, 1.0, 0.2), vec4(0.0, 10.0, 1.0, 0.01), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 00.2), vec4(0.06, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 0.03),
     // EARTH
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
 
@@ -417,7 +417,7 @@ float logicoma(vec2 uv) {
 
 float dMenger(vec3 z0, vec3 offset, float scale) {
     vec4 z = vec4(z0, 1.0);
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < 3; n++) {
         z = abs(z);
 
         if (z.x < z.y) z.xy = z.yx;

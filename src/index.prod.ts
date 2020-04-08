@@ -1,6 +1,8 @@
 import { chromatic, animateUniforms } from './index.common'
 
 window.addEventListener("load", ev => {
+    let finished = false;
+
     const style = document.createElement("style");
     style.innerText = require("../dist/style.prod.min.css").default;
     document.head.appendChild(style);
@@ -28,6 +30,10 @@ window.addEventListener("load", ev => {
             document.body.requestFullscreen().then(() => {
                 chromatic.onRender = (time, timeDelta) => {
                     animateUniforms(time, false, false);
+                    if (!finished && time > chromatic.timeLength + 2.0) {
+                        document.exitFullscreen();
+                        finished = true;
+                    }
                 }
 
                 chromatic.init();

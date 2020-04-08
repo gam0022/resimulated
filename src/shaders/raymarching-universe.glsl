@@ -446,6 +446,12 @@ float yosshin(vec3 p) {
     return d < 0.0 ? 1.0 : 0.0;
 }
 
+float prismbeings(vec2 uv) {
+    int i = int(uv.y * 16.0);
+    int j = int(uv.x + beat);
+    return float((i >> (int(beat * 4.0) % 8) & j) & 1);
+}
+
 uniform float gF0;                    // 0.95 0 1 lighting
 uniform float gCameraLightIntensity;  // 1 0 10
 
@@ -512,10 +518,18 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 }
 
                 if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX) {
-                    intersection.baseColor = vec3(0.1);
+                    intersection.baseColor = vec3(0.05);
                     intersection.emission = vec3(0.0);
                     intersection.metallic = 0.9;
-                    intersection.reflectance = 0.7;
+                    intersection.reflectance = 0.9;
+                    intersection.roughness = 0.01;
+                }
+
+                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 1) {
+                    intersection.baseColor = vec3(0.0);
+                    intersection.emission = vec3(0.3, 0.3, 0.5) * prismbeings(dir.xy);
+                    intersection.metallic = 0.9;
+                    intersection.reflectance = 0.9;
                     intersection.roughness = 0.01;
                 }
 

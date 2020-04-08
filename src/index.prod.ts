@@ -9,8 +9,12 @@ window.addEventListener("load", ev => {
         document.body.style.cursor = window.document.fullscreenElement ? "none" : "auto";
     });
 
+    const container = document.createElement("div");
+    container.className = "container";
+    document.body.appendChild(container);
+
     const button = document.createElement("p");
-    document.body.appendChild(button);
+    container.appendChild(button);
     button.innerHTML = "click to start";
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
@@ -19,7 +23,7 @@ window.addEventListener("load", ev => {
             // loading animation
             const loading = document.createElement("p");
             loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
-            document.body.appendChild(loading);
+            container.appendChild(loading);
 
             chromatic.onRender = (time, timeDelta) => {
                 animateUniforms(time, false, false);

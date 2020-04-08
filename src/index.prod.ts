@@ -24,22 +24,24 @@ window.addEventListener("load", ev => {
         loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
         container.appendChild(loading);
 
-        document.body.requestFullscreen().then(() => {
-            chromatic.onRender = (time, timeDelta) => {
-                animateUniforms(time, false, false);
-            }
+        setTimeout(() => {
+            document.body.requestFullscreen().then(() => {
+                chromatic.onRender = (time, timeDelta) => {
+                    animateUniforms(time, false, false);
+                }
 
-            chromatic.init();
+                chromatic.init();
 
-            window.addEventListener("resize", () => {
-                chromatic.setSize(window.innerWidth, window.innerHeight);
+                window.addEventListener("resize", () => {
+                    chromatic.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                setTimeout(() => {
+                    container.remove();
+                    chromatic.play();
+                    chromatic.playSound();
+                }, 1000);
             });
-
-            setTimeout(() => {
-                container.remove();
-                chromatic.play();
-                chromatic.playSound();
-            }, 1000);
-        });
+        }, 1000);
     }
 }, false);

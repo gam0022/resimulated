@@ -14,6 +14,13 @@ window.addEventListener("load", ev => {
     button.innerHTML = "click to start";
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
+            button.style.display = "none";
+
+            // loading animation
+            const loading = document.createElement("p");
+            loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
+            document.body.appendChild(loading);
+
             chromatic.onRender = (time, timeDelta) => {
                 animateUniforms(time, false, false);
             }

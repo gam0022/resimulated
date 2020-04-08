@@ -17,14 +17,14 @@ window.addEventListener("load", ev => {
     container.appendChild(button);
     button.innerHTML = "click to start";
     button.onclick = () => {
+        button.remove();
+
+        // loading animation
+        const loading = document.createElement("p");
+        loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
+        container.appendChild(loading);
+
         document.body.requestFullscreen().then(() => {
-            button.remove();
-
-            // loading animation
-            const loading = document.createElement("p");
-            loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
-            container.appendChild(loading);
-
             chromatic.onRender = (time, timeDelta) => {
                 animateUniforms(time, false, false);
             }

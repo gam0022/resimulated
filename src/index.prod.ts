@@ -11,7 +11,7 @@ window.addEventListener("load", ev => {
 
     const button = document.createElement('p');
     document.body.appendChild(button);
-    button.innerHTML = 'click me!';
+    button.innerHTML = 'click to start';
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
             chromatic.onRender = (time, timeDelta) => {

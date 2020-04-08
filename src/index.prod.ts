@@ -9,10 +9,21 @@ window.addEventListener("load", ev => {
         document.body.style.cursor = window.document.fullscreenElement ? "none" : "auto";
     });
 
+    const container = document.createElement("div");
+    container.className = "container";
+    document.body.appendChild(container);
+
     const button = document.createElement("p");
-    document.body.appendChild(button);
+    container.appendChild(button);
     button.innerHTML = "click to start";
     button.onclick = () => {
+        button.remove();
+
+        // loading animation
+        const loading = document.createElement("p");
+        loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
+        container.appendChild(loading);
+
         document.body.requestFullscreen().then(() => {
             chromatic.onRender = (time, timeDelta) => {
                 animateUniforms(time, false, false);
@@ -25,6 +36,7 @@ window.addEventListener("load", ev => {
             });
 
             setTimeout(() => {
+                container.remove();
                 chromatic.play();
                 chromatic.playSound();
             }, 1000);

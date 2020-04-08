@@ -119,18 +119,18 @@ vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
     // EARTH
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
 
-// fbmAmp, fbmFreq, fbmShift, colorSeed
-vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetParams = vec4[](
+// fbmAmp, fbmFreq, fbmYScale, fbmShift
+vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetFbmParams = vec4[](
     // MERCURY
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_A
-    vec4(0.05, 10.0, 0.05, 0.2), vec4(0.2, 15.0, 0.05, 0.3), vec4(0.05, 10.0, 0.05, 1.0), vec4(0.05, 10.0, 0.05, 1.2), vec4(0.05, 10.0, 0.05, 1.3), vec4(0.0),
+    vec4(0.05, 10.0, 1.05, 0.0), vec4(0.3, 20.0, 1.0, 0.0), vec4(0.05, 10.0, 1.05, 0.01), vec4(0.05, 10.0, 4.05, 0.02), vec4(0.05, 10.0, 2.05, 00.1), vec4(0.0),
     // KANETA
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // PLANETS_FMSCAT
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_B
-    vec4(0.05, 10.0, 0.05, 0.2), vec4(0.0, 10.0, 0.05, 0.3), vec4(0.0, 10.0, 0.05, 1.0), vec4(0.05, 10.0, 0.05, 1.2), vec4(0.0, 10.0, 0.05, 1.3), vec4(0.05, 10.0, 0.05, 3.0),
+    vec4(0.05, 10.0, 1.0, 0.2), vec4(0.0, 10.0, 1.0, 0.01), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 1.2), vec4(0.0, 10.0, 1.0, 0.03), vec4(0.05, 10.0, 1.0, 0.03),
     // EARTH
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
 
@@ -195,9 +195,8 @@ uniform vec3 gPlanetPalC;  // 256 178 102
 uniform vec3 gPlanetPalD;  // 130 130 25
 
 float hPlanetsMix(vec2 p, int id) {
-    vec3 rand = hash31(float(id) * 0.23);
-    p.y *= 4.0 * rand.x;
-    return fbm(p + 0.05 * rand.y * fbm(p, 32.0 * rand.z), planetParams[id].y);
+    p.y *= planetFbmParams[id].z;
+    return fbm(p + planetFbmParams[id].w * fbm(p, 4.0 * planetFbmParams[id].y), planetFbmParams[id].y);
 }
 
 vec3 pal(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) { return a + b * cos(TAU * (c * t + d)); }
@@ -212,7 +211,7 @@ float dPlanetsMix(vec3 p) {
         float s = sdSphere(q, 1.0);
         if (s < 1.0) {
             vec2 uv = uvSphere(normalize(q));
-            s -= planetParams[id].x * hPlanetsMix(uv, id);
+            s -= planetFbmParams[id].x * hPlanetsMix(uv, id);
         }
         d = min(d, s);
     }
@@ -496,7 +495,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     }
                 }
 
-                float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
+                float seed = float(id);
                 float h = hPlanetsMix(uv, id);
                 vec3 rand = hash31(seed);
                 intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);

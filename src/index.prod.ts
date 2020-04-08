@@ -24,8 +24,7 @@ window.addEventListener("load", ev => {
             });
 
             window.addEventListener("resize", () => {
-                const resolutionScale = 1.0;
-                chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+                chromatic.setSize(window.innerWidth, window.innerHeight);
             });
 
             setTimeout(() => {

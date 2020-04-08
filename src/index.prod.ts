@@ -18,7 +18,7 @@ window.addEventListener("load", ev => {
     button.innerHTML = "click to start";
     button.onclick = () => {
         document.body.requestFullscreen().then(() => {
-            button.style.display = "none";
+            button.remove();
 
             // loading animation
             const loading = document.createElement("p");
@@ -36,6 +36,7 @@ window.addEventListener("load", ev => {
             });
 
             setTimeout(() => {
+                container.remove();
                 chromatic.play();
                 chromatic.playSound();
             }, 1000);

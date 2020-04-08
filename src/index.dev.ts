@@ -8,8 +8,8 @@ import * as three from 'three';
 const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
-window.addEventListener("load", ev => {
-    chromatic.init();
+window.addEventListener("load", async ev => {
+    await chromatic.init();
     chromatic.play();
 
     // dat.GUI

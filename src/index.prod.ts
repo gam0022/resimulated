@@ -24,12 +24,12 @@ window.addEventListener("load", ev => {
         loading.innerHTML = 'Loading <div class="lds-facebook"><div></div><div></div><div></div></div>';
         container.appendChild(loading);
 
-        document.body.requestFullscreen().then(() => {
+        document.body.requestFullscreen().then(async () => {
             chromatic.onRender = (time, timeDelta) => {
                 animateUniforms(time, false, false);
             }
 
-            chromatic.init();
+            await chromatic.init();
 
             window.addEventListener("resize", () => {
                 chromatic.setSize(window.innerWidth, window.innerHeight);

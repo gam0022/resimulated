@@ -79,7 +79,9 @@ export class Chromatic {
         soundShader: string,
         createTextTexture: (gl: WebGL2RenderingContext) => WebGLTexture,
     ) {
-        this.init = () => {
+        const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        this.init = async () => {
             this.timeLength = timeLength;
             this.isPlaying = true;
             this.needsUpdate = false;
@@ -385,7 +387,7 @@ export class Chromatic {
                 }
             }
 
-            const initSound = () => {
+            const initSound = async () => {
                 // Sound
                 const sampleLength = Math.ceil(audio.sampleRate * timeLength);
                 const audioBuffer = audio.createBuffer(2, sampleLength, audio.sampleRate);
@@ -399,6 +401,8 @@ export class Chromatic {
                 }
 
                 const soundProgram = loadProgram(soundShader);
+
+                await sleep(100);
 
                 if (!PRODUCTION) {
                     endTime = performance.now();
@@ -514,112 +518,119 @@ export class Chromatic {
             // Create Rendering Pipeline
             const imagePasses: Pass[] = [];
             let passIndex = 0;
-            imageShaders.forEach((shader, i, ary) => {
-                if (i === bloomPassBeginIndex) {
-                    imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
-                        passIndex,
-                        PassType.Bloom,
-                        1
-                    ));
-                    passIndex++;
 
-                    let scale = 1;
-                    for (let j = 0; j < bloomDonwsampleIterations; j++) {
-                        scale *= 0.5;
+            const initRenderingPipeline = async () => {
+                for (let i = 0; i < imageShaders.length; i++) {
+                    const shader = imageShaders[i];
+                    if (i === bloomPassBeginIndex) {
                         imagePasses.push(initPass(
-                            loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
+                            loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                             passIndex,
                             PassType.Bloom,
-                            scale,
+                            1
+                        ));
+                        passIndex++;
+
+                        let scale = 1;
+                        for (let j = 0; j < bloomDonwsampleIterations; j++) {
+                            scale *= 0.5;
+                            imagePasses.push(initPass(
+                                loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
+                                passIndex,
+                                PassType.Bloom,
+                                scale,
+                            ));
+                            passIndex++;
+                        }
+
+                        for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
+                            scale *= 2;
+                            imagePasses.push(initPass(
+                                loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
+                                passIndex,
+                                PassType.BloomUpsample,
+                                scale,
+                            ));
+                            passIndex++;
+                        }
+
+                        imagePasses.push(initPass(
+                            loadProgram(imageCommonHeaderShader + bloomFinalShader),
+                            passIndex,
+                            PassType.BloomUpsample,
+                            1,
                         ));
                         passIndex++;
                     }
 
-                    for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
-                        scale *= 2;
-                        imagePasses.push(initPass(
-                            loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
-                            passIndex,
-                            PassType.BloomUpsample,
-                            scale,
-                        ));
-                        passIndex++;
+                    let startTime, endTime;
+
+                    if (!PRODUCTION) {
+                        startTime = performance.now();
                     }
 
                     imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + bloomFinalShader),
+                        loadProgram(imageCommonHeaderShader + shader),
                         passIndex,
-                        PassType.BloomUpsample,
-                        1,
+                        i < imageShaders.length - 1 ? PassType.Image : PassType.FinalImage,
+                        1
                     ));
+
+                    await sleep(100);
+
+                    if (!PRODUCTION) {
+                        endTime = performance.now();
+                        console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
+                    }
+
                     passIndex++;
                 }
 
-                let startTime, endTime;
+                // Init Sound
+                await initSound();
 
-                if (!PRODUCTION) {
-                    startTime = performance.now();
-                }
-
-                imagePasses.push(initPass(
-                    loadProgram(imageCommonHeaderShader + shader),
-                    passIndex,
-                    i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
-                    1
-                ));
-
-                if (!PRODUCTION) {
-                    endTime = performance.now();
-                    console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
-                }
-
-                passIndex++;
-            })
-
-            // Init Sound
-            initSound();
-
-            // Rendering Loop
-            let lastTimestamp = 0;
-            let startTimestamp: number | null = null;
-            const update = (timestamp: number) => {
-                requestAnimationFrame(update);
-                if (!startTimestamp) {
-                    startTimestamp = timestamp;
-                }
-
-                const timeDelta = (timestamp - lastTimestamp) * 0.001;
-
-                if (!PRODUCTION) {
-                    if (this.onUpdate != null) {
-                        this.onUpdate();
-                    }
-                }
-
-                if (this.isPlaying || this.needsUpdate) {
-                    if (this.onRender != null) {
-                        this.onRender(this.time, timeDelta);
+                // Rendering Loop
+                let lastTimestamp = 0;
+                let startTimestamp: number | null = null;
+                const update = (timestamp: number) => {
+                    requestAnimationFrame(update);
+                    if (!startTimestamp) {
+                        startTimestamp = timestamp;
                     }
 
-                    this.render();
+                    const timeDelta = (timestamp - lastTimestamp) * 0.001;
 
-                    if (PRODUCTION) {
-                        this.time = (timestamp - startTimestamp) * 0.001;
-                    } else {
-                        if (this.isPlaying) {
-                            this.time += timeDelta;
+                    if (!PRODUCTION) {
+                        if (this.onUpdate != null) {
+                            this.onUpdate();
                         }
                     }
+
+                    if (this.isPlaying || this.needsUpdate) {
+                        if (this.onRender != null) {
+                            this.onRender(this.time, timeDelta);
+                        }
+
+                        this.render();
+
+                        if (PRODUCTION) {
+                            this.time = (timestamp - startTimestamp) * 0.001;
+                        } else {
+                            if (this.isPlaying) {
+                                this.time += timeDelta;
+                            }
+                        }
+                    }
+
+                    this.needsUpdate = false;
+                    lastTimestamp = timestamp;
+                };
+
+                this.play = () => {
+                    requestAnimationFrame(update);
                 }
-
-                this.needsUpdate = false;
-                lastTimestamp = timestamp;
-            };
-
-            this.play = () => {
-                requestAnimationFrame(update);
             }
+            await initRenderingPipeline();
         }
     }
 }

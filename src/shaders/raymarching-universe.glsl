@@ -124,7 +124,7 @@ vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetParams = vec4[](
     // MERCURY
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_A
-    vec4(0.05, 10.0, 0.05, 0.2), vec4(0.3, 4.0, 0.05, 0.3), vec4(0.05, 10.0, 0.05, 1.0), vec4(0.05, 10.0, 0.05, 1.2), vec4(0.05, 10.0, 0.05, 1.3), vec4(0.0),
+    vec4(0.05, 10.0, 0.05, 0.2), vec4(0.2, 15.0, 0.05, 0.3), vec4(0.05, 10.0, 0.05, 1.0), vec4(0.05, 10.0, 0.05, 1.2), vec4(0.05, 10.0, 0.05, 1.3), vec4(0.0),
     // KANETA
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // PLANETS_FMSCAT
@@ -194,10 +194,10 @@ uniform vec3 gPlanetPalB;  // 110 115 115
 uniform vec3 gPlanetPalC;  // 256 178 102
 uniform vec3 gPlanetPalD;  // 130 130 25
 
-float hPlanetsMix(vec2 p, float seed) {
-    vec3 rand = hash31(seed);
+float hPlanetsMix(vec2 p, int id) {
+    vec3 rand = hash31(float(id) * 0.23);
     p.y *= 4.0 * rand.x;
-    return fbm(p + 0.05 * rand.y * fbm(p, 32.0 * rand.z), 8.0);
+    return fbm(p + 0.05 * rand.y * fbm(p, 32.0 * rand.z), planetParams[id].y);
 }
 
 vec3 pal(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) { return a + b * cos(TAU * (c * t + d)); }
@@ -212,8 +212,7 @@ float dPlanetsMix(vec3 p) {
         float s = sdSphere(q, 1.0);
         if (s < 1.0) {
             vec2 uv = uvSphere(normalize(q));
-            float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(i);
-            s -= planetParams[id].x * hPlanetsMix(uv, seed);
+            s -= planetParams[id].x * hPlanetsMix(uv, id);
         }
         d = min(d, s);
     }
@@ -490,7 +489,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     offset = p - center;
                     float d = sdSphere(offset, 1.0);
                     if (abs(d) < eps * 100.0) {
-                        id = i;
+                        id = PLANETS_NUM_MAX * int(gPlanetsId) + i;
                         dir = normalize(offset);
                         uv = uvSphere(dir);
                         break;
@@ -498,7 +497,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 }
 
                 float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(id);
-                float h = hPlanetsMix(uv, seed);
+                float h = hPlanetsMix(uv, id);
                 vec3 rand = hash31(seed);
                 intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
                 intersection.roughness = 0.4;
@@ -506,11 +505,11 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.emission = vec3(0.0);
                 // intersection.normal = calcNormal(p, dPlanetsMix, 0.01);
 
-                if (gPlanetsId == PLANETS_MIX_B && id == 4) {
+                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 4) {
                     intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
                 }
 
-                if (gPlanetsId == PLANETS_MIX_B && id == 2) {
+                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 2) {
                     intersection.baseColor = vec3(0.1);
                     intersection.emission = vec3(0.3, 0.3, 0.5) * yosshin(offset);
                     intersection.metallic = 0.5;

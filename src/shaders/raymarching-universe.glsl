@@ -1,4 +1,4 @@
-// #define STRIP_FIXED
+#define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -119,6 +119,21 @@ vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
     // EARTH
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
 
+// fbmAmp, fbmFreq, fbmShift, colorSeed
+vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetParams = vec4[](
+    // MERCURY
+    vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
+    // MIX_A
+    vec4(0.05, 10.0, 0.05, 0.2), vec4(0.3, 4.0, 0.05, 0.3), vec4(0.05, 10.0, 0.05, 1.0), vec4(0.05, 10.0, 0.05, 1.2), vec4(0.05, 10.0, 0.05, 1.3), vec4(0.0),
+    // KANETA
+    vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
+    // PLANETS_FMSCAT
+    vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
+    // MIX_B
+    vec4(0.05, 10.0, 0.05, 0.2), vec4(0.0, 10.0, 0.05, 0.3), vec4(0.0, 10.0, 0.05, 1.0), vec4(0.05, 10.0, 0.05, 1.2), vec4(0.0, 10.0, 0.05, 1.3), vec4(0.05, 10.0, 0.05, 3.0),
+    // EARTH
+    vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
+
 int[PLANETS_PAT_MAX] planetNums = int[](1, 5, 1, 1, 6, 1);
 float[PLANETS_PAT_MAX] planetTextIds = float[](7.0, 8.0, 13.0, 14.0, 15.0, 0.0);
 
@@ -191,13 +206,14 @@ float dPlanetsMix(vec3 p) {
     float d = INF;
 
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
-        vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
+        int id = PLANETS_NUM_MAX * int(gPlanetsId) + i;
+        vec3 center = planetCenters[id];
         vec3 q = p - center;
         float s = sdSphere(q, 1.0);
         if (s < 1.0) {
             vec2 uv = uvSphere(normalize(q));
             float seed = gPlanetPalD.x * gPlanetsId + gPlanetPalD.y * float(i);
-            s -= 0.05 * hPlanetsMix(uv, seed);
+            s -= planetParams[id].x * hPlanetsMix(uv, seed);
         }
         d = min(d, s);
     }

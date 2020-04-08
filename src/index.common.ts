@@ -61,10 +61,10 @@ export const chromatic = new Chromatic(
             "FMS_Cat",
 
             // 15-20
-            "LJ & Alcatraz",
+            "½-bit Cheese",
             "Prismbeings",
             "0x4015 & YET1",
-            "½-bit Cheese",
+            "LJ & Alcatraz",
             "logicoma",
             "Polarity",
         ];

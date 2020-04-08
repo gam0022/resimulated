@@ -5,6 +5,10 @@ window.addEventListener("load", ev => {
     style.innerText = require("../dist/style.prod.min.css").default;
     document.head.appendChild(style);
 
+    document.addEventListener("fullscreenchange", () => {
+        document.body.style.cursor = window.document.fullscreenElement ? "none" : "auto";
+    });
+
     const button = document.createElement('p');
     document.body.appendChild(button);
     button.innerHTML = 'click me!';
@@ -15,13 +19,6 @@ window.addEventListener("load", ev => {
             }
 
             chromatic.init();
-
-            document.body.style.cursor = "none";
-            document.addEventListener("fullscreenchange", () => {
-                if (!window.document.fullscreenElement) {
-                    document.body.style.cursor = "auto";
-                }
-            });
 
             window.addEventListener("resize", () => {
                 chromatic.setSize(window.innerWidth, window.innerHeight);

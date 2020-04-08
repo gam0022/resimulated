@@ -61,7 +61,7 @@ export const chromatic = new Chromatic(
             "FMS_Cat",
 
             // 15-20
-            "½-bit Cheese",
+            String.fromCharCode(0x00BD) + "-bit Cheese",
             "Prismbeings",
             "0x4015 & YET1",
             "LJ & Alcatraz",

@@ -720,20 +720,10 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
 
         vec3 sunColor = vec3(1.0, 0.9, 0.8);
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
-
-        // fog
-        // intersection.color = mix(intersection.color, vec3(0.6),
-        //                         1.0 - exp(-0.0001 * intersection.distance *
-        //                         intersection.distance *
-        //                         intersection.distance));
     } else {
-        intersection.color = vec3(0.01);
-
-        if (gSceneId == SCENE_UNIVERSE) {
-            float rdo = ray.direction.y + 0.6;
-            vec2 uv = (ray.direction.xz + ray.direction.xz * 250000.0 / rdo) * 0.000008;
-            intersection.color += skyboxUniverse(uv);
-        }
+        float rdo = ray.direction.y + 0.6;
+        vec2 uv = (ray.direction.xz + ray.direction.xz * 250000.0 / rdo) * 0.000008;
+        intersection.color = skyboxUniverse(uv);
     }
 }
 

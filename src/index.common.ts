@@ -48,11 +48,11 @@ export const chromatic = new Chromatic(
             "MERCURY",
 
             // 8-12
-            "Ctrl-Alt-Test",
             "RGBA & TBC",
-            "Fairlight",
+            "Ctrl-Alt-Test",
             "Conspiracy",
             "Poo-Brain",
+            "Fairlight",
 
             // 13
             "kaneta",
@@ -424,10 +424,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             const e = easeInOutCubic(l);
             target = new Vector3(0, 0, remapTo(e, 0, 400));
             camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
-            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 12));
+            chromatic.uniforms.gShockDistortion = 0.5 * Math.exp(-20 * (t - 12));
             scale = 1;
             // chromatic.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
-            chromatic.uniforms.gCameraFov = 40 * Math.exp(-0.5 * e);
+            chromatic.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-20 * (t - 12)));
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);

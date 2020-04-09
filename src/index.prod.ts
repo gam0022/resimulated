@@ -31,6 +31,7 @@ window.addEventListener("load", ev => {
     const button = document.createElement("p");
     container.appendChild(button);
     button.innerHTML = "CLICK TO START";
+    button.className = "button";
     button.onclick = () => {
         button.remove();
         message.remove();

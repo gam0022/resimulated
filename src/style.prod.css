@@ -36,6 +36,19 @@ p {
     text-align: center;
 }
 
+.button {
+    animation: blinkAnime 0.85714285714s infinite alternate;
+}
+
+@keyframes blinkAnime {
+    0% {
+        color: black;
+    }
+    100% {
+        color: white;
+    }
+}
+
 select {
     font-size: 100px;
     font-family: arial;

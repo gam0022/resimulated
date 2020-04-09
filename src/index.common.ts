@@ -185,6 +185,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gSceneEps = 0.0002645177773046626;
         chromatic.uniforms.gBallRadius = 0;
+
+        if (t >= 0) {
+            chromatic.uniforms.gXSfhitGlitch = 0.1 * Math.exp(-4 * (t - 0));
+        }
     }).then(16, t => {
         // ちょっとEmissive
         camera = new Vector3(0.05336320223924196, 3.2510840695253322 + 0.01 * t, -5.0872681523358665).add(Vector3.fbm(t).scale(0.001));

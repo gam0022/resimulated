@@ -1,7 +1,6 @@
 // #define STRIP_FIXED
 
-uniform float gSceneId;   // 0 0 2 scene
-uniform float gSceneEps;  // 0.002 0.00001 0.01
+uniform float gSceneId;  // 0 0 2 scene
 #define SCENE_MANDEL 0.0
 #define SCENE_UNIVERSE 1.0
 
@@ -477,7 +476,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;
-        intersection.normal = calcNormal(p, map, gSceneEps);
+        intersection.normal = calcNormal(p, map, eps * 0.1);
 
         intersection.transparent = false;
         intersection.refractiveIndex = 1.2;

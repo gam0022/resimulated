@@ -453,7 +453,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
 
-        if ((2 <= t && t < 4) || (10 <= t && t < 12) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
+        if ((6 <= t && t < 8) || (14 <= t && t < 16) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
             chromatic.uniforms.gGlitchIntensity = 0.05;
         }
 

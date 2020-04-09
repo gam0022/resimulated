@@ -84,7 +84,7 @@ vec2 uvSphere(vec3 n) {
     return vec2(u, v);
 }
 
-uniform float gPlanetsId;  // 0 0 4 planets
+uniform float gPlanetsId;  // 0 0 5 planets
 #define PLANETS_MERCURY 0.0
 #define PLANETS_MIX_A 1.0
 #define PLANETS_KANETA 2.0

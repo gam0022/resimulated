@@ -1,4 +1,6 @@
 // #define STRIP_FIXED
+const float INF = 1e+10;
+const float OFFSET = 0.1;
 
 uniform float gSceneId;  // 0 0 2 scene
 #define SCENE_MANDEL 0.0
@@ -12,17 +14,11 @@ uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 uniform float gCameraFov;      // 13 0 180
 
-// consts
-const float INF = 1e+10;
-const float OFFSET = 0.1;
-
-// ray
 struct Ray {
     vec3 origin;
     vec3 direction;
 };
 
-// camera
 struct Camera {
     vec3 eye, target;
     vec3 forward, right, up;
@@ -41,7 +37,6 @@ Ray cameraShootRay(Camera c, vec2 uv) {
     return r;
 }
 
-// intersection
 struct Intersection {
     bool hit;
     vec3 position;
@@ -62,12 +57,10 @@ struct Intersection {
     vec3 color;
 };
 
-// util
 #define calcNormal(p, dFunc, eps)                                                                                                                                                 \
     normalize(vec2(eps, -eps).xyy *dFunc(p + vec2(eps, -eps).xyy) + vec2(eps, -eps).yyx * dFunc(p + vec2(eps, -eps).yyx) + vec2(eps, -eps).yxy * dFunc(p + vec2(eps, -eps).yxy) + \
               vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
 
-// Distance Functions
 float sdSphere(vec3 p, float r) { return length(p) - r; }
 
 float sdCircle(vec2 p, float r) { return length(p) - r; }

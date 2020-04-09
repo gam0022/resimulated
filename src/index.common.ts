@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3, remap, remapFrom, easeInOutCubic } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -405,6 +405,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gTonemapExposure = 1;
 
         target = new Vector3(0, 0, 0);
+        let scale = Math.exp(-0.01 * t);
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
 
         if (t < 12) {
@@ -417,8 +418,14 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gCameraFov = 13;
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
-            camera = new Vector3(15, 3, 50);
-            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t % 8));
+            const l = remapFrom(t, 16, 20);
+            const e = easeInOutCubic(l);
+            target = new Vector3(0, 0, remapTo(e, 0, 400));
+            camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
+            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 16));
+            scale = 1;
+            chromatic.uniforms.gCameraFov = 40 * Math.exp(-0.5 * e);
+            // chromatic.uniforms.gCameraFov = 20 * (1.3 + Math.cos(Math.PI * 2 * l));
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);
@@ -432,15 +439,15 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         } else {
             chromatic.uniforms.gPlanetsId = Planets.MIX_B;
             camera = new Vector3(-15, -3, 50);
-            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t % 8));
+            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 28));
         }
 
-        camera = camera.scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
+        camera = camera.scale(scale).add(Vector3.fbm(t).scale(0.01));
 
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = remap(t, 0, 8, 1, 0);
+        chromatic.uniforms.gBlend = remapTo(easeInOutCubic(remapFrom(t, 0, 16)), 1, 0);
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;
@@ -453,7 +460,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
 
-        if ((2 <= t && t < 4) || (10 <= t && t < 12) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
+        if ((6 <= t && t < 8) || (14 <= t && t < 16) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
             chromatic.uniforms.gGlitchIntensity = 0.05;
         }
 

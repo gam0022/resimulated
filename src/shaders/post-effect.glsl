@@ -11,9 +11,12 @@ uniform float gFlashSpeed;       // 0 0 60
 uniform float gBlend;            // 0 -1 1
 
 uniform float gGlitchIntensity;  // 0 0 0.1
+uniform float gXSfhitGlitch;     // 0 0 0.1
 uniform float gInvertRate;       // 0 0 1
 
 vec3 chromaticAberration(vec2 uv) {
+    uv.x += gXSfhitGlitch * (fbm(vec2(232.0 * uv.y, beat)) - 0.5);
+
     vec2 d = abs(uv - 0.5);
     float f = mix(0.5, dot(d, d), gChromaticAberrationDistance);
     f *= f * gChromaticAberrationIntensity;

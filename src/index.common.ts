@@ -473,7 +473,11 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         }
 
         if (26 <= t && t < 28) {
-            chromatic.uniforms.gInvertRate = Math.exp(-6 * (t - 26));
+            chromatic.uniforms.gInvertRate = Math.exp(-8 * (t - 26));
+        }
+
+        if (28 <= t && t < 30) {
+            chromatic.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-6 * (t - 28));
         }
 
         chromatic.uniforms.gBallRadius = 0;

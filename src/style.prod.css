@@ -30,6 +30,13 @@ canvas {
 }
 
 p {
+    width: 100%;
+    font-size: 100px;
+    font-family: arial;
+    text-align: center;
+}
+
+select {
     font-size: 100px;
     font-family: arial;
     text-align: center;

@@ -200,9 +200,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
-        intersection.transparent = false;
-        intersection.refractiveIndex = 1.2;
-
         if (gBallRadius > 0.0 && dBall(p) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;

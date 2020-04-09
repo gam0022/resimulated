@@ -1,4 +1,4 @@
-#define STRIP_FIXED
+// #define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01

@@ -15,18 +15,18 @@ window.addEventListener("load", ev => {
     container.className = "container";
     document.body.appendChild(container);
 
-    const message = document.createElement("p");
-    message.innerHTML = "RESOLUTION: ";
-    container.appendChild(message);
+    const resolutionMessage = document.createElement("p");
+    resolutionMessage.innerHTML = "RESOLUTION: ";
+    container.appendChild(resolutionMessage);
 
-    const resolutionSscale = document.createElement("select");
-    resolutionSscale.innerHTML = `
+    const resolutionScale = document.createElement("select");
+    resolutionScale.innerHTML = `
     <option value="0.25">LOW 25%</option>
     <option value="0.5">REGULAR 50%</option>
     <option value="0.75">REGULAR 75%</option>
     <option value="1.0" selected>FULL 100%</option>
     `;
-    message.appendChild(resolutionSscale);
+    resolutionMessage.appendChild(resolutionScale);
 
     const button = document.createElement("p");
     container.appendChild(button);
@@ -34,7 +34,7 @@ window.addEventListener("load", ev => {
     button.className = "button";
     button.onclick = () => {
         button.remove();
-        message.remove();
+        resolutionMessage.remove();
 
         // loading animation
         const loading = document.createElement("p");
@@ -54,7 +54,7 @@ window.addEventListener("load", ev => {
                 chromatic.init();
 
                 window.addEventListener("resize", () => {
-                    const scale = parseFloat(resolutionSscale.value);
+                    const scale = parseFloat(resolutionScale.value);
                     chromatic.setSize(window.innerWidth * scale, window.innerHeight * scale);
                 });
 

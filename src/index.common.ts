@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic, easeInOutCubicVelocity } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -426,8 +426,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
             chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 12));
             scale = 1;
+            // chromatic.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
             chromatic.uniforms.gCameraFov = 40 * Math.exp(-0.5 * e);
-            // chromatic.uniforms.gCameraFov = 20 * (1.3 + Math.cos(Math.PI * 2 * l));
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);

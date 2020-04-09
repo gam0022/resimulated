@@ -13,6 +13,7 @@ export const fbm = (x: number, t: number) => Math.sin(x + t) + 0.5 * Math.sin(2.
 
 // https://gist.github.com/gre/1650294
 export const easeInOutCubic = (t: number) => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+export const easeInOutCubicVelocity = (t: number) => t < .5 ? 12 * t * t : 12 * (t - 1) * (t - 1);
 export const easeInOutCos = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 
 export class Vector3 {

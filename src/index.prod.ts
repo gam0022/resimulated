@@ -58,10 +58,13 @@ window.addEventListener("load", ev => {
 
                 chromatic.init();
 
-                window.addEventListener("resize", () => {
+                const onResize = () => {
                     const scale = parseFloat(resolutionScale.value);
                     chromatic.setSize(window.innerWidth * scale, window.innerHeight * scale);
-                });
+                };
+
+                window.addEventListener("resize", onResize);
+                onResize();
 
                 setTimeout(() => {
                     container.remove();

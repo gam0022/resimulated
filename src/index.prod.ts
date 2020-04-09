@@ -15,6 +15,15 @@ window.addEventListener("load", ev => {
     container.className = "container";
     document.body.appendChild(container);
 
+    const resolutionSscale = document.createElement("select");
+    resolutionSscale.innerHTML = `
+    <option value="0.25">0.25</option>
+    <option value="0.5">0.5</option>
+    <option value="0.75">0.75</option>
+    <option value="1.0" selected>1.0</option>
+    `;
+    container.appendChild(resolutionSscale);
+
     const button = document.createElement("p");
     container.appendChild(button);
     button.innerHTML = "CLICK TO START";
@@ -39,7 +48,8 @@ window.addEventListener("load", ev => {
                 chromatic.init();
 
                 window.addEventListener("resize", () => {
-                    chromatic.setSize(window.innerWidth, window.innerHeight);
+                    const scale = parseFloat(resolutionSscale.value);
+                    chromatic.setSize(window.innerWidth * scale, window.innerHeight * scale);
                 });
 
                 setTimeout(() => {

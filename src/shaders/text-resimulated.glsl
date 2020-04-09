@@ -56,7 +56,7 @@ void text(vec2 uv, inout vec3 result) {
         if (uv.x > -0.78) {
             col *= 0.0;
         }
-        brightness = remapTo(t4, 1.0, 0.5);
+        brightness = remapTo(t4, 1.0, 0.0);
     } else {
         // 24-32 (8)
         // REALITY
@@ -68,7 +68,7 @@ void text(vec2 uv, inout vec3 result) {
             col *= 0.0;
         }
         col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
-        brightness = remapTo(t8, 0.5, 0.0);
+        brightness = t8 >= 0.8 && t8 < 0.85 ? 1.0 : 0.0;
     }
 
     result *= brightness;

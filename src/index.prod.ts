@@ -41,6 +41,11 @@ window.addEventListener("load", ev => {
         loading.innerHTML = 'LOADING <div class="lds-facebook"><div></div><div></div><div></div></div>';
         container.appendChild(loading);
 
+        const loadingMessage = document.createElement("p");
+        loadingMessage.innerHTML = "It takes about one minute. please wait.";
+        loadingMessage.style.fontSize = "50px";
+        container.appendChild(loadingMessage);
+
         setTimeout(() => {
             document.body.requestFullscreen().then(() => {
                 chromatic.onRender = (time, timeDelta) => {

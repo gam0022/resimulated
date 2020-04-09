@@ -21,7 +21,7 @@ void text(vec2 uv, inout vec3 result) {
 
         col += texture(iTextTexture, textUv(uv, 3.0, vec2(1.0, 0.1), 1.0)).rgb;
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
-        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
+        col *= remap(t4, 0.5, 1.0, 1.0, saturate(cos(TAU * b * iTime)));
     } else if (b < 16.0) {
         // 12-16 (4)
         // RE: SIMULATED

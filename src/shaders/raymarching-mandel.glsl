@@ -307,10 +307,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
 
         // fog
-        // intersection.color = mix(intersection.color, vec3(0.6),
-        //                         1.0 - exp(-0.0001 * intersection.distance *
-        //                         intersection.distance *
-        //                         intersection.distance));
+        // intersection.color = mix(intersection.color, vec3(0.01), 1.0 - exp(-0.01 * intersection.distance));
     } else {
         intersection.color = vec3(0.01);
     }

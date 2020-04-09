@@ -189,12 +189,12 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float eps;
 
     for (int i = 0; i < 300; i++) {
-        d = abs(map(p));
+        d = map(p);
         distance += d;
         p = ray.origin + distance * ray.direction;
         intersection.count = i;
         eps = gSceneEps * distance;
-        if (abs(d) < eps) break;
+        if (d < eps) break;
     }
 
     if (distance < intersection.distance) {
@@ -206,7 +206,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.transparent = false;
         intersection.refractiveIndex = 1.2;
 
-        if (gBallRadius > 0.0 && abs(dBall(p)) < eps) {
+        if (gBallRadius > 0.0 && dBall(p) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;

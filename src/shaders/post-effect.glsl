@@ -6,6 +6,8 @@ uniform float gVignetteSmoothness;  // 2 0 5
 uniform float gVignetteRoundness;   // 1 0 1
 
 uniform float gTonemapExposure;  // 0.1 0.0 2
+uniform float gFlash;            // 0 0 1
+uniform float gFlashSpeed;       // 0 0 60
 uniform float gBlend;            // 0 -1 1
 
 uniform float gGlitchIntensity;  // 0 0 0.1
@@ -53,6 +55,11 @@ vec3 invert(vec3 c, vec2 uv) {
     }
 }
 
+vec3 flash(vec3 c) {
+    c = mix(c, vec3(1.0), gFlash * saturate(cos(iTime * PI * gFlashSpeed)));
+    return c;
+}
+
 vec3 blend(vec3 c) {
     c = mix(c, vec3(1.0), saturate(gBlend));
     c = mix(c, vec3(0.0), saturate(-gBlend));
@@ -66,6 +73,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     col = acesFilm(col * gTonemapExposure);
     col = pow(col, vec3(1.0 / 2.2));
     col = invert(col, uv);
+    col = flash(col);
     col = blend(col);
     fragColor = vec4(col, 1.0);
 }

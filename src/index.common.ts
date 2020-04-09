@@ -367,14 +367,20 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         const b = (t % 1);
         chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.05, 0.1) * Math.exp(-5 * b);
 
+        chromatic.uniforms.gFlash = 1;
+
         if (t < 2) {
             chromatic.uniforms.gBallDistortionFreq = 12;
+            chromatic.uniforms.gFlashSpeed = 5;
         } else if (t < 4) {
             chromatic.uniforms.gBallDistortionFreq = 20;
+            chromatic.uniforms.gFlashSpeed = 10;
         } else if (t < 6) {
             chromatic.uniforms.gBallDistortionFreq = 10 + t * 5;
+            chromatic.uniforms.gFlashSpeed = 15;
         } else {
             chromatic.uniforms.gBallDistortionFreq = t * t;
+            chromatic.uniforms.gFlashSpeed = 30;
         }
 
         if (t >= 4) {

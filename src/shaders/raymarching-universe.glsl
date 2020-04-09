@@ -1,4 +1,4 @@
-// #define STRIP_FIXED
+#define STRIP_FIXED
 
 uniform float gSceneId;   // 0 0 2 scene
 uniform float gSceneEps;  // 0.002 0.00001 0.01
@@ -109,7 +109,7 @@ vec3[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetCenters = vec3[](
     // MERCURY
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
     // MIX_A
-    vec3(-10.0, 1.0, 3.0), vec3(-6.0, -1.0, 2.0), vec3(0.0, 0.0, 0.0), vec3(6.0, 0.0, 8.0), vec3(8.0, 3.0, 2.0), vec3(0.0),
+    vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 100.0), vec3(0.0, 0.0, 200.0), vec3(0.0, 0.0, 300.0), vec3(0.0, 0.0, 400.0), vec3(0.0),
     // KANETA
     vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0),
     // PLANETS_FMSCAT

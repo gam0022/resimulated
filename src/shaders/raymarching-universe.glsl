@@ -28,6 +28,7 @@ struct Camera {
     vec3 eye, target;
     vec3 forward, right, up;
 };
+Camera camera;
 
 Ray cameraShootRay(Camera c, vec2 uv) {
     c.forward = normalize(c.target - c.eye);
@@ -48,7 +49,7 @@ struct Intersection {
     float distance;
     vec3 normal;
     vec2 uv;
-    float count;
+    int count;
 
     vec3 baseColor;
     float roughness;
@@ -124,7 +125,7 @@ vec4[PLANETS_PAT_MAX * PLANETS_NUM_MAX] planetFbmParams = vec4[](
     // MERCURY
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // MIX_A
-    vec4(0.05, 10.0, 1.05, 0.0), vec4(0.3, 17.0, 1.0, 0.01), vec4(0.05, 10.0, 1.05, 0.01), vec4(0.05, 10.0, 4.05, 0.02), vec4(0.05, 10.0, 2.05, 00.1), vec4(0.0),
+    vec4(0.3, 17.0, 1.0, 0.01), vec4(0.05, 10.0, 1.05, 0.0), vec4(0.05, 10.0, 1.05, 0.01), vec4(0.05, 10.0, 4.05, 0.02), vec4(0.05, 10.0, 2.05, 00.1), vec4(0.0),
     // KANETA
     vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0),
     // PLANETS_FMSCAT
@@ -202,8 +203,9 @@ float dPlanetsMix(vec3 p) {
     for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
         int id = PLANETS_NUM_MAX * int(gPlanetsId) + i;
         vec3 center = planetCenters[id];
+        float distance = max(0.0, length(center - camera.eye) - 60.0);
         vec3 q = p - center;
-        float s = sdSphere(q, 1.0);
+        float s = sdSphere(q, 1.0 * exp(-0.04 * distance));
         if (s < 1.0) {
             vec2 uv = uvSphere(normalize(q));
             s -= planetFbmParams[id].x * hPlanetsMix(uv, id);
@@ -463,7 +465,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
     float eps = 0.02;
 
-    for (float i = 0.0; i < 200.0; i++) {
+    for (int i = 0; i < 200; i++) {
         d = map(p);
         distance += d;
         p = ray.origin + distance * ray.direction;
@@ -718,8 +720,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
 
     if (intersection.hit) {
         intersection.color = intersection.emission;
-        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
-        // intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
+        intersection.color += evalPointLight(intersection, -ray.direction, camera.eye, gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
 
         vec3 sunColor = vec3(1.0, 0.9, 0.8);
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
@@ -765,7 +766,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
     uv = distortion(uv);
 
-    Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
     camera.up = vec3(0.0, 1.0, 0.0);  // y-up

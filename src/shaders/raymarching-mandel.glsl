@@ -34,6 +34,7 @@ struct Camera {
     vec3 eye, target;
     vec3 forward, right, up;
 };
+Camera camera;
 
 Ray cameraShootRay(Camera c, vec2 uv) {
     c.forward = normalize(c.target - c.eye);
@@ -54,7 +55,7 @@ struct Intersection {
     float distance;
     vec3 normal;
     vec2 uv;
-    float count;
+    int count;
 
     vec3 baseColor;
     float roughness;
@@ -193,7 +194,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
     float eps;
 
-    for (float i = 0.0; i < 300.0; i++) {
+    for (int i = 0; i < 300; i++) {
         d = abs(map(p));
         distance += d;
         p = ray.origin + distance * ray.direction;
@@ -301,8 +302,7 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
 
     if (intersection.hit) {
         intersection.color = intersection.emission;
-        intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ), gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
-        // intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
+        intersection.color += evalPointLight(intersection, -ray.direction, camera.eye, gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
 
         vec3 sunColor = vec3(2.0, 1.0, 1.0);
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
@@ -341,7 +341,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord * 2.0 - iResolution.xy) / min(iResolution.x, iResolution.y);
     uv = distortion(uv);
 
-    Camera camera;
     camera.eye = vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ);
     camera.target = vec3(gCameraTargetX, gCameraTargetY, gCameraTargetZ);
     camera.up = vec3(0.0, 1.0, 0.0);  // y-up

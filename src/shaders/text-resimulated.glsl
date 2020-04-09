@@ -21,7 +21,7 @@ void text(vec2 uv, inout vec3 result) {
 
         col += texture(iTextTexture, textUv(uv, 3.0, vec2(1.0, 0.1), 1.0)).rgb;
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
-        col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
+        col *= remap(t4, 0.5, 1.0, 1.0, saturate(cos(TAU * b * iTime)));
     } else if (b < 16.0) {
         // 12-16 (4)
         // RE: SIMULATED
@@ -68,7 +68,7 @@ void text(vec2 uv, inout vec3 result) {
             col *= 0.0;
         }
         col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
-        brightness = t8 >= 0.8 && t8 < 0.85 ? 1.0 : 0.0;
+        brightness = 0.8 <= t8 && t8 < 0.84 ? 1.0 : 0.0;
     }
 
     result *= brightness;

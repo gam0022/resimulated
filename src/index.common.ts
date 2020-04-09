@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic, easeInOutCubicVelocity } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -48,11 +48,11 @@ export const chromatic = new Chromatic(
             "MERCURY",
 
             // 8-12
-            "Ctrl-Alt-Test",
             "RGBA & TBC",
-            "Fairlight",
+            "Ctrl-Alt-Test",
             "Conspiracy",
             "Poo-Brain",
+            "Fairlight",
 
             // 13
             "kaneta",
@@ -185,6 +185,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gSceneEps = 0.0002645177773046626;
         chromatic.uniforms.gBallRadius = 0;
+
+        if (t >= 0) {
+            chromatic.uniforms.gXSfhitGlitch = 0.1 * Math.exp(-4 * (t - 0));
+        }
     }).then(16, t => {
         // ちょっとEmissive
         camera = new Vector3(0.05336320223924196, 3.2510840695253322 + 0.01 * t, -5.0872681523358665).add(Vector3.fbm(t).scale(0.001));
@@ -367,14 +371,20 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         const b = (t % 1);
         chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.05, 0.1) * Math.exp(-5 * b);
 
+        chromatic.uniforms.gFlash = 1;
+
         if (t < 2) {
             chromatic.uniforms.gBallDistortionFreq = 12;
+            chromatic.uniforms.gFlashSpeed = 5;
         } else if (t < 4) {
             chromatic.uniforms.gBallDistortionFreq = 20;
+            chromatic.uniforms.gFlashSpeed = 10;
         } else if (t < 6) {
             chromatic.uniforms.gBallDistortionFreq = 10 + t * 5;
+            chromatic.uniforms.gFlashSpeed = 15;
         } else {
             chromatic.uniforms.gBallDistortionFreq = t * t;
+            chromatic.uniforms.gFlashSpeed = 30;
         }
 
         if (t >= 4) {
@@ -408,37 +418,39 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         let scale = Math.exp(-0.01 * t);
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
 
-        if (t < 12) {
+        if (t < 8) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(-1.38, -0.8550687112306142, 47.4);
             chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
-        } else if (t < 16) {
+        } else if (t < 12) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
-            chromatic.uniforms.gCameraFov = 13;
+            chromatic.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 8)));
+            // chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
-            const l = remapFrom(t, 16, 20);
+            const l = remapFrom(t, 13, 20);
             const e = easeInOutCubic(l);
             target = new Vector3(0, 0, remapTo(e, 0, 400));
             camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
-            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 16));
+            chromatic.uniforms.gShockDistortion = 1.5 * Math.exp(-10 * (t - 12));
             scale = 1;
-            chromatic.uniforms.gCameraFov = 40 * Math.exp(-0.5 * e);
-            // chromatic.uniforms.gCameraFov = 20 * (1.3 + Math.cos(Math.PI * 2 * l));
+            // chromatic.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
+            chromatic.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-0.1 * (t - 12)));
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);
-
-            if ((t % 4) > 3) {
-                chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-10 * (t % 4));
-            }
         } else if (t < 28) {
             chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
             camera = new Vector3(-15, 3, 20);
+
+            if (t >= 27) {
+                chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 27));
+            }
         } else {
             chromatic.uniforms.gPlanetsId = Planets.MIX_B;
-            camera = new Vector3(-15, -3, 50);
+            target = new Vector3(1, 0, 0);
+            camera = new Vector3(remapTo(1 - Math.exp(-20 * (t - 28)), 10, -15), -3, 50);
             chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 28));
         }
 
@@ -460,8 +472,36 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
 
-        if ((6 <= t && t < 8) || (14 <= t && t < 16) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
-            chromatic.uniforms.gGlitchIntensity = 0.05;
+        if (t >= 0) {
+            chromatic.uniforms.gXSfhitGlitch = 0.05 * Math.exp(-1.55 * t);
+        }
+
+        if (t >= 7) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 7));
+        }
+
+        if (t >= 15) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 15));
+        }
+
+        if (t >= 21) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 21));
+        }
+
+        if (t >= 26) {
+            chromatic.uniforms.gInvertRate = Math.exp(-8 * (t - 26));
+        }
+
+        if (t >= 26.5) {
+            chromatic.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-6 * (t - 26.5));
+        }
+
+        if (t >= 31) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 31));
+        }
+
+        if (t >= 31.5) {
+            chromatic.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-10 * (t - 31.5));
         }
 
         chromatic.uniforms.gBallRadius = 0;

@@ -441,7 +441,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             camera = new Vector3(-15, 3, 20);
 
             if (t >= 27) {
-                chromatic.uniforms.gGlitchIntensity = 0.05;
+                chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 27));
             }
         } else {
             chromatic.uniforms.gPlanetsId = Planets.MIX_B;
@@ -468,12 +468,20 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         ball.z = 0;
         chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
 
-        if ((7 <= t && t < 8) || (15 <= t && t < 16) || (21 <= t && t < 22) || (31 <= t && t < 32)) {
-            chromatic.uniforms.gGlitchIntensity = 0.05;
-        }
-
         if (t >= 0) {
             chromatic.uniforms.gXSfhitGlitch = 0.05 * Math.exp(-1.55 * t);
+        }
+
+        if (t >= 7) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 7));
+        }
+
+        if (t >= 15) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 15));
+        }
+
+        if (t >= 21) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 21));
         }
 
         if (t >= 26) {
@@ -482,6 +490,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
 
         if (t >= 26.5) {
             chromatic.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-6 * (t - 26.5));
+        }
+
+        if (t >= 31) {
+            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 31));
         }
 
         if (t >= 31.5) {

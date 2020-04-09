@@ -25,7 +25,7 @@ vec3 chromaticAberration(vec2 uv) {
     float a = 2.0 * hash11(beat) - 1.0;
     vec2 grid = hash23(vec3(floor(vec2(uv.x * (4.0 + 8.0 * a), (uv.y + a) * 32.0)), beat));
     grid = 2.0 * grid - 1.0;
-    shift += exp(-5.0 * fract(beat)) * gGlitchIntensity * grid;
+    shift += gGlitchIntensity * grid;
 
     vec3 col;
     col.r = texture(iPrevPass, uv + shift).r;

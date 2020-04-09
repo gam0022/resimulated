@@ -408,14 +408,14 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         let scale = Math.exp(-0.01 * t);
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
 
-        if (t < 10) {
+        if (t < 8) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(-1.38, -0.8550687112306142, 47.4);
             chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
         } else if (t < 12) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
-            chromatic.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 10)));
+            chromatic.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 8)));
             // chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;

@@ -23,7 +23,7 @@ void text(vec2 uv, inout vec3 result) {
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
         col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
     } else if (b < 16.0) {
-        // 12-16 (8)
+        // 12-16 (4)
         // RE: SIMULATED
         col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
         col *= remap(t8, 0.5, 1.0, 0.0, 1.0);
@@ -59,7 +59,7 @@ void text(vec2 uv, inout vec3 result) {
         brightness = remapTo(t4, 1.0, 0.0);
     } else {
         // 24-32 (8)
-        // REALITY
+        // RE -> REALITY
         col += texture(iTextTexture, textUv(uv, 6.0, vec2(-0.553, 0.0), 3.0)).rgb;
         float t = remapFrom(t8, 0.75, 0.85);
         // t = easeInOutCubic(t);

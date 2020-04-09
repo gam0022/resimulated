@@ -16,7 +16,7 @@ window.addEventListener("load", ev => {
     document.body.appendChild(container);
 
     const message = document.createElement("p");
-    message.innerHTML = "RESOLUTION";
+    message.innerHTML = "RESOLUTION: ";
     container.appendChild(message);
 
     const resolutionSscale = document.createElement("select");

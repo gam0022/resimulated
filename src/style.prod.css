@@ -20,6 +20,7 @@ canvas {
 
 .container {
     display: flex;
+    flex-direction: column;
     position: absolute;
     top: 0;
     justify-content: center;
@@ -30,22 +31,23 @@ canvas {
 }
 
 p {
-    width: 100%;
     font-size: 100px;
     font-family: arial;
     text-align: center;
 }
 
 .button {
+    border-style: solid;
+    padding: 10px;
     animation: blinkAnime 0.85714285714s infinite alternate;
 }
 
 @keyframes blinkAnime {
     0% {
-        color: black;
+        border-color: black;
     }
     100% {
-        color: white;
+        border-color: white;
     }
 }
 

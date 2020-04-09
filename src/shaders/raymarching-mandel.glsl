@@ -63,9 +63,6 @@ struct Intersection {
     float metallic;
     vec3 emission;
 
-    bool transparent;
-    float refractiveIndex;
-
     vec3 color;
 };
 
@@ -214,8 +211,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;
             intersection.emission = vec3(0.0);
-            intersection.transparent = false;
-            intersection.refractiveIndex = 1.2;
             intersection.reflectance = 1.0;
 
             if (gLogoIntensity > 0.0) {
@@ -232,8 +227,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             float edge = calcEdge(p);
             float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
             intersection.emission = gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
-
-            intersection.transparent = false;
             intersection.reflectance = 0.0;
         }
     }
@@ -354,26 +347,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         calcRadiance(intersection, ray);
         color += reflection * intersection.color;
         if (!intersection.hit || intersection.reflectance == 0.0) break;
+
         reflection *= intersection.reflectance;
-
-        bool isIncoming = dot(ray.direction, intersection.normal) < 0.0;
-        vec3 orientingNormal = isIncoming ? intersection.normal : -intersection.normal;
-
-        bool isTotalReflection = false;
-        if (intersection.transparent) {
-            float nnt = isIncoming ? 1.0 / intersection.refractiveIndex : intersection.refractiveIndex;
-            ray.origin = intersection.position - orientingNormal * OFFSET;
-            ray.direction = refract(ray.direction, orientingNormal, nnt);
-            isTotalReflection = (ray.direction == vec3(0.0));
-            bounce = 0;
-        }
-
-        if (isTotalReflection || !intersection.transparent) {
-            ray.origin = intersection.position + orientingNormal * OFFSET;
-            vec3 l = reflect(ray.direction, orientingNormal);
-            reflection *= fresnelSchlick(gF0, dot(l, orientingNormal));
-            ray.direction = l;
-        }
+        ray.origin = intersection.position + intersection.normal * OFFSET;
+        vec3 l = reflect(ray.direction, intersection.normal);
+        reflection *= fresnelSchlick(gF0, dot(l, intersection.normal));
+        ray.direction = l;
     }
 
     fragColor = vec4(color, 1.0);

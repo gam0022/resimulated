@@ -472,6 +472,10 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gGlitchIntensity = 0.05;
         }
 
+        if (26 <= t && t < 28) {
+            chromatic.uniforms.gInvertRate = Math.exp(-6 * (t - 26));
+        }
+
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;

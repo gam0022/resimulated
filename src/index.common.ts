@@ -1,5 +1,5 @@
 import { Chromatic } from "./chromatic"
-import { mix, clamp, saturate, Vector3, remap, remapFrom, easeInOutCubic } from "./math"
+import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
@@ -440,7 +440,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0;
         chromatic.uniforms.gBloomIntensity = 5;
         chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = remap(t, 0, 8, 1, 0);
+        chromatic.uniforms.gBlend = remapTo(easeInOutCubic(remapFrom(t, 0, 16)), 1, 0);
     }).then(32, t => {
         // クレジット
         chromatic.uniforms.gSceneId = 1;

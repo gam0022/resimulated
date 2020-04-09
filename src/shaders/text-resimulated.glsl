@@ -68,7 +68,7 @@ void text(vec2 uv, inout vec3 result) {
             col *= 0.0;
         }
         col *= remap(t8, 0.75, 1.0, 1.0, 0.0);
-        brightness = t8 >= 0.8 && t8 < 0.85 ? 1.0 : 0.0;
+        brightness = t8 >= 0.85 && t8 < 0.9 ? 1.0 : 0.0;
     }
 
     result *= brightness;

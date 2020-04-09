@@ -415,7 +415,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         } else if (t < 12) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
-            chromatic.uniforms.gCameraFov = mix(20 * Math.exp(-0.005 * t), 13, Math.exp(-10 * (t - 10)));
+            chromatic.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 10)));
             // chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
@@ -426,7 +426,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatic.uniforms.gShockDistortion = 0.5 * Math.exp(-5 * (t - 12));
             scale = 1;
             // chromatic.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
-            chromatic.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-20 * (t - 12)));
+            chromatic.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-10 * (t - 12)));
         } else if (t < 24) {
             chromatic.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);

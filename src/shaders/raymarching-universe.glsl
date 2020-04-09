@@ -1,7 +1,8 @@
 // #define STRIP_FIXED
+const float INF = 1e+10;
+const float OFFSET = 0.1;
 
-uniform float gSceneId;   // 0 0 2 scene
-uniform float gSceneEps;  // 0.002 0.00001 0.01
+uniform float gSceneId;  // 0 0 2 scene
 #define SCENE_MANDEL 0.0
 #define SCENE_UNIVERSE 1.0
 
@@ -13,17 +14,11 @@ uniform float gCameraTargetY;  // 2.75 -100 100
 uniform float gCameraTargetZ;  // 0 -100 100
 uniform float gCameraFov;      // 13 0 180
 
-// consts
-const float INF = 1e+10;
-const float OFFSET = 0.1;
-
-// ray
 struct Ray {
     vec3 origin;
     vec3 direction;
 };
 
-// camera
 struct Camera {
     vec3 eye, target;
     vec3 forward, right, up;
@@ -42,7 +37,6 @@ Ray cameraShootRay(Camera c, vec2 uv) {
     return r;
 }
 
-// intersection
 struct Intersection {
     bool hit;
     vec3 position;
@@ -57,18 +51,13 @@ struct Intersection {
     float metallic;
     vec3 emission;
 
-    bool transparent;
-    float refractiveIndex;
-
     vec3 color;
 };
 
-// util
 #define calcNormal(p, dFunc, eps)                                                                                                                                                 \
     normalize(vec2(eps, -eps).xyy *dFunc(p + vec2(eps, -eps).xyy) + vec2(eps, -eps).yyx * dFunc(p + vec2(eps, -eps).yyx) + vec2(eps, -eps).yxy * dFunc(p + vec2(eps, -eps).yxy) + \
               vec2(eps, -eps).xxx * dFunc(p + vec2(eps, -eps).xxx))
 
-// Distance Functions
 float sdSphere(vec3 p, float r) { return length(p) - r; }
 
 float sdCircle(vec2 p, float r) { return length(p) - r; }
@@ -477,10 +466,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;
-        intersection.normal = calcNormal(p, map, gSceneEps);
-
-        intersection.transparent = false;
-        intersection.refractiveIndex = 1.2;
+        intersection.normal = calcNormal(p, map, eps * 0.1);
         intersection.reflectance = 0.0;
 
         if (dPlanets(p) < eps) {
@@ -514,10 +500,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.roughness = 0.4;
                 intersection.metallic = 0.8 * rand.x;
                 intersection.emission = vec3(0.0);
-
-                if (id == int(PLANETS_MIX_A) * PLANETS_NUM_MAX + 1) {
-                    // intersection.baseColor = mix(vec3(1.0), vec3(0.5), remapFrom(h, 0.7, 0.95));
-                }
 
                 if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX) {
                     intersection.baseColor = vec3(0.05);
@@ -724,20 +706,10 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
 
         vec3 sunColor = vec3(1.0, 0.9, 0.8);
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
-
-        // fog
-        // intersection.color = mix(intersection.color, vec3(0.6),
-        //                         1.0 - exp(-0.0001 * intersection.distance *
-        //                         intersection.distance *
-        //                         intersection.distance));
     } else {
-        intersection.color = vec3(0.01);
-
-        if (gSceneId == SCENE_UNIVERSE) {
-            float rdo = ray.direction.y + 0.6;
-            vec2 uv = (ray.direction.xz + ray.direction.xz * 250000.0 / rdo) * 0.000008;
-            intersection.color += skyboxUniverse(uv);
-        }
+        float rdo = ray.direction.y + 0.6;
+        vec2 uv = (ray.direction.xz + ray.direction.xz * 250000.0 / rdo) * 0.000008;
+        intersection.color = skyboxUniverse(uv);
     }
 }
 
@@ -779,26 +751,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
         calcRadiance(intersection, ray);
         color += reflection * intersection.color;
         if (!intersection.hit || intersection.reflectance == 0.0) break;
+
         reflection *= intersection.reflectance;
-
-        bool isIncoming = dot(ray.direction, intersection.normal) < 0.0;
-        vec3 orientingNormal = isIncoming ? intersection.normal : -intersection.normal;
-
-        bool isTotalReflection = false;
-        if (intersection.transparent) {
-            float nnt = isIncoming ? 1.0 / intersection.refractiveIndex : intersection.refractiveIndex;
-            ray.origin = intersection.position - orientingNormal * OFFSET;
-            ray.direction = refract(ray.direction, orientingNormal, nnt);
-            isTotalReflection = (ray.direction == vec3(0.0));
-            bounce = 0;
-        }
-
-        if (isTotalReflection || !intersection.transparent) {
-            ray.origin = intersection.position + orientingNormal * OFFSET;
-            vec3 l = reflect(ray.direction, orientingNormal);
-            reflection *= fresnelSchlick(gF0, dot(l, orientingNormal));
-            ray.direction = l;
-        }
+        ray.origin = intersection.position + intersection.normal * OFFSET;
+        vec3 l = reflect(ray.direction, intersection.normal);
+        reflection *= fresnelSchlick(gF0, dot(l, intersection.normal));
+        ray.direction = l;
     }
 
     fragColor = vec4(color, 1.0);

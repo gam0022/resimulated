@@ -408,21 +408,23 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         let scale = Math.exp(-0.01 * t);
         chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
 
-        if (t < 12) {
+        if (t < 10) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(-1.38, -0.8550687112306142, 47.4);
             chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
-        } else if (t < 16) {
+        } else if (t < 12) {
             chromatic.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
-            chromatic.uniforms.gCameraFov = 13;
+            const a = remapFrom(t, 10, 11);
+            chromatic.uniforms.gCameraFov = mix(20 * Math.exp(-0.005 * t), 13, easeInOutCubic(a));
+            // chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
         } else if (t < 20) {
             chromatic.uniforms.gPlanetsId = Planets.MIX_A;
-            const l = remapFrom(t, 16, 20);
+            const l = remapFrom(t, 12, 20);
             const e = easeInOutCubic(l);
             target = new Vector3(0, 0, remapTo(e, 0, 400));
             camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
-            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 16));
+            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 12));
             scale = 1;
             chromatic.uniforms.gCameraFov = 40 * Math.exp(-0.5 * e);
             // chromatic.uniforms.gCameraFov = 20 * (1.3 + Math.cos(Math.PI * 2 * l));

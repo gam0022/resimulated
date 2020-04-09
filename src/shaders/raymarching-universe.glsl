@@ -48,7 +48,7 @@ struct Intersection {
     float distance;
     vec3 normal;
     vec2 uv;
-    float count;
+    int count;
 
     vec3 baseColor;
     float roughness;
@@ -463,7 +463,9 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     vec3 p = ray.origin;
     float eps = 0.02;
 
-    for (float i = 0.0; i < 200.0; i++) {
+    int iteration = gPlanetsId == PLANETS_MIX_A ? 500 : 200;
+
+    for (int i = 0; i < iteration; i++) {
         d = map(p);
         distance += d;
         p = ray.origin + distance * ray.direction;

@@ -721,7 +721,6 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
     if (intersection.hit) {
         intersection.color = intersection.emission;
         intersection.color += evalPointLight(intersection, -ray.direction, camera.eye, gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
-        // intersection.color += evalPointLight(intersection, -ray.direction, vec3(gCameraEyeX, gCameraEyeY, gCameraEyeZ + 4.0), vec3(0.0));
 
         vec3 sunColor = vec3(1.0, 0.9, 0.8);
         intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);

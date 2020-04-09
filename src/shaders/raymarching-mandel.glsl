@@ -209,13 +209,14 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.position = p;
         intersection.normal = calcNormal(p, map, gSceneEps);
 
+        intersection.transparent = false;
+        intersection.refractiveIndex = 1.2;
+
         if (gBallRadius > 0.0 && abs(dBall(p)) < eps) {
             intersection.baseColor = vec3(0.0);
             intersection.roughness = 0.0;
             intersection.metallic = 1.0;
             intersection.emission = vec3(0.0);
-            intersection.transparent = false;
-            intersection.refractiveIndex = 1.2;
             intersection.reflectance = 1.0;
 
             if (gLogoIntensity > 0.0) {
@@ -232,8 +233,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
             float edge = calcEdge(p);
             float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
             intersection.emission = gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
-
-            intersection.transparent = false;
             intersection.reflectance = 0.0;
         }
     }

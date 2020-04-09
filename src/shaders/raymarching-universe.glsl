@@ -515,10 +515,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                 intersection.metallic = 0.8 * rand.x;
                 intersection.emission = vec3(0.0);
 
-                if (id == int(PLANETS_MIX_A) * PLANETS_NUM_MAX + 1) {
-                    // intersection.baseColor = mix(vec3(1.0), vec3(0.5), remapFrom(h, 0.7, 0.95));
-                }
-
                 if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX) {
                     intersection.baseColor = vec3(0.05);
                     intersection.emission = vec3(0.0);

@@ -5,15 +5,16 @@ void text(vec2 uv, inout vec3 result) {
     float t8 = mod(b, 8.0) / 8.0;
     float brightness = 1.0;
 
-    if (b < 0.0) {
-        // nop
-    } else if (b < 4.0) {
+    if (b < 4.0) {
         // 0-4 (4)
+        // nop
+    } else if (b < 8.0) {
+        // 4-8 (4)
         // A 64k INTRO
         col += texture(iTextTexture, textUv(uv, 0.0, vec2(0.0, 0.0), 3.0)).rgb;
         col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
-    } else if (b < 8.0) {
-        // 4-8 (4)
+    } else if (b < 12.0) {
+        // 8-12 (4)
         // gam0022 & sadakkey
         col += texture(iTextTexture, textUv(uv, 1.0, vec2(-1.0, 0.1), 1.0)).rgb;
         col += texture(iTextTexture, textUv(uv, 2.0, vec2(-1.0, -0.1), 1.0)).rgb;
@@ -22,7 +23,7 @@ void text(vec2 uv, inout vec3 result) {
         col += texture(iTextTexture, textUv(uv, 4.0, vec2(1.0, -0.1), 1.0)).rgb;
         col *= remap(t4, 0.5, 1.0, 1.0, 0.0);
     } else if (b < 16.0) {
-        // 8-16 (8)
+        // 12-16 (8)
         // RE: SIMULATED
         col += texture(iTextTexture, textUv(uv, 5.0, vec2(0.0, 0.0), 3.0)).rgb;
         col *= remap(t8, 0.5, 1.0, 0.0, 1.0);

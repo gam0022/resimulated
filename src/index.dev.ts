@@ -173,6 +173,8 @@ window.addEventListener("load", ev => {
     const fpsSpan = document.getElementById("fps-span");
     const stopButton = <HTMLInputElement>document.getElementById("stop-button");
     const playPauseButton = <HTMLInputElement>document.getElementById("play-pause-button");
+    const frameDecButton = <HTMLInputElement>document.getElementById("frame-dec-button");
+    const frameIncButton = <HTMLInputElement>document.getElementById("frame-inc-button");
     const timeInput = <HTMLInputElement>document.getElementById("time-input");
     const beatInput = <HTMLInputElement>document.getElementById("beat-input");
     const timeBar = <HTMLInputElement>document.getElementById("time-bar");
@@ -446,6 +448,26 @@ window.addEventListener("load", ev => {
         } else {
             chromatic.stopSound();
         }
+    });
+
+    frameDecButton.addEventListener("click", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
+        chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
+        chromatic.time -= 1 / 60;
+    });
+
+    frameIncButton.addEventListener("click", ev => {
+        if (chromatic.isPlaying) {
+            chromatic.stopSound();
+        }
+
+        chromatic.isPlaying = false;
+        chromatic.needsUpdate = true;
+        chromatic.time += 1 / 60;
     });
 
     timeInput.addEventListener("input", ev => {

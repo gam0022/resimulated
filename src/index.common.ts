@@ -26,7 +26,7 @@ export const chromatic = new Chromatic(
     require("./shaders/build-in/bloom-final.glsl").default,
 
     // Sound Shader
-    require("./shaders/sound-template.glsl").default,
+    require("./shaders/sound-resimulated.glsl").default,
 
     // Text Texture
     gl => {

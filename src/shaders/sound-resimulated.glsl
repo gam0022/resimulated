@@ -385,6 +385,37 @@ vec2 leadsub(float note, float t) {
     return vec2(dist(v * amp, 2.0));
 }
 
+vec2 leadsub2(float note, float t) {
+    vec2 v = vec2(0.0);
+    float dr = 0.1;
+    float amp = smoothstep(0.2, 0.0, abs(t - dr - 0.1) - dr) * exp(t * 0.2);
+    float f = noteToFreq(note);
+    float sqr = 0.05;  // smoothstep(0.0, 0.01, abs(mod(t * 9.0, 64.0) - 20.0) - 20.0);
+
+    float base = f;                    // 50.0 + sin(sin(t * 0.1) * t) * 20.0;
+    float flt = exp(t * -2.5) * 20.0;  // + pow(cos(t * 1.0) * 0.5 + 0.5, 4.0) * 80.0 - 0.0;
+    for (int i = 0; i < NSPC; i++) {
+        float h = float(i + 1);
+        float inten = 4.0 / h;
+        // inten *= sin((pow(h, sin(t) * 0.5 + 0.5) + t * 0.5) * pi2) * 0.9 + 0.1;
+
+        inten = mix(inten, inten * mod(h, 2.0), sqr);
+
+        inten *= exp(-3.0 * max(1.9 - h, 0.0));  // + exp(abs(h - flt) * -2.0) * 8.0;
+
+        inten *= _filter(h, flt);
+
+        v.x += inten * sin((TAU + 0.01) * (t * base * h));
+        v.y += inten * sin(TAU * (t * base * h));
+    }
+
+    float o = v.x * amp;  // exp(max(tnote - 0.3, 0.0) * -5.0);
+
+    // o = dist(o, 2.5);
+
+    return vec2(dist(v * amp, 2.0));
+}
+
 // https://www.shadertoy.com/view/4sSSWz
 float noise2(float phi) { return fract(sin(phi * 0.055753) * 122.3762) * 4.0 - 3.0; }
 
@@ -1255,7 +1286,7 @@ vec2 chordSquare1(float beat, float time) {
         S(72, 0, 0, 0), S(0, 0, 67, 0), S(0, 0, 0, 71), S(0, 0, 0, 0), S(72, 0, 0, 0), S(0, 0, 67, 0), S(0, 0, 0, 71), S(0, 0, 0, 0));
 
     // 展開 #define SQUARE1_DEV_LEN 8　変える
-    int[SQUARE1_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 1, 2, 2, 2), D(3, 3, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 0, 0, 0, 0));
+    int[SQUARE1_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 1, 2, 2, 2), D(3, 3, 3, 3, 3, 3, 3, 3), D(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SQUARE1_BEAT_LEN, SQUARE1_DEV_PAT, SQUARE1_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -1318,7 +1349,7 @@ vec2 chordSquare3(float beat, float time) {
         S(0, 0, 0, 71), S(0, 0, 0, 0), S(72, 0, 0, 0), S(0, 0, 67, 0), S(0, 0, 0, 71), S(0, 0, 0, 0), S(72, 0, 0, 0), S(0, 0, 67, 0));
 
     // 展開 #define SQUARE3_DEV_LEN 8　変える
-    int[SQUARE3_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 1, 2, 2, 2), D(3, 3, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 0, 0, 0, 0));
+    int[SQUARE3_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 1, 2, 2, 2), D(3, 3, 3, 3, 3, 3, 3, 3), D(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, SQUARE3_BEAT_LEN, SQUARE3_DEV_PAT, SQUARE3_DEV_LEN, notes, development, chordsquare1)
     return ret;
 }
@@ -1604,8 +1635,49 @@ vec2 hookSupersaw7(float beat, float time) {
         S(69, 72, 79, 69), S(72, 79, 69, 72), S(79, 69, 72, 79), S(69, 72, 79, 69), S(72, 79, 69, 72), S(79, 69, 72, 79), S(69, 72, 79, 69), S(72, 79, 69, 72));
 
     // 展開 #define HOOK3_DEV_LEN 8　変える
-    int[HOOK7_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 0, 0, 0, 0), D(1, 1, 1, 1, 1, 1, 1, 1), D(0, 0, 0, 0, 0, 0, 0, 0));
+    int[HOOK7_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 1, 1, 1, 1), D(0, 0, 0, 0, 0, 0, 0, 0), D(1, 1, 1, 1, 1, 1, 1, 1), D(0, 0, 0, 0, 0, 0, 0, 0));
     SEQUENCER(beat, time, HOOK7_BEAT_LEN, HOOK7_DEV_PAT, HOOK7_DEV_LEN, notes, development, arpsaw)
+    return ret;
+}
+
+vec2 hookSupersaw9(float beat, float time) {
+// 1つの展開のビート数
+#define HOOK3_BEAT_LEN 8
+
+// 展開のパターンの種類
+#define HOOK3_DEV_PAT 8
+
+// 展開の長さ
+#define HOOK3_DEV_LEN 32
+
+    int[HOOK3_BEAT_LEN * NOTE_DIV * HOOK3_DEV_PAT] notes = int[](
+        // 展開0
+        O(0), O(0),
+
+        // 展開1
+        F(69), S(69, 69, 69, 69), S(69, 69, 69, 69), S(69, 69, 69, 69), F(69), S(69, 69, 69, 69), S(69, 69, 69, 69), S(72, 72, 72, 72),
+
+        // 展開2
+        F(71), S(71, 71, 71, 71), S(71, 71, 71, 71), S(71, 71, 71, 71), F(83), S(71, 71, 71, 71), S(71, 71, 71, 71), S(71, 71, 71, 71),
+
+        // 展開3 HOOK 7～8小節目に使用
+        F(71), S(71, 71, 71, 71), S(71, 71, 71, 71), S(71, 71, 71, 71), F(76), S(76, 76, 76, 76), S(79, 79, 79, 79), S(79, 79, 79, 79),
+
+        // 展開4 HOOK 9～小節目に使用
+        F(67), S(67, 67, 67, 67), S(67, 67, 67, 67), S(67, 67, 67, 67), F(62), S(62, 62, 62, 62), S(62, 62, 62, 62), S(60, 60, 60, 60),
+
+        // 展開5 HOOK 11～小節目に使用
+        F(71), S(71, 71, 71, 71), S(71, 71, 71, 71), S(71, 71, 71, 71), F(74), S(74, 74, 74, 74), S(74, 74, 74, 74), S(74, 74, 74, 74),
+
+        // 展開6 HOOK 11～小節目に使用
+        F(67), S(67, 67, 67, 67), S(67, 67, 67, 67), S(67, 67, 67, 67), F(67), S(67, 67, 67, 67), S(67, 67, 67, 67), S(72, 72, 72, 72),
+
+        // 展開7 HOOK 11～小節目に使用
+        F(71), S(71, 71, 71, 71), S(71, 71, 71, 71), S(71, 71, 71, 71), F(74), S(74, 74, 74, 74), S(76, 76, 76, 76), S(76, 76, 76, 76));
+
+    // 展開 #define HOOK3_DEV_LEN 8　変える
+    int[HOOK3_DEV_LEN / DEV_PACK] development = int[](D(0, 0, 0, 0, 0, 0, 0, 0), D(0, 0, 0, 0, 0, 0, 0, 0), D(1, 2, 1, 3, 4, 5, 6, 7), D(0, 0, 0, 0, 0, 0, 0, 0));
+    SEQUENCER(beat, time, HOOK3_BEAT_LEN, HOOK3_DEV_PAT, HOOK3_DEV_LEN, notes, development, leadsub2)
     return ret;
 }
 
@@ -1729,69 +1801,79 @@ vec2 noisesidechain3(float beat, float time) {
 
 vec2 mainSound(float time) {
     //編集用に時間を途中からすすめる
-    time += 0.0;
+    // time += 0.0;
 
     float beat = timeToBeat(time);
     vec2 ret = vec2(0.0);
 
-    // kick
+    // Kick
     ret += vec2(0.7) * kick1(beat, time);
     ret += vec2(0.06) * kick2(beat, time);
+
+    // Exf
     ret += vec2(0.5, 0.15) * crashcymbal1(beat, time);
     ret += vec2(0.15, 0.5) * crashcymbal2(beat, time);
 
-    // arp
-    ret += vec2(0.3) * sidechain * subbass1(beat, time);              // サブベース
-    ret += vec2(0.1) * sidechain2 * arp0(beat, time);                 //
-    ret += vec2(0.35, 0.0) * sidechain2 * arp1(beat, time);           //
-    ret += vec2(0.0, 0.35) * sidechain2 * arp2(beat, time);           //
-    ret += vec2(0.5, 1.0) * sidechain2 * arp3(beat, time);            // サイン波のアルペジオ
-    ret += vec2(1.0, 0.3) * sidechain2 * arp4(beat, time);            //  サイン波のアルペジオ
-    ret += vec2(0.7, 0.2) * sidechain2 * chordSupersaw1(beat, time);  // コード
-    ret += vec2(0.4) * sidechain2 * chordSupersaw2(beat, time);       // コード
-    ret += vec2(0.3, 0.2) * sidechain2 * chordSupersaw3(beat, time);  // コード
-    ret += vec2(0.5, 0.6) * sidechain2 * chordSupersaw4(beat, time);  // コード
-    ret += vec2(0.3) * sidechain2 * chordSupersaw5(beat, time);       // コード
+    // Arp
+    ret += vec2(0.3) * sidechain * subbass1(beat, time);
+    ret += vec2(0.1) * sidechain2 * arp0(beat, time);
+    ret += vec2(0.35, 0.0) * sidechain2 * arp1(beat, time);
+    ret += vec2(0.0, 0.35) * sidechain2 * arp2(beat, time);
+    ret += vec2(0.5, 1.0) * sidechain2 * arp3(beat, time);
+    ret += vec2(1.0, 0.3) * sidechain2 * arp4(beat, time);
+    ret += vec2(0.4) * sidechain * arp5(beat, time);
 
+    // Chord
+    ret += vec2(0.7, 0.2) * sidechain2 * chordSupersaw1(beat, time);
+    ret += vec2(0.4) * sidechain2 * chordSupersaw2(beat, time);
+    ret += vec2(0.3, 0.2) * sidechain2 * chordSupersaw3(beat, time);
+    ret += vec2(0.5, 0.6) * sidechain2 * chordSupersaw4(beat, time);
+    ret += vec2(0.3) * sidechain2 * chordSupersaw5(beat, time);
+
+    // Noise
     ret += vec2(0.4) * sidechain5 * noisesidechain1(beat, time);
     ret += vec2(0.2, 0.05) * sidechain5 * noisesidechain2(beat, time);
     ret += vec2(0.05, 0.2) * sidechain5 * noisesidechain3(beat, time);
 
-    ret += vec2(0.4) * sidechain * arp5(beat, time);                // アルペジオ中央
-    ret += vec2(0.1, 0.3) * sidechain2 * chordSquare1(beat, time);  //
-    ret += vec2(0.3) * sidechain2 * chordSquare2(beat, time);       //
-    ret += vec2(0.3, 0.1) * sidechain2 * chordSquare3(beat, time);  //
+    // Buildup chord
+    ret += vec2(0.1, 0.3) * sidechain2 * chordSquare1(beat, time);
+    ret += vec2(0.3) * sidechain2 * chordSquare2(beat, time);
+    ret += vec2(0.3, 0.1) * sidechain2 * chordSquare3(beat, time);
 
-    // ret = vec2(0.0);
-    // supersaw
+    // Supersaw
     ret += vec2(0.02, 0.15) * sidechain * introSupersaw1(beat, time);
     ret += vec2(0.2, 0.05) * sidechain2 * introSupersaw2(beat, time);
+
+    // Hook_Supersaw
     ret += vec2(0.3, 0.15) * sidechain * hookSupersaw1(beat, time);
     ret += vec2(0.4) * sidechain * hookSupersaw2(beat, time);
     ret += vec2(0.10, 0.2) * sidechain * hookSupersaw3(beat, time);
     ret += vec2(0.2, 0.05) * sidechain * hookSupersaw4(beat, time);
-    ret += vec2(0.15) * sidechain * hookSupersaw5(beat, time);
-    ret += vec2(0.02, 0.1) * sidechain * hookSupersaw6(beat, time);
-    ret += vec2(0.07, 0.02) * sidechain4 * hookSupersaw7(beat, time);
-    ret += vec2(0.1, 0.02) * sidechain4 * hookSupersaw8(beat, time);
 
-    // ここまでの音をMute
+    // Hook_Voice
+    ret += vec2(0.07, 0.13) * sidechain * hookSupersaw5(beat, time);
+    ret += vec2(0.03, 0.1) * sidechain * hookSupersaw6(beat, time);
+    ret += vec2(0.08, 0.05) * sidechain4 * hookSupersaw7(beat, time);
+    ret += vec2(0.1, 0.05) * sidechain4 * hookSupersaw8(beat, time);
+    ret += vec2(0.03, 0.02) * sidechain * hookSupersaw9(beat, time);
 
     // ret = vec2(0.0);
 
-    // bass
+    // ここまでの音をMute
+
+    // Bass
     ret += vec2(0.5) * sidechain4 * bass1(beat, time);
     ret += vec2(0.19, 0.19) * sidechain4 * bass2(beat, time);
     ret += vec2(0.01) * sidechain4 * bass3(beat, time);
-    ret += vec2(0.2, 0.15) * sidechain2 * sideSupersaw1(beat, time);  // ベースの補強
-    ret += vec2(0.15, 0.2) * sidechain2 * sideSupersaw2(beat, time);  // ベースの補強
-    ret += vec2(0.05, 0.05) * sidechain4 * tb303synth(beat, time);    // ベースの補強
+    ret += vec2(0.2, 0.15) * sidechain2 * sideSupersaw1(beat, time);
+    ret += vec2(0.15, 0.2) * sidechain2 * sideSupersaw2(beat, time);
+    ret += vec2(0.05, 0.05) * sidechain4 * tb303synth(beat, time);
 
-    // hihat
+    // Hihat
     ret += vec2(0.0, 0.7) * sidechain * thihat1(beat, time);
     ret += vec2(0.3, 0.05) * sidechain * thihat2(beat, time);
 
-    // snare
+    // Snare
     ret += vec2(0.2) * snare1(beat, time);
     ret += vec2(0.1) * snare2(beat, time);
     ret += vec2(0.37, 0.3) * sidechain2 * noisefeed(beat, time);

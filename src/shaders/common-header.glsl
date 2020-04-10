@@ -3,12 +3,32 @@ precision highp float;
 precision highp int;
 precision mediump sampler3D;
 
+// #define AA
+
+uniform vec3 iResolution;
+uniform float iTime;
+uniform sampler2D iPrevPass;
+uniform sampler2D iTextTexture;
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord);
 
 out vec4 outColor;
 void main(void) {
     vec4 c;
+#ifdef AA
+    vec4 t;
+    c = vec4(0.0);
+    for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < 2; x++) {
+            vec2 sub = vec2(float(x), float(y)) * 0.5;  // FIXME
+            vec2 uv = gl_FragCoord.xy + sub;
+            mainImage(t, uv);
+            c += 0.25 * t;
+        }
+    }
+#else
     mainImage(c, gl_FragCoord.xy);
+#endif
     outColor = c;
 }
 
@@ -18,11 +38,6 @@ const float TAU = 6.28318530718;
 const float PIH = 1.57079632679;
 
 #define saturate(x) clamp(x, 0.0, 1.0)
-
-uniform vec3 iResolution;
-uniform float iTime;
-uniform sampler2D iPrevPass;
-uniform sampler2D iTextTexture;
 
 // https://www.shadertoy.com/view/3tX3R4
 float clamp2(float x, float min, float max) { return (min < max) ? clamp(x, min, max) : clamp(x, max, min); }

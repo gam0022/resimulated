@@ -15,6 +15,7 @@ export const chromatic = new Chromatic(
         require("./shaders/raymarching-universe.glsl").default,
         require("./shaders/text-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
+        // require("./shaders/effects/debug-circle.glsl").default,
     ],
 
     // Bloom

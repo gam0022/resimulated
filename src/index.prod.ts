@@ -46,8 +46,8 @@ window.addEventListener("load", ev => {
         loadingMessage.style.fontSize = "50px";
         container.appendChild(loadingMessage);
 
-        setTimeout(() => {
-            document.body.requestFullscreen().then(() => {
+        document.body.requestFullscreen().then(() => {
+            setTimeout(() => {
                 chromatic.onRender = (time, timeDelta) => {
                     animateUniforms(time, false, false);
                     if (!finished && time > chromatic.timeLength + 2.0) {
@@ -70,8 +70,8 @@ window.addEventListener("load", ev => {
                 setTimeout(() => {
                     chromatic.play();
                     chromatic.playSound();
-                }, 3000);
-            });
-        }, 1000);
+                }, 2500);
+            }, 1000);
+        });
     }
 }, false);

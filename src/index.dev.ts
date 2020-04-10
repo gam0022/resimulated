@@ -91,7 +91,7 @@ window.addEventListener("load", ev => {
                 chromatic.canvas.toBlob(blob => {
                     saveAs(blob, filename);
 
-                    if (frame < fps * timeLengthInput.valueAsNumber) {
+                    if (frame <= Math.ceil(fps * timeLengthInput.valueAsNumber)) {
                         requestAnimationFrame(update);
                     }
                 });

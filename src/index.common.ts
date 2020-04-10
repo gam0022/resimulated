@@ -15,6 +15,7 @@ export const chromatic = new Chromatic(
         require("./shaders/raymarching-universe.glsl").default,
         require("./shaders/text-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
+        // require("./shaders/effects/debug-circle.glsl").default,
     ],
 
     // Bloom
@@ -36,7 +37,7 @@ export const chromatic = new Chromatic(
 
         // MAX: 4096 / 128 = 32
         const texts = [
-            /* 0 */ "A 64k INTRO",
+            /* 0 */ "A 64K INTRO",
             /* 1 */ "GRAPHICS",
             /* 2 */ "gam0022",
             /* 3 */ "MUSIC",
@@ -71,12 +72,15 @@ export const chromatic = new Chromatic(
 
         canvas.width = 2048;
         canvas.height = 4096;
+        textCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+        textCtx.fillStyle = "black";
+        textCtx.fillRect(0, 0, canvas.width, canvas.height);
+
         textCtx.font = "110px arial";
         textCtx.textAlign = "center";
         textCtx.textBaseline = "middle";
         textCtx.fillStyle = "white";
-        textCtx.clearRect(0, 0, canvas.width, canvas.height);
-
         texts.forEach((text, index) => {
             textCtx.fillText(text, canvas.width / 2, 64 + index * 128);
         });

@@ -37,7 +37,7 @@ export const chromatic = new Chromatic(
 
         // MAX: 4096 / 128 = 32
         const texts = [
-            /* 0 */ "A 64k INTRO",
+            /* 0 */ "A 64K INTRO",
             /* 1 */ "GRAPHICS",
             /* 2 */ "gam0022",
             /* 3 */ "MUSIC",

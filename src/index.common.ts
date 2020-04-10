@@ -179,6 +179,26 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gCameraLightIntensity = 1.2;
         chromatic.uniforms.gEmissiveIntensity = 0;
         chromatic.uniforms.gBallRadius = 0;
+
+        const k = t % 8;
+        let kickTime = 0;
+        let kickAmp = 0;
+        if (k < 1.0) {
+            kickTime = k;
+            kickAmp = 1;
+        } else if (k < 3.5) {
+        } else if (k < 4) {
+            kickTime = k - 3.5;
+            kickAmp = 1;
+        } else if (k < 5) {
+            kickTime = k - 4;
+            kickAmp = 1;
+        } else if (k < 7) {
+        } else {
+            kickTime = k - 7;
+            kickAmp = 1;
+        }
+        chromatic.uniforms.gShockDistortion = 0.2 * kickAmp * Math.exp(-60 * kickTime);
     }).then(16, t => {
         camera = new Vector3(-0.08503080276580499, 1.3346599987007965, -15.01732922836809).add(Vector3.fbm(t).scale(0.001));
         target = new Vector3(0.784904810273659, 3.3444920877098543, 7.36034431847018);
@@ -193,6 +213,26 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         if (t >= 0) {
             chromatic.uniforms.gXSfhitGlitch = 0.1 * Math.exp(-4 * (t - 0));
         }
+
+        const k = t % 8;
+        let kickTime = 0;
+        let kickAmp = 0;
+        if (k < 1.0) {
+            kickTime = k;
+            kickAmp = 1;
+        } else if (k < 3.5) {
+        } else if (k < 4) {
+            kickTime = k - 3.5;
+            kickAmp = 1;
+        } else if (k < 5) {
+            kickTime = k - 4;
+            kickAmp = 1;
+        } else if (k < 7) {
+        } else {
+            kickTime = k - 7;
+            kickAmp = 1;
+        }
+        chromatic.uniforms.gShockDistortion = 0.2 * kickAmp * Math.exp(-60 * kickTime);
     }).then(16, t => {
         // ちょっとEmissive
         camera = new Vector3(0.05336320223924196, 3.2510840695253322 + 0.01 * t, -5.0872681523358665).add(Vector3.fbm(t).scale(0.001));

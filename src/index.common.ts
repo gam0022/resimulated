@@ -233,9 +233,8 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             kickAmp = 1;
         }
 
-        if (t > 8) {
-            chromatic.uniforms.gCameraLightIntensity += 30 * kickAmp * Math.exp(-60 * kickTime);
-        }
+        chromatic.uniforms.gCameraLightIntensity += (t < 4 ? 5 : 60) * kickAmp * Math.exp(-60 * kickTime);
+
     }).then(16, t => {
         // ちょっとEmissive
         camera = new Vector3(0.05336320223924196, 3.2510840695253322 + 0.01 * t, -5.0872681523358665).add(Vector3.fbm(t).scale(0.001));

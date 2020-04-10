@@ -42,7 +42,7 @@ window.addEventListener("load", ev => {
         container.appendChild(loading);
 
         const loadingMessage = document.createElement("p");
-        loadingMessage.innerHTML = "It takes about one minute. please wait.";
+        loadingMessage.innerHTML = "It takes about one minute. Please wait.";
         loadingMessage.style.fontSize = "50px";
         container.appendChild(loadingMessage);
 

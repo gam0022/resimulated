@@ -71,12 +71,15 @@ export const chromatic = new Chromatic(
 
         canvas.width = 2048;
         canvas.height = 4096;
+        textCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+        textCtx.fillStyle = "black";
+        textCtx.fillRect(0, 0, canvas.width, canvas.height);
+
         textCtx.font = "110px arial";
         textCtx.textAlign = "center";
         textCtx.textBaseline = "middle";
         textCtx.fillStyle = "white";
-        textCtx.clearRect(0, 0, canvas.width, canvas.height);
-
         texts.forEach((text, index) => {
             textCtx.fillText(text, canvas.width / 2, 64 + index * 128);
         });

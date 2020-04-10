@@ -46,8 +46,8 @@ window.addEventListener("load", ev => {
         loadingMessage.style.fontSize = "50px";
         container.appendChild(loadingMessage);
 
-        setTimeout(() => {
-            document.body.requestFullscreen().then(() => {
+        document.body.requestFullscreen().then(() => {
+            setTimeout(() => {
                 chromatic.onRender = (time, timeDelta) => {
                     animateUniforms(time, false, false);
                     if (!finished && time > chromatic.timeLength + 2.0) {
@@ -57,6 +57,7 @@ window.addEventListener("load", ev => {
                 }
 
                 chromatic.init();
+                container.remove();
 
                 const onResize = () => {
                     const scale = parseFloat(resolutionScale.value);
@@ -67,11 +68,10 @@ window.addEventListener("load", ev => {
                 onResize();
 
                 setTimeout(() => {
-                    container.remove();
                     chromatic.play();
                     chromatic.playSound();
-                }, 1000);
-            });
-        }, 1000);
+                }, 2500);
+            }, 1000);
+        });
     }
 }, false);

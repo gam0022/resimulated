@@ -319,7 +319,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatic.uniforms.gBallRadius = 0.1;
 
         // hue
-        chromatic.uniforms.gEmissiveHueShiftBeat = t < 4 ? 0.25 : 2.0;
+        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
     }).then(16, t => {
         // サビ後半
         ball.z = -20;

@@ -57,6 +57,7 @@ window.addEventListener("load", ev => {
                 }
 
                 chromatic.init();
+                container.remove();
 
                 const onResize = () => {
                     const scale = parseFloat(resolutionScale.value);
@@ -67,10 +68,9 @@ window.addEventListener("load", ev => {
                 onResize();
 
                 setTimeout(() => {
-                    container.remove();
                     chromatic.play();
                     chromatic.playSound();
-                }, 1000);
+                }, 2000);
             });
         }, 1000);
     }

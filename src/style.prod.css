@@ -38,7 +38,7 @@ p {
 
 .button {
     border-style: solid;
-    padding: 10px;
+    padding: 10px 20px;
     animation: blinkAnime 0.85714285714s infinite alternate;
 }
 

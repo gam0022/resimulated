@@ -70,7 +70,7 @@ window.addEventListener("load", ev => {
                 setTimeout(() => {
                     chromatic.play();
                     chromatic.playSound();
-                }, 2000);
+                }, 3000);
             });
         }, 1000);
     }

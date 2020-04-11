@@ -1,4 +1,4 @@
-import { chromatic, animateUniforms } from './index.common'
+import { chromatiq, animateUniforms } from './index.common'
 
 window.addEventListener("load", ev => {
     let finished = false;
@@ -48,28 +48,28 @@ window.addEventListener("load", ev => {
 
         document.body.requestFullscreen().then(() => {
             setTimeout(() => {
-                chromatic.onRender = (time, timeDelta) => {
+                chromatiq.onRender = (time, timeDelta) => {
                     animateUniforms(time, false, false);
-                    if (!finished && time > chromatic.timeLength + 2.0) {
+                    if (!finished && time > chromatiq.timeLength + 2.0) {
                         document.exitFullscreen();
                         finished = true;
                     }
                 }
 
-                chromatic.init();
+                chromatiq.init();
                 container.remove();
 
                 const onResize = () => {
                     const scale = parseFloat(resolutionScale.value);
-                    chromatic.setSize(window.innerWidth * scale, window.innerHeight * scale);
+                    chromatiq.setSize(window.innerWidth * scale, window.innerHeight * scale);
                 };
 
                 window.addEventListener("resize", onResize);
                 onResize();
 
                 setTimeout(() => {
-                    chromatic.play();
-                    chromatic.playSound();
+                    chromatiq.play();
+                    chromatiq.playSound();
                 }, 2500);
             }, 1000);
         });

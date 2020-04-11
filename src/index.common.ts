@@ -1,10 +1,10 @@
-import { Chromatic } from "./chromatic"
+import { Chromatiq } from "./chromatiq"
 import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubic, easeInOutCubicVelocity } from "./math"
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
 
-export const chromatic = new Chromatic(
+export const chromatiq = new Chromatiq(
     109.714285714,// デモの長さ（秒）
     require("./shaders/build-in/vertex.glsl").default,
 
@@ -148,37 +148,37 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
     let ball = new Vector3(0, 0, -10);
 
     // reset values
-    chromatic.uniformArray.forEach(uniform => {
+    chromatiq.uniformArray.forEach(uniform => {
         // debug時は値の毎フレームリセットをしない
         if (!PRODUCTION) {
             if (debugDisableReset) return;
             if (debugCamera && uniform.key.includes("gCamera")) return;
         }
 
-        chromatic.uniforms[uniform.key] = uniform.initValue;
+        chromatiq.uniforms[uniform.key] = uniform.initValue;
     });
 
     new Timeline(beat).then(8, t => {
-        chromatic.uniforms.gBlend = -1.0 + easeInOutCubic(remapFrom(t, 0, 4));
-        chromatic.uniforms.gTonemapExposure = 0.2;
+        chromatiq.uniforms.gBlend = -1.0 + easeInOutCubic(remapFrom(t, 0, 4));
+        chromatiq.uniforms.gTonemapExposure = 0.2;
 
         camera = new Vector3(0, 0.2, -13.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
-        chromatic.uniforms.gMandelboxScale = 1.8;
-        chromatic.uniforms.gCameraLightIntensity = 0.4;
-        chromatic.uniforms.gEmissiveIntensity = 0;
-        chromatic.uniforms.gSceneEps = 0.003;
-        chromatic.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gMandelboxScale = 1.8;
+        chromatiq.uniforms.gCameraLightIntensity = 0.4;
+        chromatiq.uniforms.gEmissiveIntensity = 0;
+        chromatiq.uniforms.gSceneEps = 0.003;
+        chromatiq.uniforms.gBallRadius = 0;
     }).then(8, t => {
-        chromatic.uniforms.gTonemapExposure = 0.2;
+        chromatiq.uniforms.gTonemapExposure = 0.2;
         camera = new Vector3(0, 0.2, -17.0 - t * 0.1).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
 
-        chromatic.uniforms.gMandelboxScale = 1.8;
-        chromatic.uniforms.gCameraLightIntensity = 1.2;
-        chromatic.uniforms.gEmissiveIntensity = 0;
-        chromatic.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gMandelboxScale = 1.8;
+        chromatiq.uniforms.gCameraLightIntensity = 1.2;
+        chromatiq.uniforms.gEmissiveIntensity = 0;
+        chromatiq.uniforms.gBallRadius = 0;
 
         const k = t % 8;
         let kickTime = 0;
@@ -198,20 +198,20 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             kickTime = k - 7;
             kickAmp = 1;
         }
-        chromatic.uniforms.gCameraLightIntensity += 10 * kickAmp * Math.exp(-60 * kickTime);
+        chromatiq.uniforms.gCameraLightIntensity += 10 * kickAmp * Math.exp(-60 * kickTime);
     }).then(16, t => {
         camera = new Vector3(-0.08503080276580499, 1.3346599987007965, -15.01732922836809).add(Vector3.fbm(t).scale(0.001));
         target = new Vector3(0.784904810273659, 3.3444920877098543, 7.36034431847018);
-        chromatic.uniforms.gCameraFov = (t < 8 ? 2 : 5) + 0.05 * t;
+        chromatiq.uniforms.gCameraFov = (t < 8 ? 2 : 5) + 0.05 * t;
 
-        chromatic.uniforms.gMandelboxScale = 2.5010184112784057;
-        chromatic.uniforms.gCameraLightIntensity = 1.4;
-        chromatic.uniforms.gEmissiveIntensity = 0;
-        chromatic.uniforms.gSceneEps = 0.0002645177773046626;
-        chromatic.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gMandelboxScale = 2.5010184112784057;
+        chromatiq.uniforms.gCameraLightIntensity = 1.4;
+        chromatiq.uniforms.gEmissiveIntensity = 0;
+        chromatiq.uniforms.gSceneEps = 0.0002645177773046626;
+        chromatiq.uniforms.gBallRadius = 0;
 
         if (t >= 0) {
-            chromatic.uniforms.gXSfhitGlitch = 0.1 * Math.exp(-4 * (t - 0));
+            chromatiq.uniforms.gXSfhitGlitch = 0.1 * Math.exp(-4 * (t - 0));
         }
 
         const k = t % 8;
@@ -233,32 +233,32 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             kickAmp = 1;
         }
 
-        chromatic.uniforms.gCameraLightIntensity += (t < 4 ? 5 : 60) * kickAmp * Math.exp(-60 * kickTime);
+        chromatiq.uniforms.gCameraLightIntensity += (t < 4 ? 5 : 60) * kickAmp * Math.exp(-60 * kickTime);
 
     }).then(16, t => {
         // ちょっとEmissive
         camera = new Vector3(0.05336320223924196, 3.2510840695253322 + 0.01 * t, -5.0872681523358665).add(Vector3.fbm(t).scale(0.001));
         target = new Vector3(-0.21247566790275868, 3.469965904363116, -0.4828265949411093);
-        chromatic.uniforms.gCameraFov = 22.457765885219057;
+        chromatiq.uniforms.gCameraFov = 22.457765885219057;
 
-        chromatic.uniforms.gMandelboxScale = 2.9815487838971206;
-        chromatic.uniforms.gCameraLightIntensity = 0.01;
-        chromatic.uniforms.gEmissiveIntensity = 1.8818642917049402;
-        chromatic.uniforms.gEdgeEps = 0.0001;
-        chromatic.uniforms.gEmissiveSpeed = 0.5;
-        chromatic.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gMandelboxScale = 2.9815487838971206;
+        chromatiq.uniforms.gCameraLightIntensity = 0.01;
+        chromatiq.uniforms.gEmissiveIntensity = 1.8818642917049402;
+        chromatiq.uniforms.gEdgeEps = 0.0001;
+        chromatiq.uniforms.gEmissiveSpeed = 0.5;
+        chromatiq.uniforms.gBallRadius = 0;
     }).then(16, t => {
         // ちょっとEmissive2
         camera = new Vector3(-0.009156083313678657, 3.548031114215368, -5.16851465075457 + 0.5 * t).add(Vector3.fbm(t).scale(0.005));
         target = camera.add(new Vector3(0.1, 0.1, 1));
-        chromatic.uniforms.gCameraFov = 23;
+        chromatiq.uniforms.gCameraFov = 23;
 
-        chromatic.uniforms.gMandelboxScale = 2.9815487838971206;
-        chromatic.uniforms.gCameraLightIntensity = 0.003;
-        chromatic.uniforms.gEdgeEps = 0.0001;
-        chromatic.uniforms.gEmissiveIntensity = 1.8818642917049402;
-        chromatic.uniforms.gEmissiveSpeed = 0.5;
-        chromatic.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gMandelboxScale = 2.9815487838971206;
+        chromatiq.uniforms.gCameraLightIntensity = 0.003;
+        chromatiq.uniforms.gEdgeEps = 0.0001;
+        chromatiq.uniforms.gEmissiveIntensity = 1.8818642917049402;
+        chromatiq.uniforms.gEmissiveSpeed = 0.5;
+        chromatiq.uniforms.gBallRadius = 0;
     }).then(16, t => {
         // 展開
         const camera1 = new Vector3(0, 2.8, -8);
@@ -267,146 +267,146 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         camera = Vector3.mix(camera1, camera2, saturate(0.1 * t));
         target = new Vector3(0, 0, 0);
 
-        chromatic.uniforms.gMandelboxScale = 1.0 + 0.02 * t;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gMandelboxScale = 1.0 + 0.02 * t;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0;
     }).then(16, t => {
         // Ballをズームするカット
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 0.2 + 0.003 * t * t).add(ball).add(Vector3.fbm(t).scale(0.001));
         target = ball;
 
-        chromatic.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.32 + 0 * Math.sin(t);
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
     }).then(8, t => {
         // Ballをズームするカット
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(-0.2 - 0.05 * t, 0.2 + 0.05 * t, 1.0 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.001));
         target = ball;
 
-        chromatic.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.32 - 0.02 * t;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
     }).then(8, t => {
         // サビ 1-1
         ball.z = -10 - 0.5 * t;
         camera = new Vector3(1, -0.2, -14).add(Vector3.fbm(t).scale(0.001));
         target = ball.add(new Vector3(-0.15, 0, 0));
 
-        chromatic.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
     }).then(8, t => {
         // サビ 1-2
         ball.z = -10 - 0.5 * t;
         camera = new Vector3(0.4, 0.5, -8).add(Vector3.fbm(t).scale(0.001));
         target = ball.add(new Vector3(-0.15, -0.15, 0));
 
-        chromatic.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.244560757418114;//1.2;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
     }).then(8, t => {
         // サビ 1-3
         ball.z = -10 - 0.5 * t;
         camera = new Vector3(0, 0, -1).add(ball).add(Vector3.fbm(t).scale(0.001));
         target = ball.add(new Vector3(-0.15, 0, 0));
-        chromatic.uniforms.gCameraFov = 43;
+        chromatiq.uniforms.gCameraFov = 43;
 
-        chromatic.uniforms.gMandelboxScale = 1.2;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.2;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
 
         // hue
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatiq.uniforms.gEmissiveHueShiftBeat = 0.5;
     }).then(16, t => {
         // サビ後半
         ball.z = -20;
         camera = new Vector3(0, 0, -10).add(Vector3.fbm(t).scale(0.01));
         target = camera.add(new Vector3(0, 0, -1));
 
-        chromatic.uniforms.gMandelboxScale = 1.2 - 0.01 * t;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.2 - 0.01 * t;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
 
         if (t > 8) {
             //chromatic.uniforms.gFoldRotate = 4 * 2 * Math.floor(t);
         }
 
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
-        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
-        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
+        chromatiq.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatiq.uniforms.gEmissiveHueShiftZ = 0.3;
+        chromatiq.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(16, t => {
         // サビ後半
         ball.z = 10;
         camera = new Vector3(0, 0, -8 - t * 2.0).add(Vector3.fbm(t).scale(0.01));
         target = camera.add(new Vector3(0, 0, 1));
 
-        chromatic.uniforms.gMandelboxScale = 1.2 - 0.0125 * t;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
-        chromatic.uniforms.gFoldRotate = 8;
+        chromatiq.uniforms.gMandelboxScale = 1.2 - 0.0125 * t;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gFoldRotate = 8;
 
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.5;
-        chromatic.uniforms.gEmissiveHueShiftZ = 0.3;
-        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
+        chromatiq.uniforms.gEmissiveHueShiftBeat = 0.5;
+        chromatiq.uniforms.gEmissiveHueShiftZ = 0.3;
+        chromatiq.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(8, t => {
         // Revisonロゴ
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(0, 0, 1 + 0.003 * t * t).add(ball);
         target = ball.scale(1);
 
-        chromatic.uniforms.gMandelboxScale = 1.32 - 0.04 * t;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gMandelboxScale = 1.32 - 0.04 * t;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gBallRadius = 0.1;
 
-        chromatic.uniforms.gLogoIntensity = remap(t, 4, 8, 0.02, 2);
+        chromatiq.uniforms.gLogoIntensity = remap(t, 4, 8, 0.02, 2);
         if (t >= 7) {
             const a = Math.exp(-10 * (t - 7));
-            chromatic.uniforms.gShockDistortion = a;
-            chromatic.uniforms.gLogoIntensity += a;
+            chromatiq.uniforms.gShockDistortion = a;
+            chromatiq.uniforms.gLogoIntensity += a;
         }
 
-        chromatic.uniforms.gF0 = 0;
-        chromatic.uniforms.gChromaticAberrationIntensity = 0.04 + 0.1 * saturate(Math.sin(Math.PI * 2 * t));
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.3;
-        chromatic.uniforms.gEmissiveHueShiftXY = 0.3;
+        chromatiq.uniforms.gF0 = 0;
+        chromatiq.uniforms.gChromaticAberrationIntensity = 0.04 + 0.1 * saturate(Math.sin(Math.PI * 2 * t));
+        chromatiq.uniforms.gEmissiveHueShiftBeat = 0.3;
+        chromatiq.uniforms.gEmissiveHueShiftXY = 0.3;
     }).then(8, t => {
         // 不穏感
         ball.z = -10 - 0.2 * t;
         camera = new Vector3(-0.2 - 0.1 * t, 0.2 + 0.02 * t, 1 + 0.05 * t).add(ball).add(Vector3.fbm(t).scale(0.01));
         target = ball;
-        chromatic.uniforms.gCameraFov = remap(t, 0, 8, 13, 20);
+        chromatiq.uniforms.gCameraFov = remap(t, 0, 8, 13, 20);
 
-        chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.01, 0.05);
+        chromatiq.uniforms.gBallDistortion = remap(t, 0, 8, 0.01, 0.05);
 
         if (t < 2) {
-            chromatic.uniforms.gBallDistortionFreq = 12;
+            chromatiq.uniforms.gBallDistortionFreq = 12;
         } else if (t < 4) {
-            chromatic.uniforms.gBallDistortionFreq = 20;
+            chromatiq.uniforms.gBallDistortionFreq = 20;
         } else if (t < 6) {
-            chromatic.uniforms.gBallDistortionFreq = 20 + t * 5;
+            chromatiq.uniforms.gBallDistortionFreq = 20 + t * 5;
         } else {
-            chromatic.uniforms.gBallDistortionFreq = 30;
+            chromatiq.uniforms.gBallDistortionFreq = 30;
         }
 
         if (t >= 4) {
-            chromatic.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
+            chromatiq.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
         }
 
         if (t >= 7) {
             const a = Math.exp(-10 * (t - 7));
-            chromatic.uniforms.gShockDistortion = a;
+            chromatiq.uniforms.gShockDistortion = a;
         }
 
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0.3;
+        chromatiq.uniforms.gEmissiveHueShiftBeat = 0.3;
 
-        chromatic.uniforms.gMandelboxScale = 1.1;
-        chromatic.uniforms.gBallRadius = 0.1;
-        chromatic.uniforms.gLogoIntensity = 1.0 + Math.sin(t * Math.PI * 2);
-        chromatic.uniforms.gF0 = 0;
-        chromatic.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
-        chromatic.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gMandelboxScale = 1.1;
+        chromatiq.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gLogoIntensity = 1.0 + Math.sin(t * Math.PI * 2);
+        chromatiq.uniforms.gF0 = 0;
+        chromatiq.uniforms.gChromaticAberrationIntensity = 0.06 + 0.1 * Math.sin(10 * t);
+        chromatiq.uniforms.gEmissiveIntensity = 6;
     }).then(16, t => {
         // 爆発とディストーション
         ball.z = -12 - 0.2 * t;
@@ -415,159 +415,159 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         target = ball;
 
         const b = (t % 1);
-        chromatic.uniforms.gBallDistortion = remap(t, 0, 8, 0.05, 0.1) * Math.exp(-5 * b);
+        chromatiq.uniforms.gBallDistortion = remap(t, 0, 8, 0.05, 0.1) * Math.exp(-5 * b);
 
-        chromatic.uniforms.gFlash = 1;
+        chromatiq.uniforms.gFlash = 1;
 
         if (t < 2) {
-            chromatic.uniforms.gBallDistortionFreq = 12;
-            chromatic.uniforms.gFlashSpeed = 5;
+            chromatiq.uniforms.gBallDistortionFreq = 12;
+            chromatiq.uniforms.gFlashSpeed = 5;
         } else if (t < 4) {
-            chromatic.uniforms.gBallDistortionFreq = 20;
-            chromatic.uniforms.gFlashSpeed = 10;
+            chromatiq.uniforms.gBallDistortionFreq = 20;
+            chromatiq.uniforms.gFlashSpeed = 10;
         } else if (t < 6) {
-            chromatic.uniforms.gBallDistortionFreq = 10 + t * 5;
-            chromatic.uniforms.gFlashSpeed = 15;
+            chromatiq.uniforms.gBallDistortionFreq = 10 + t * 5;
+            chromatiq.uniforms.gFlashSpeed = 15;
         } else {
-            chromatic.uniforms.gBallDistortionFreq = t * t;
-            chromatic.uniforms.gFlashSpeed = 30;
+            chromatiq.uniforms.gBallDistortionFreq = t * t;
+            chromatiq.uniforms.gFlashSpeed = 30;
         }
 
         if (t >= 4) {
-            chromatic.uniforms.gShockDistortion = 4 * Math.exp(-10 * (t - 4));
-            chromatic.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
+            chromatiq.uniforms.gShockDistortion = 4 * Math.exp(-10 * (t - 4));
+            chromatiq.uniforms.gInvertRate = Math.exp(-10 * (t - 4));
         }
 
         if (t >= 8) {
-            chromatic.uniforms.gInvertRate = Math.exp(-20 * (t - 8));
+            chromatiq.uniforms.gInvertRate = Math.exp(-20 * (t - 8));
         }
 
-        chromatic.uniforms.gExplodeDistortion = easeInOutCubic(remapFrom(t, 4, 16));
-        chromatic.uniforms.gBlend = easeInOutCubic(remapFrom(t, 13, 16));
+        chromatiq.uniforms.gExplodeDistortion = easeInOutCubic(remapFrom(t, 4, 16));
+        chromatiq.uniforms.gBlend = easeInOutCubic(remapFrom(t, 13, 16));
 
-        chromatic.uniforms.gMandelboxScale = 1.2;
-        chromatic.uniforms.gBallRadius = 0.1;
-        chromatic.uniforms.gEmissiveIntensity = 6;
-        chromatic.uniforms.gChromaticAberrationIntensity = 0.04;
+        chromatiq.uniforms.gMandelboxScale = 1.2;
+        chromatiq.uniforms.gBallRadius = 0.1;
+        chromatiq.uniforms.gEmissiveIntensity = 6;
+        chromatiq.uniforms.gChromaticAberrationIntensity = 0.04;
 
-        chromatic.uniforms.gEmissiveHue = 0.01;
-        chromatic.uniforms.gEmissiveHueShiftBeat = 0;
-        chromatic.uniforms.gEmissiveHueShiftZ = remapFrom(t, 4, 16);
-        chromatic.uniforms.gEmissiveHueShiftXY = remapFrom(t, 4, 16);
+        chromatiq.uniforms.gEmissiveHue = 0.01;
+        chromatiq.uniforms.gEmissiveHueShiftBeat = 0;
+        chromatiq.uniforms.gEmissiveHueShiftZ = remapFrom(t, 4, 16);
+        chromatiq.uniforms.gEmissiveHueShiftXY = remapFrom(t, 4, 16);
     }).then(32, t => {
         // 惑星でグリーティング
-        chromatic.uniforms.gSceneId = 1;
-        chromatic.uniforms.gSceneEps = 0.002;
-        chromatic.uniforms.gTonemapExposure = 1;
+        chromatiq.uniforms.gSceneId = 1;
+        chromatiq.uniforms.gSceneEps = 0.002;
+        chromatiq.uniforms.gTonemapExposure = 1;
 
         target = new Vector3(0, 0, 0);
         let scale = Math.exp(-0.01 * t);
-        chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
+        chromatiq.uniforms.gCameraFov = 20 * Math.exp(-0.005 * (t % 4));
 
         if (t < 8) {
-            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+            chromatiq.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(-1.38, -0.8550687112306142, 47.4);
-            chromatic.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
+            chromatiq.uniforms.gCameraFov = 20 * Math.exp(-0.005 * t);
         } else if (t < 12) {
-            chromatic.uniforms.gPlanetsId = Planets.MERCURY;
+            chromatiq.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
-            chromatic.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 8)));
+            chromatiq.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 8)));
             // chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
         } else if (t < 20) {
-            chromatic.uniforms.gPlanetsId = Planets.MIX_A;
+            chromatiq.uniforms.gPlanetsId = Planets.MIX_A;
             const l = remapFrom(t, 13, 20);
             const e = easeInOutCubic(l);
             target = new Vector3(0, 0, remapTo(e, 0, 400));
             camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
-            chromatic.uniforms.gShockDistortion = 1.5 * Math.exp(-10 * (t - 12));
+            chromatiq.uniforms.gShockDistortion = 1.5 * Math.exp(-10 * (t - 12));
             scale = 1;
             // chromatic.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
-            chromatic.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-0.1 * (t - 12)));
+            chromatiq.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-0.1 * (t - 12)));
         } else if (t < 24) {
-            chromatic.uniforms.gPlanetsId = Planets.KANETA;
+            chromatiq.uniforms.gPlanetsId = Planets.KANETA;
             camera = new Vector3(15, 1, 20);
         } else if (t < 28) {
-            chromatic.uniforms.gPlanetsId = Planets.FMSCAT;
+            chromatiq.uniforms.gPlanetsId = Planets.FMSCAT;
             camera = new Vector3(-15, 3, 20);
 
             if (t >= 27) {
-                chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 27));
+                chromatiq.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 27));
             }
         } else {
-            chromatic.uniforms.gPlanetsId = Planets.MIX_B;
+            chromatiq.uniforms.gPlanetsId = Planets.MIX_B;
             target = new Vector3(1, 0, 0);
             camera = new Vector3(remapTo(1 - Math.exp(-20 * (t - 28)), 10, -15), -3, 50);
-            chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 28));
+            chromatiq.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 28));
         }
 
         camera = camera.scale(scale).add(Vector3.fbm(t).scale(0.01));
 
-        chromatic.uniforms.gBallRadius = 0;
-        chromatic.uniforms.gBloomIntensity = 5;
-        chromatic.uniforms.gBloomThreshold = 0.7;
-        chromatic.uniforms.gBlend = remapTo(easeInOutCubic(remapFrom(t, 0, 16)), 1, 0);
+        chromatiq.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gBloomIntensity = 5;
+        chromatiq.uniforms.gBloomThreshold = 0.7;
+        chromatiq.uniforms.gBlend = remapTo(easeInOutCubic(remapFrom(t, 0, 16)), 1, 0);
     }).then(32, t => {
         // クレジット
-        chromatic.uniforms.gSceneId = 1;
-        chromatic.uniforms.gPlanetsId = Planets.EARTH;
-        chromatic.uniforms.gSceneEps = 0.005;
-        chromatic.uniforms.gTonemapExposure = 1;
+        chromatiq.uniforms.gSceneId = 1;
+        chromatiq.uniforms.gPlanetsId = Planets.EARTH;
+        chromatiq.uniforms.gSceneEps = 0.005;
+        chromatiq.uniforms.gTonemapExposure = 1;
 
         camera = new Vector3(-47.38, -0.85, 12.4).scale(Math.exp(-0.01 * t)).add(Vector3.fbm(t).scale(0.01));
         target = new Vector3(0, 0, 0);
         ball.z = 0;
-        chromatic.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
+        chromatiq.uniforms.gCameraFov = 30 * Math.exp(-0.01 * t);
 
         if (t >= 0) {
-            chromatic.uniforms.gXSfhitGlitch = 0.05 * Math.exp(-1.55 * t);
+            chromatiq.uniforms.gXSfhitGlitch = 0.05 * Math.exp(-1.55 * t);
         }
 
         if (t >= 7) {
-            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 7));
+            chromatiq.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 7));
         }
 
         if (t >= 15) {
-            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 15));
+            chromatiq.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 15));
         }
 
         if (t >= 21) {
-            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 21));
+            chromatiq.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 21));
         }
 
         if (t >= 26) {
-            chromatic.uniforms.gInvertRate = Math.exp(-8 * (t - 26));
+            chromatiq.uniforms.gInvertRate = Math.exp(-8 * (t - 26));
         }
 
         if (t >= 26.5) {
-            chromatic.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-6 * (t - 26.5));
+            chromatiq.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-6 * (t - 26.5));
         }
 
         if (t >= 31) {
-            chromatic.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 31));
+            chromatiq.uniforms.gGlitchIntensity = 0.05 * Math.exp(-5 * (t - 31));
         }
 
         if (t >= 31.5) {
-            chromatic.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-10 * (t - 31.5));
+            chromatiq.uniforms.gXSfhitGlitch = 0.5 * Math.exp(-10 * (t - 31.5));
         }
 
-        chromatic.uniforms.gBallRadius = 0;
-        chromatic.uniforms.gBloomIntensity = 5;
-        chromatic.uniforms.gBloomThreshold = 0.7;
+        chromatiq.uniforms.gBallRadius = 0;
+        chromatiq.uniforms.gBloomIntensity = 5;
+        chromatiq.uniforms.gBloomThreshold = 0.7;
     }).over(t => {
         // 終わり(仮)
-        chromatic.uniforms.gBlend = -1;
+        chromatiq.uniforms.gBlend = -1;
     });
 
-    chromatic.uniforms.gBallZ = ball.z;
+    chromatiq.uniforms.gBallZ = ball.z;
 
     if (!PRODUCTION && debugCamera) {
         return;
     }
 
-    chromatic.uniforms.gCameraEyeX = camera.x;
-    chromatic.uniforms.gCameraEyeY = camera.y;
-    chromatic.uniforms.gCameraEyeZ = camera.z;
-    chromatic.uniforms.gCameraTargetX = target.x;
-    chromatic.uniforms.gCameraTargetY = target.y;
-    chromatic.uniforms.gCameraTargetZ = target.z;
+    chromatiq.uniforms.gCameraEyeX = camera.x;
+    chromatiq.uniforms.gCameraEyeY = camera.y;
+    chromatiq.uniforms.gCameraEyeZ = camera.z;
+    chromatiq.uniforms.gCameraTargetX = target.x;
+    chromatiq.uniforms.gCameraTargetY = target.y;
+    chromatiq.uniforms.gCameraTargetZ = target.z;
 }

@@ -1,4 +1,4 @@
-import { chromatic, animateUniforms } from './index.common'
+import { chromatiq, animateUniforms } from './index.common'
 
 import * as dat from 'dat.gui';
 import { saveAs } from 'file-saver';
@@ -9,8 +9,8 @@ const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
 window.addEventListener("load", ev => {
-    chromatic.init();
-    chromatic.play();
+    chromatiq.init();
+    chromatiq.play();
 
     // dat.GUI
     const gui = new dat.GUI({ width: 1000 });
@@ -28,21 +28,21 @@ window.addEventListener("load", ev => {
     const debugFolder = gui.addFolder("debug");
     debugFolder.add(config, "debugCamera").onChange(value => {
         if (value) {
-            camera.position.x = chromatic.uniforms.gCameraEyeX;
-            camera.position.y = chromatic.uniforms.gCameraEyeY;
-            camera.position.z = chromatic.uniforms.gCameraEyeZ;
-            controls.target.x = chromatic.uniforms.gCameraTargetX;
-            controls.target.y = chromatic.uniforms.gCameraTargetY;
-            controls.target.z = chromatic.uniforms.gCameraTargetZ;
+            camera.position.x = chromatiq.uniforms.gCameraEyeX;
+            camera.position.y = chromatiq.uniforms.gCameraEyeY;
+            camera.position.z = chromatiq.uniforms.gCameraEyeZ;
+            controls.target.x = chromatiq.uniforms.gCameraTargetX;
+            controls.target.y = chromatiq.uniforms.gCameraTargetY;
+            controls.target.z = chromatiq.uniforms.gCameraTargetZ;
         }
 
-        chromatic.needsUpdate = true;
+        chromatiq.needsUpdate = true;
     });
     debugFolder.add(config, "debugParams").onChange(value => {
-        chromatic.needsUpdate = true;
+        chromatiq.needsUpdate = true;
     });
     debugFolder.add(config, "debugDisableReset").onChange(value => {
-        chromatic.needsUpdate = true;
+        chromatiq.needsUpdate = true;
     });
 
     const miscFolder = gui.addFolder("misc");
@@ -57,23 +57,23 @@ window.addEventListener("load", ev => {
         onBeatLengthUpdate();
     });
     // NOTE: 使用頻度が低いのでmisc送りに
-    miscFolder.add(chromatic, "debugFrameNumber", -1, 30, 1).onChange(value => {
-        chromatic.needsUpdate = true;
+    miscFolder.add(chromatiq, "debugFrameNumber", -1, 30, 1).onChange(value => {
+        chromatiq.needsUpdate = true;
     });
 
     const saevFunctions = {
         saveImage: () => {
-            chromatic.canvas.toBlob(blob => {
+            chromatiq.canvas.toBlob(blob => {
                 saveAs(blob, "chromatic.png");
             });
         },
         saveImageSequence: () => {
-            if (chromatic.isPlaying) {
-                chromatic.stopSound();
+            if (chromatiq.isPlaying) {
+                chromatiq.stopSound();
             }
 
-            chromatic.isPlaying = false;
-            chromatic.needsUpdate = false;
+            chromatiq.isPlaying = false;
+            chromatiq.needsUpdate = false;
             playPauseButton.value = playChar;
 
             const fps = 60;
@@ -82,13 +82,13 @@ window.addEventListener("load", ev => {
                 const time = frame / fps;
                 timeBar.valueAsNumber = time;
                 timeInput.valueAsNumber = time;
-                chromatic.time = time;
+                chromatiq.time = time;
 
                 animateUniforms(time, config.debugCamera, config.debugDisableReset);
-                chromatic.render();
+                chromatiq.render();
 
                 const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
-                chromatic.canvas.toBlob(blob => {
+                chromatiq.canvas.toBlob(blob => {
                     saveAs(blob, filename);
 
                     if (frame <= Math.ceil(fps * timeLengthInput.valueAsNumber)) {
@@ -102,8 +102,8 @@ window.addEventListener("load", ev => {
             requestAnimationFrame(update);
         },
         saveSound: () => {
-            const sampleLength = Math.ceil(chromatic.audioContext.sampleRate * chromatic.timeLength);
-            const waveBlob = bufferToWave(chromatic.audioSource.buffer, sampleLength);
+            const sampleLength = Math.ceil(chromatiq.audioContext.sampleRate * chromatiq.timeLength);
+            const waveBlob = bufferToWave(chromatiq.audioSource.buffer, sampleLength);
             saveAs(waveBlob, "chromatic.wav");
         },
     };
@@ -113,7 +113,7 @@ window.addEventListener("load", ev => {
 
     const groupFolders: { [index: string]: dat.GUI } = {};
 
-    chromatic.uniformArray.forEach(unifrom => {
+    chromatiq.uniformArray.forEach(unifrom => {
         let groupFolder = groupFolders[unifrom.group];
         if (!groupFolder) {
             groupFolder = gui.addFolder(unifrom.group);
@@ -121,7 +121,7 @@ window.addEventListener("load", ev => {
         }
 
         if (typeof unifrom.initValue === "number") {
-            groupFolder.add(chromatic.uniforms, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
+            groupFolder.add(chromatiq.uniforms, unifrom.key, unifrom.min, unifrom.max).onChange(value => {
                 if (config.debugCamera) {
                     switch (unifrom.key) {
                         case "gCameraEyeX":
@@ -145,11 +145,11 @@ window.addEventListener("load", ev => {
                     }
                 }
 
-                chromatic.needsUpdate = true;
+                chromatiq.needsUpdate = true;
             });
         } else {
-            groupFolder.addColor(chromatic.uniforms, unifrom.key).onChange(value => {
-                chromatic.needsUpdate = true;
+            groupFolder.addColor(chromatiq.uniforms, unifrom.key).onChange(value => {
+                chromatiq.needsUpdate = true;
             });
         }
     })
@@ -190,14 +190,14 @@ window.addEventListener("load", ev => {
         const ret = config.resolution.match(/(\d+)x(\d+)/);
         if (ret) {
             // Fixed Resolution
-            chromatic.setSize(parseInt(ret[1]), parseInt(ret[2]));
+            chromatiq.setSize(parseInt(ret[1]), parseInt(ret[2]));
         } else {
             // Scaled Resolution
             const resolutionScale = parseFloat(config.resolution);
-            chromatic.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
+            chromatiq.setSize(window.innerWidth * resolutionScale, window.innerHeight * resolutionScale);
         }
 
-        chromatic.needsUpdate = true;
+        chromatiq.needsUpdate = true;
     }
 
     const onTimeModeChange = () => {
@@ -257,15 +257,15 @@ window.addEventListener("load", ev => {
         sessionStorage.setItem("resolution", config.resolution);
         sessionStorage.setItem("timeMode", config.timeMode);
         sessionStorage.setItem("bpm", config.bpm.toString());
-        sessionStorage.setItem("debugFrameNumber", chromatic.debugFrameNumber.toString());
+        sessionStorage.setItem("debugFrameNumber", chromatiq.debugFrameNumber.toString());
 
-        sessionStorage.setItem("time", chromatic.time.toString());
-        sessionStorage.setItem("isPlaying", chromatic.isPlaying.toString());
+        sessionStorage.setItem("time", chromatiq.time.toString());
+        sessionStorage.setItem("isPlaying", chromatiq.isPlaying.toString());
         sessionStorage.setItem("timeLength", timeLengthInput.value);
 
         sessionStorage.setItem("guiClosed", gui.closed.toString());
 
-        for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
+        for (const [key, uniform] of Object.entries(chromatiq.uniforms)) {
             sessionStorage.setItem(key, uniform.toString());
         }
     }
@@ -309,25 +309,25 @@ window.addEventListener("load", ev => {
 
         const debugFrameNumberStr = sessionStorage.getItem("debugFrameNumber");
         if (debugFrameNumberStr) {
-            chromatic.debugFrameNumber = parseFloat(debugFrameNumberStr);
+            chromatiq.debugFrameNumber = parseFloat(debugFrameNumberStr);
         }
 
         const timeStr = sessionStorage.getItem("time")
         if (timeStr) {
-            chromatic.time = parseFloat(timeStr);
+            chromatiq.time = parseFloat(timeStr);
         }
 
         const isPlayingStr = sessionStorage.getItem("isPlaying");
         if (isPlayingStr) {
-            chromatic.isPlaying = parseBool(isPlayingStr);
-            playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
+            chromatiq.isPlaying = parseBool(isPlayingStr);
+            playPauseButton.value = chromatiq.isPlaying ? pauseChar : playChar;
         }
 
         const timeLengthStr = sessionStorage.getItem("timeLength");
         if (timeLengthStr) {
             timeLengthInput.valueAsNumber = parseFloat(timeLengthStr);
         } else {
-            timeLengthInput.valueAsNumber = chromatic.timeLength;
+            timeLengthInput.valueAsNumber = chromatiq.timeLength;
         }
 
         beatLengthInput.valueAsNumber = timeToBeat(timeLengthInput.valueAsNumber);
@@ -339,15 +339,15 @@ window.addEventListener("load", ev => {
             gui.closed = parseBool(guiClosedStr);
         }
 
-        for (const [key, uniform] of Object.entries(chromatic.uniforms)) {
+        for (const [key, uniform] of Object.entries(chromatiq.uniforms)) {
             const unifromStr = sessionStorage.getItem(key);
             if (unifromStr) {
                 const ary = unifromStr.split(",");
                 if (ary.length === 3) {
-                    chromatic.uniforms[key] = ary.map(s => parseFloat(s));
+                    chromatiq.uniforms[key] = ary.map(s => parseFloat(s));
                 }
                 else if (ary.length === 1) {
-                    chromatic.uniforms[key] = parseFloat(unifromStr);
+                    chromatiq.uniforms[key] = parseFloat(unifromStr);
                 }
             }
         }
@@ -364,12 +364,12 @@ window.addEventListener("load", ev => {
     const camera = new three.PerspectiveCamera(75, 1.0, 1, 1000);
 
     if (config.debugCamera) {
-        camera.position.set(chromatic.uniforms.gCameraEyeX, chromatic.uniforms.gCameraEyeY, chromatic.uniforms.gCameraEyeZ);
-        camera.lookAt(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+        camera.position.set(chromatiq.uniforms.gCameraEyeX, chromatiq.uniforms.gCameraEyeY, chromatiq.uniforms.gCameraEyeZ);
+        camera.lookAt(chromatiq.uniforms.gCameraTargetX, chromatiq.uniforms.gCameraTargetY, chromatiq.uniforms.gCameraTargetZ);
     }
 
-    const controls = new THREE.OrbitControls(camera, chromatic.canvas);
-    controls.target = new three.Vector3(chromatic.uniforms.gCameraTargetX, chromatic.uniforms.gCameraTargetY, chromatic.uniforms.gCameraTargetZ);
+    const controls = new THREE.OrbitControls(camera, chromatiq.canvas);
+    controls.target = new three.Vector3(chromatiq.uniforms.gCameraTargetX, chromatiq.uniforms.gCameraTargetY, chromatiq.uniforms.gCameraTargetZ);
     controls.zoomSpeed = 3.0;
     controls.screenSpacePanning = true;
     controls.mouseButtons = {
@@ -383,7 +383,7 @@ window.addEventListener("load", ev => {
 
 
     // Player
-    chromatic.onRender = (time, timeDelta) => {
+    chromatiq.onRender = (time, timeDelta) => {
         timeInput.valueAsNumber = time;
         beatInput.valueAsNumber = timeToBeat(time);
         timeBar.valueAsNumber = time;
@@ -399,20 +399,20 @@ window.addEventListener("load", ev => {
         gui.updateDisplay();
     }
 
-    chromatic.onUpdate = () => {
+    chromatiq.onUpdate = () => {
         if (config.debugCamera) {
             controls.update();
 
             if (!camera.position.equals(prevCameraPosotion) || !controls.target.equals(prevCameraTarget)) {
-                chromatic.uniforms.gCameraEyeX = camera.position.x;
-                chromatic.uniforms.gCameraEyeY = camera.position.y;
-                chromatic.uniforms.gCameraEyeZ = camera.position.z;
-                chromatic.uniforms.gCameraTargetX = controls.target.x;
-                chromatic.uniforms.gCameraTargetY = controls.target.y;
-                chromatic.uniforms.gCameraTargetZ = controls.target.z;
+                chromatiq.uniforms.gCameraEyeX = camera.position.x;
+                chromatiq.uniforms.gCameraEyeY = camera.position.y;
+                chromatiq.uniforms.gCameraEyeZ = camera.position.z;
+                chromatiq.uniforms.gCameraTargetX = controls.target.x;
+                chromatiq.uniforms.gCameraTargetY = controls.target.y;
+                chromatiq.uniforms.gCameraTargetZ = controls.target.z;
 
                 gui.updateDisplay();
-                chromatic.needsUpdate = true;
+                chromatiq.needsUpdate = true;
             }
 
             prevCameraPosotion.copy(camera.position);
@@ -420,8 +420,8 @@ window.addEventListener("load", ev => {
         }
     }
 
-    if (chromatic.isPlaying) {
-        chromatic.playSound();
+    if (chromatiq.isPlaying) {
+        chromatiq.playSound();
     }
 
 
@@ -429,89 +429,89 @@ window.addEventListener("load", ev => {
     window.addEventListener("resize", onResolutionCange);
 
     stopButton.addEventListener("click", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
-        chromatic.time = 0;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
+        chromatiq.time = 0;
         playPauseButton.value = playChar;
     });
 
     playPauseButton.addEventListener("click", ev => {
-        chromatic.isPlaying = !chromatic.isPlaying;
-        playPauseButton.value = chromatic.isPlaying ? pauseChar : playChar;
+        chromatiq.isPlaying = !chromatiq.isPlaying;
+        playPauseButton.value = chromatiq.isPlaying ? pauseChar : playChar;
 
-        if (chromatic.isPlaying) {
-            chromatic.playSound()
+        if (chromatiq.isPlaying) {
+            chromatiq.playSound()
         } else {
-            chromatic.stopSound();
+            chromatiq.stopSound();
         }
     });
 
     frameDecButton.addEventListener("click", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
-        chromatic.time -= 1 / 60;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
+        chromatiq.time -= 1 / 60;
     });
 
     frameIncButton.addEventListener("click", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
-        chromatic.time += 1 / 60;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
+        chromatiq.time += 1 / 60;
     });
 
     timeInput.addEventListener("input", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.time = timeInput.valueAsNumber;
+        chromatiq.time = timeInput.valueAsNumber;
         playPauseButton.value = playChar;
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
     });
 
     beatInput.addEventListener("input", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.time = beatToTime(beatInput.valueAsNumber);
+        chromatiq.time = beatToTime(beatInput.valueAsNumber);
         playPauseButton.value = playChar;
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
     });
 
     timeBar.addEventListener("input", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.time = timeBar.valueAsNumber;
+        chromatiq.time = timeBar.valueAsNumber;
         playPauseButton.value = playChar;
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
     });
 
     beatBar.addEventListener("input", ev => {
-        if (chromatic.isPlaying) {
-            chromatic.stopSound();
+        if (chromatiq.isPlaying) {
+            chromatiq.stopSound();
         }
 
-        chromatic.time = beatToTime(beatBar.valueAsNumber);
+        chromatiq.time = beatToTime(beatBar.valueAsNumber);
         playPauseButton.value = playChar;
-        chromatic.isPlaying = false;
-        chromatic.needsUpdate = true;
+        chromatiq.isPlaying = false;
+        chromatiq.needsUpdate = true;
     });
 
     timeLengthInput.addEventListener("input", ev => {

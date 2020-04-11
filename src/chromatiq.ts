@@ -27,7 +27,7 @@ class Pass {
 const SOUND_WIDTH = 512;
 const SOUND_HEIGHT = 512;
 
-export class Chromatic {
+export class Chromatiq {
     /** 再生時間の長さです */
     timeLength: number;
 

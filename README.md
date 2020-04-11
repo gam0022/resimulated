@@ -1,6 +1,4 @@
-# Chromatic
-
-デモシーンを目的にしたファイルサイズが極小のWebGLエンジンです。
+# RE: SIMULATED
 
 ## 環境構築
 
@@ -13,25 +11,20 @@
 
 ```sh
 # gitからリポジトリをcloneします。
-git clone git@github.com:gam0022/webpack-tdf2020.git
+git clone git@github.com:gam0022/resimulated.git
 
-cd webpack-tdf2020
+cd resimulated
 
 # プロジェクトのセットアップをします。
 npm install
 
 # 開発をするときのコマンド（Webサーバを起動）
-npm run start
+npm run server
 
-# ビルドをするときのコマンド（提出するときにしか使わないので、sadakkey さんはあまり使わないはず）
+# ビルドをするときのコマンド
 npm run build
 ```
 
-## 編集するとき
+## Chromatiq
 
-### サウンド
-
-`src/shaders/sound-*.glsl` を編集してください。
-
-ファイル名は以下から指定できます。
-https://github.com/gam0022/webpack-tdf2020/blob/master/src/index.dev.ts#L13
+PC 64K Introのために開発したファイルサイズの最小化を目的にした自作のWebGLエンジンです。

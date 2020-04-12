@@ -550,7 +550,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatiq.uniforms.gBloomIntensity = 5;
         chromatiq.uniforms.gBloomThreshold = 0.7;
     }).over(t => {
-        // 終わり(仮)
+        // デモ終了後
         chromatiq.uniforms.gBlend = -1;
     });
 

@@ -25,18 +25,18 @@ window.addEventListener("load", ev => {
     const resolutionScale = document.createElement("select");
     if (NEORT) {
         resolutionScale.innerHTML = `
-        <option value="0.25">LOW 25%</option>
-        <option value="0.5" selected>REGULAR 50%</option>
-        <option value="0.75">REGULAR 75%</option>
-        <option value="1.0">FULL 100%</option>
-        `;
+    <option value="0.25">LOW 25%</option>
+    <option value="0.5" selected>REGULAR 50%</option>
+    <option value="0.75">REGULAR 75%</option>
+    <option value="1.0">FULL 100%</option>
+    `;
     } else {
         resolutionScale.innerHTML = `
-        <option value="0.25">LOW 25%</option>
-        <option value="0.5">REGULAR 50%</option>
-        <option value="0.75">REGULAR 75%</option>
-        <option value="1.0" selected>FULL 100%</option>
-        `;
+    <option value="0.25">LOW 25%</option>
+    <option value="0.5">REGULAR 50%</option>
+    <option value="0.75">REGULAR 75%</option>
+    <option value="1.0" selected>FULL 100%</option>
+    `;
     }
     resolutionMessage.appendChild(resolutionScale);
 

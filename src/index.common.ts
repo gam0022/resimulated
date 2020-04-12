@@ -329,10 +329,6 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatiq.uniforms.gEmissiveIntensity = 6;
         chromatiq.uniforms.gBallRadius = 0.1;
 
-        if (t > 8) {
-            // chromatiq.uniforms.gFoldRotate = 4 * 2 * Math.floor(t);
-        }
-
         chromatiq.uniforms.gEmissiveHueShiftBeat = 0.5;
         chromatiq.uniforms.gEmissiveHueShiftZ = 0.3;
         chromatiq.uniforms.gEmissiveHueShiftXY = 0.3;

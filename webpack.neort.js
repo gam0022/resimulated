@@ -7,7 +7,7 @@ module.exports = merge(common, {
     entry: './src/index.prod.ts',
     mode: 'production',
     output: {
-        filename: 'bundle.js',
+        filename: 'bundle.neort.js',
         path: path.resolve(__dirname, 'dist'),
     },
     plugins: [new webpack.DefinePlugin({
@@ -15,6 +15,6 @@ module.exports = merge(common, {
         GLOBAL_UNIFORMS: JSON.stringify(true),
         // PLAY_SOUND_FILE: JSON.stringify('200319_bgm_sketch.aac'),
         PLAY_SOUND_FILE: JSON.stringify(false),
-        NEORT: JSON.stringify(false),
+        NEORT: JSON.stringify(true),
     })],
 });

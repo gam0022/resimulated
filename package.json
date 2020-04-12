@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "webpack-dev-server --open --config webpack.dev.js",
-    "build": "node node_modules/clean-css-cli/bin/cleancss -o dist/style.prod.min.css src/style.prod.css && webpack --config webpack.prod.js && ruby pnginator.rb ./dist/bundle.js ./dist/resimulated.html"
+    "build": "node node_modules/clean-css-cli/bin/cleancss -o dist/style.prod.min.css src/style.prod.css && webpack --config webpack.prod.js && ruby pnginator.rb ./dist/bundle.js ./dist/resimulated.html",
+    "build-neort": "webpack --config webpack.neort.js"
   },
   "keywords": [],
   "author": "",

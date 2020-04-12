@@ -1,5 +1,8 @@
 import { chromatiq, animateUniforms } from './index.common'
 
+// for Webpack DefinePlugin
+declare var NEORT: boolean;
+
 window.addEventListener("load", ev => {
     let finished = false;
 
@@ -20,12 +23,21 @@ window.addEventListener("load", ev => {
     container.appendChild(resolutionMessage);
 
     const resolutionScale = document.createElement("select");
-    resolutionScale.innerHTML = `
-    <option value="0.25">LOW 25%</option>
-    <option value="0.5">REGULAR 50%</option>
-    <option value="0.75">REGULAR 75%</option>
-    <option value="1.0" selected>FULL 100%</option>
-    `;
+    if (NEORT) {
+        resolutionScale.innerHTML = `
+        <option value="0.25">LOW 25%</option>
+        <option value="0.5" selected>REGULAR 50%</option>
+        <option value="0.75">REGULAR 75%</option>
+        <option value="1.0">FULL 100%</option>
+        `;
+    } else {
+        resolutionScale.innerHTML = `
+        <option value="0.25">LOW 25%</option>
+        <option value="0.5">REGULAR 50%</option>
+        <option value="0.75">REGULAR 75%</option>
+        <option value="1.0" selected>FULL 100%</option>
+        `;
+    }
     resolutionMessage.appendChild(resolutionScale);
 
     const button = document.createElement("p");
@@ -42,7 +54,11 @@ window.addEventListener("load", ev => {
         container.appendChild(loading);
 
         const loadingMessage = document.createElement("p");
-        loadingMessage.innerHTML = "It takes about one minute. Please wait.";
+        if (NEORT) {
+            loadingMessage.innerHTML = "It takes about one minute. Please wait.<br> 読み込みに1分程度かかります。しばらくお待ち下さい。";
+        } else {
+            loadingMessage.innerHTML = "It takes about one minute. Please wait.";
+        }
         loadingMessage.style.fontSize = "50px";
         container.appendChild(loadingMessage);
 

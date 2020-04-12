@@ -4,22 +4,17 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = merge(common, {
-    entry: './src/index.dev.ts',
-    mode: 'development',
+    entry: './src/index.prod.ts',
+    mode: 'production',
     output: {
-        filename: 'bundle.js',
+        filename: 'bundle.neort.js',
         path: path.resolve(__dirname, 'dist'),
     },
-    devtool: 'inline-source-map',
-    devServer: {
-        inline: true,
-        hot: true,
-        contentBase: './dist',
-    },
     plugins: [new webpack.DefinePlugin({
-        PRODUCTION: JSON.stringify(false),
+        PRODUCTION: JSON.stringify(true),
         GLOBAL_UNIFORMS: JSON.stringify(true),
         // PLAY_SOUND_FILE: JSON.stringify('200319_bgm_sketch.aac'),
         PLAY_SOUND_FILE: JSON.stringify(false),
+        NEORT: JSON.stringify(true),
     })],
 });

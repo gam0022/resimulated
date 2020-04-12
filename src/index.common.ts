@@ -3,7 +3,6 @@ import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubi
 
 // for Webpack DefinePlugin
 declare var PRODUCTION: boolean;
-declare var NOERT: boolean;
 
 export const chromatiq = new Chromatiq(
     109.714285714,// デモの長さ（秒）

@@ -18,10 +18,10 @@ cd resimulated
 # プロジェクトのセットアップをします。
 npm install
 
-# 開発をするときのコマンド（Webサーバを起動）
-npm run server
+# 開発をするときのコマンド（ホットリドード・デバッグ用UIありでWebサーバを起動）
+npm run start
 
-# ビルドをするときのコマンド
+# ビルドをするときのコマンド（dist\resimulated.htmlを生成）
 npm run build
 ```
 

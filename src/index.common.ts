@@ -329,10 +329,6 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatiq.uniforms.gEmissiveIntensity = 6;
         chromatiq.uniforms.gBallRadius = 0.1;
 
-        if (t > 8) {
-            //chromatic.uniforms.gFoldRotate = 4 * 2 * Math.floor(t);
-        }
-
         chromatiq.uniforms.gEmissiveHueShiftBeat = 0.5;
         chromatiq.uniforms.gEmissiveHueShiftZ = 0.3;
         chromatiq.uniforms.gEmissiveHueShiftXY = 0.3;
@@ -472,7 +468,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             chromatiq.uniforms.gPlanetsId = Planets.MERCURY;
             camera = new Vector3(5, 1, 30);
             chromatiq.uniforms.gCameraFov = mix(13, 20 * Math.exp(-0.005 * t), Math.exp(-20 * (t - 8)));
-            // chromatic.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
+            // chromatiq.uniforms.gShockDistortion = 0.3 * Math.exp(-20 * (t - 10));
         } else if (t < 20) {
             chromatiq.uniforms.gPlanetsId = Planets.MIX_A;
             const l = remapFrom(t, 13, 20);
@@ -481,7 +477,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
             camera = target.add(new Vector3(5, 5, 40).scale(remapTo(e, 1, 0.8)));
             chromatiq.uniforms.gShockDistortion = 1.5 * Math.exp(-10 * (t - 12));
             scale = 1;
-            // chromatic.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
+            // chromatiq.uniforms.gCameraFov = remapTo(easeInOutCubic(easeInOutCubicVelocity(l)), 10, 40);
             chromatiq.uniforms.gCameraFov = mix(40 * Math.exp(-0.5 * e), 13, Math.exp(-0.1 * (t - 12)));
         } else if (t < 24) {
             chromatiq.uniforms.gPlanetsId = Planets.KANETA;
@@ -554,7 +550,7 @@ export const animateUniforms = (time: number, debugCamera: boolean, debugDisable
         chromatiq.uniforms.gBloomIntensity = 5;
         chromatiq.uniforms.gBloomThreshold = 0.7;
     }).over(t => {
-        // 終わり(仮)
+        // デモ終了後
         chromatiq.uniforms.gBlend = -1;
     });
 

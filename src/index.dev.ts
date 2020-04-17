@@ -64,7 +64,7 @@ window.addEventListener("load", ev => {
     const saevFunctions = {
         saveImage: () => {
             chromatiq.canvas.toBlob(blob => {
-                saveAs(blob, "chromatic.png");
+                saveAs(blob, "chromatiq.png");
             });
         },
         saveImageSequence: () => {
@@ -87,7 +87,7 @@ window.addEventListener("load", ev => {
                 animateUniforms(time, config.debugCamera, config.debugDisableReset);
                 chromatiq.render();
 
-                const filename = `chromatic${frame.toString().padStart(4, "0")}.png`;
+                const filename = `chromatiq${frame.toString().padStart(4, "0")}.png`;
                 chromatiq.canvas.toBlob(blob => {
                     saveAs(blob, filename);
 
@@ -104,7 +104,7 @@ window.addEventListener("load", ev => {
         saveSound: () => {
             const sampleLength = Math.ceil(chromatiq.audioContext.sampleRate * chromatiq.timeLength);
             const waveBlob = bufferToWave(chromatiq.audioSource.buffer, sampleLength);
-            saveAs(waveBlob, "chromatic.wav");
+            saveAs(waveBlob, "chromatiq.wav");
         },
     };
     miscFolder.add(saevFunctions, "saveImage");

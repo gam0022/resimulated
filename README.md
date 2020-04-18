@@ -1,6 +1,6 @@
 # RE: SIMULATED by gam0022 & sadakkey
 
-RE: SIMULATED by [@gam0022](https://twitter.com/gam0022)(Graphics) & [@sadakkey](https://twitter.com/sadakkey)(Music)
+RE: SIMULATED by [@gam0022](https://twitter.com/gam0022) (Graphics) & [@sadakkey](https://twitter.com/sadakkey) (Music)
 
 A WebGL 64KB Intro
 

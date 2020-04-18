@@ -29,7 +29,7 @@ A WebGL engine developed for PC 64K Intro aimed at minimizing the file size.
 
 ### 0: Required
 
-- [node.js 6.13.1](https://nodejs.org/ja/) or higher
+- [node.js v12.14.1](https://nodejs.org/ja/) or higher
 - ruby
 
 ### 1: Get Started
@@ -41,7 +41,7 @@ cd resimulated
 # init
 npm install
 
-# Start web server with hot-reload and UI for debug
+# Start Web server with hot-reload / UI for debug
 npm run start
 
 # Generate a dist\resimulated.html

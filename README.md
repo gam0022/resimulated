@@ -21,10 +21,6 @@ Run in browser on your PC! (only tested latest Chrome)
 - [:speech_balloon: Pouet](https://www.pouet.net/prod.php?which=85260)
 - [:bird: Twitter](https://twitter.com/gam0022/status/1249658268319768576)
 
-## Chromatiq
-
-A WebGL engine developed for PC 64K Intro aimed at minimizing the file size.
-
 ## Development
 
 ### 0: Required
@@ -47,6 +43,22 @@ npm run start
 # Generate a dist\resimulated.html
 npm run build
 ```
+
+## Chromatiq
+
+A WebGL engine developed for PC 64K Intro aimed at minimizing the file size.
+
+Written in a single TypeScript, but it's still in development. ([source code](https://github.com/gam0022/resimulated/blob/master/src/chromatiq.ts))
+
+### Features
+
+It has only simple functions so that it does not depend on the work.
+
+- Rendering multi-pass image shader (as viewport square)
+- Build-in bloom post-effect
+- Interface to animate the uniform from a script
+- GLSL Sound (Shadertoy compatible)
+- Play Audio files (mp3 / ogg)
 
 ## Thanks
 

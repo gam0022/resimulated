@@ -17,9 +17,9 @@ Run on your browser (only tested latest Chrome).
 
 ## Links
 
-- [YouTube](https://youtu.be/tirAdWbceak)
-- [Pouet](https://www.pouet.net/prod.php?which=85260)
-- [Twitter](https://twitter.com/gam0022/status/1249658268319768576)
+- [:tv: YouTube](https://youtu.be/tirAdWbceak)
+- [:speech_balloon: Pouet](https://www.pouet.net/prod.php?which=85260)
+- [:bird: Twitter](https://twitter.com/gam0022/status/1249658268319768576)
 
 ## Chromatiq
 

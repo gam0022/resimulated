@@ -321,6 +321,7 @@ export class Chromatiq {
                         if (key === "iTextTexture") {
                             gl.bindTexture(gl.TEXTURE_2D, textTexture);
                         } else if (!PRODUCTION && this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
+                            // NOTE: 特定パスを強制表示するためのデバッグ用の処理
                             if (this.debugFrameNumber == 30) {
                                 gl.bindTexture(gl.TEXTURE_2D, textTexture);
                             } else {

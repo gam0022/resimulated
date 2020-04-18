@@ -12,7 +12,7 @@ A WebGL 64KB Intro
 
 Run in browser on your PC! (only tested latest Chrome)
 
-- [64KB version](https://gam0022.net/webgl/64k-intro_resimulated.html)
+- [64KB HTML version](https://gam0022.net/webgl/64k-intro_resimulated.html)
 - [NEORT version](https://neort.io/art/bqa4pgs3p9f6qoqnmujg)
 
 ## Links

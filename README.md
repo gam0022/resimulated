@@ -1,30 +1,57 @@
-# RE: SIMULATED
+# RE: SIMULATED by gam0022 & sadakkey
 
-## 環境構築
+SIMULATED by gam0022 & sadakkey
 
-### 0: 依存ツールのインストール
+A WebGL 64KB Intro
 
-- [node.js 6.13.1](https://nodejs.org/ja/) 以上
-- ruby
+1st Place PC 64K Intro at Revision 2020
 
-### 1: セットアップ
+![resimulated-collage.jpg](resimulated-collage.jpg)
 
-```sh
-# gitからリポジトリをcloneします。
-git clone git@github.com:gam0022/resimulated.git
+## Run
 
-cd resimulated
+Run on your browser(only tested Latest Chrome).
 
-# プロジェクトのセットアップをします。
-npm install
+- [64KB version](https://gam0022.net/webgl/64k-intro_resimulated.html)
+- [NEORT version](https://neort.io/art/bqa4pgs3p9f6qoqnmujg)
 
-# 開発をするときのコマンド（ホットリドード・デバッグ用UIありでWebサーバを起動）
-npm run start
+## Links
 
-# ビルドをするときのコマンド（dist\resimulated.htmlを生成）
-npm run build
-```
+- [YouTube](https://youtu.be/tirAdWbceak)
+- [Pouet](https://www.pouet.net/prod.php?which=85260)
+- [Twitter](https://twitter.com/gam0022/status/1249658268319768576)
 
 ## Chromatiq
 
-PC 64K Introのために開発したファイルサイズの最小化を目的にした自作のWebGLエンジンです。
+A WebGL engine developed for PC 64K Intro aimed at minimizing the file size.
+
+## Development
+
+### 0: Required
+
+- [node.js 6.13.1](https://nodejs.org/ja/) or higher
+- ruby
+
+### 1: Get Started
+
+```sh
+git clone git@github.com:gam0022/resimulated.git
+cd resimulated
+
+# init
+npm install
+
+# Start web server with hot-reload and UI for debug
+npm run start
+
+# Generate a dist\resimulated.html
+npm run build
+```
+
+## Thanks
+
+- [https://github.com/FMS-Cat/until](https://github.com/FMS-Cat/until)
+
+## License
+
+MIT

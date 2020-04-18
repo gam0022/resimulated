@@ -4,7 +4,7 @@ SIMULATED by [@gam0022](https://twitter.com/gam0022)(Graphics) & [@sadakkey](htt
 
 A WebGL 64KB Intro
 
-1st Place PC 64K Intro at Revision 2020
+1st Place [PC 64K Intro](https://2020.revision-party.net/competitions/pc-competitions) at [Revision 2020](https://2020.revision-party.net/start)
 
 ![resimulated-collage.jpg](resimulated-collage.jpg)
 

@@ -218,7 +218,7 @@ export class Chromatiq {
             };
 
             const setupFrameBuffer = (pass: Pass) => {
-                // NOTE: 最終パスならフレームバッファは不要なので生成しない
+                // NOTE: 最終パスならフレームバッファは不要なので生成しません
                 if (pass.type === PassType.FinalImage) {
                     return;
                 }

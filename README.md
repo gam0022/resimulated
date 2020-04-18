@@ -30,7 +30,7 @@ A WebGL engine developed for PC 64K Intro aimed at minimizing the file size.
 ### 0: Required
 
 - [node.js v12.14.1](https://nodejs.org/ja/) or higher
-- ruby
+- ruby 2.6.5p114 or higher
 
 ### 1: Get Started
 

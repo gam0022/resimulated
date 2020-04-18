@@ -51,8 +51,9 @@ npm run build
 ## Thanks
 
 - [FMS-Cat/until](https://github.com/FMS-Cat/until)
-- [VEDA 2.4: GLSLで音楽を演奏できるようになったぞ！！！ - マルシテイア](https://blog.amagi.dev/entry/veda-sound)
+- [VEDA 2.4: GLSLで音楽を演奏できるようになったぞ！！！ - マルシテイア by amagitakayosi](https://blog.amagi.dev/entry/veda-sound)
 - [[webgl2]example for webgl2 (with glsl3) by bellbind](https://gist.github.com/bellbind/8c98bb86cfd064d944312b09b98af1b9)
+- [How to Convert an AudioBuffer to an Audio File with JavaScript by Russell Good](https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/)
 - [wgld.org by h_doxas](https://wgld.org/)
 
 ## License

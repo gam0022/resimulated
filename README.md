@@ -25,6 +25,8 @@ Run in browser on your PC! (only tested latest Chrome)
 
 A WebGL engine developed for PC 64K Intro aimed at minimizing the file size.
 
+Written in a single TypeScript, but it's still in development. ([source code](https://github.com/gam0022/resimulated/blob/master/src/chromatiq.ts))
+
 ## Development
 
 ### 0: Required

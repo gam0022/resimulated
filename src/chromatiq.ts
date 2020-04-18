@@ -3,6 +3,8 @@ declare var PRODUCTION: boolean;
 declare var GLOBAL_UNIFORMS: boolean;
 declare var PLAY_SOUND_FILE: string;
 
+// NOTE: enum はコードサイズが増えるため利用禁止とします
+// NOTE: https://twitter.com/gam0022/status/1236668659285647368
 const PassType = {
     Image: 0 as const,
     FinalImage: 1 as const,
@@ -34,16 +36,16 @@ export class Chromatiq {
     /** 再生中かどうかのフラグです */
     isPlaying: boolean;
 
-    /** 強制描画 */
+    /** 強制描画。ポーズ中（isPlaying = false）に描画するために利用します */
     needsUpdate: boolean;
 
     /** 再生時間（秒）です */
     time: number;
 
-    /** レンダリング時に実行されるコールバック関数です */
+    /** レンダリングの直前に実行されるコールバック関数です。ポーズ中（isPlaying = false）は実行されません */
     onRender: (time: number, timeDelta: number) => void;
 
-    /** 毎フレーム実行されるコールバック関数です */
+    /** 毎フレーム実行されるコールバック関数です。ポーズ中（isPlaying = false）も実行されます */
     onUpdate: () => void;
 
     canvas: HTMLCanvasElement;
@@ -51,6 +53,7 @@ export class Chromatiq {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
+    // NOTE: uniformsの値をクラス外から操作することでアニメーションが可能です
     uniformArray: { key: string, initValue: any, min?: number, max?: number, group?: string }[];
     uniforms: { [key: string]: any };
 
@@ -79,6 +82,8 @@ export class Chromatiq {
         soundShader: string,
         createTextTexture: (gl: WebGL2RenderingContext) => WebGLTexture,
     ) {
+        // NOTE: フィールド参照の this を使うとコードサイズが増えるため、コンストラクタの中で動的にメソッドを定義することで、this の利用を最小限にしています
+        // NOTE: クラス外から値を参照・設定する必要があるデータのみ、フィールドとして定義する方針とします
         this.init = () => {
             this.timeLength = timeLength;
             this.isPlaying = true;
@@ -91,16 +96,17 @@ export class Chromatiq {
                 this.uniforms = {};
             }
 
-            // setup WebAudio
+            // get WebAudio context
             const audio = this.audioContext = new window.AudioContext();
 
-            // setup WebGL
+            // get WebGL context
             const canvas = this.canvas = document.createElement("canvas");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             window.document.body.appendChild(canvas);
 
-            // webgl2 enabled default from: firefox-51, chrome-56
+            // WebGL2 enabled default from: firefox-51, chrome-56
+            // NOTE: toBlob 等でレンダリング結果を保存するために preserveDrawingBuffer を有効にしています
             const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
             if (!gl) {
                 console.log("WebGL 2 is not supported...");
@@ -152,9 +158,9 @@ export class Chromatiq {
                 gl.enableVertexAttribArray(vert2dId);
                 gl.vertexAttribPointer(vert2dId, count, elem, normalize, stride, offset);
                 gl.bindVertexArray(null);
-                //NOTE: these unbound buffers is not required; works fine if unbound
-                //gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+                // NOTE: these unbound buffers is not required; works fine if unbound
+                // gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             };
 
             const textTexture = createTextTexture(gl);
@@ -212,7 +218,7 @@ export class Chromatiq {
             };
 
             const setupFrameBuffer = (pass: Pass) => {
-                // FIXME: setupFrameBuffer の呼び出し側でやるべき
+                // NOTE: 最終パスならフレームバッファは不要なので生成しない
                 if (pass.type === PassType.FinalImage) {
                     return;
                 }
@@ -233,20 +239,12 @@ export class Chromatiq {
 
                 // フレームバッファの生成
                 pass.frameBuffer = gl.createFramebuffer();
-
-                // フレームバッファをWebGLにバインド
                 gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
 
                 // フレームバッファ用テクスチャの生成
                 pass.texture = gl.createTexture();
-
-                // フレームバッファ用のテクスチャをバインド
                 gl.bindTexture(gl.TEXTURE_2D, pass.texture);
-
-                // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
                 gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
-
-                // テクスチャパラメータ
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -324,6 +322,7 @@ export class Chromatiq {
                         if (key === "iTextTexture") {
                             gl.bindTexture(gl.TEXTURE_2D, textTexture);
                         } else if (!PRODUCTION && this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
+                            // NOTE: 特定パスを強制表示するためのデバッグ用の処理
                             if (this.debugFrameNumber == 30) {
                                 gl.bindTexture(gl.TEXTURE_2D, textTexture);
                             } else {
@@ -386,7 +385,6 @@ export class Chromatiq {
             }
 
             const initSound = () => {
-                // Sound
                 const sampleLength = Math.ceil(audio.sampleRate * timeLength);
                 const audioBuffer = audio.createBuffer(2, sampleLength, audio.sampleRate);
                 const samples = SOUND_WIDTH * SOUND_HEIGHT;
@@ -407,15 +405,15 @@ export class Chromatiq {
 
                 const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
                 for (let i = 0; i < numBlocks; i++) {
-                    // Update uniform & Render
+                    // update uniform & render
                     soundPass.uniforms.iBlockOffset.value = i * samples / audio.sampleRate;
                     renderPass(soundPass);
 
-                    // Read pixels
+                    // read pixels
                     const pixels = new Uint8Array(SOUND_WIDTH * SOUND_HEIGHT * 4);
                     gl.readPixels(0, 0, SOUND_WIDTH, SOUND_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-                    // Convert pixels to samples
+                    // convert pixels to samples
                     const outputDataL = audioBuffer.getChannelData(0);
                     const outputDataR = audioBuffer.getChannelData(1);
                     for (let j = 0; j < samples; j++) {
@@ -459,11 +457,10 @@ export class Chromatiq {
                 });
             }
 
-            // Get global uniforms
+            // get global uniforms
             if (GLOBAL_UNIFORMS) {
                 let currentGroup = "default";
                 const getGlobalUniforms = (fragmentShader: string) => {
-                    // for Debug dat.GUI
                     let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?( [\w\d]+)?/g;
                     let result: RegExpExecArray;
                     while ((result = reg.exec(fragmentShader)) !== null) {
@@ -475,6 +472,7 @@ export class Chromatiq {
                                 initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
                             };
 
+                            // get min / max for Debug dat.GUI
                             if (!PRODUCTION) {
                                 uniform.min = result[6] !== undefined ? parseFloat(result[6]) : 0;
                                 uniform.max = result[7] !== undefined ? parseFloat(result[7]) : 1;
@@ -511,7 +509,7 @@ export class Chromatiq {
                 getGlobalUniforms(bloomFinalShader);
             }
 
-            // Create Rendering Pipeline
+            // create Rendering Pipeline
             const imagePasses: Pass[] = [];
             let passIndex = 0;
             imageShaders.forEach((shader, i, ary) => {
@@ -577,10 +575,9 @@ export class Chromatiq {
                 passIndex++;
             })
 
-            // Init Sound
             initSound();
 
-            // Rendering Loop
+            // rendering loop
             let lastTimestamp = 0;
             let startTimestamp: number | null = null;
             const update = (timestamp: number) => {

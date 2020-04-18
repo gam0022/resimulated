@@ -4,6 +4,7 @@ declare var GLOBAL_UNIFORMS: boolean;
 declare var PLAY_SOUND_FILE: string;
 
 // NOTE: enum はコードサイズが増えるため利用禁止とします
+// NOTE: https://twitter.com/gam0022/status/1236668659285647368
 const PassType = {
     Image: 0 as const,
     FinalImage: 1 as const,

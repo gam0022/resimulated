@@ -50,7 +50,10 @@ npm run build
 
 ## Thanks
 
-- [https://github.com/FMS-Cat/until](https://github.com/FMS-Cat/until)
+- [FMS-Cat/until](https://github.com/FMS-Cat/until)
+- [VEDA 2.4: GLSLで音楽を演奏できるようになったぞ！！！ - マルシテイア](https://blog.amagi.dev/entry/veda-sound)
+- [[webgl2]example for webgl2 (with glsl3) by bellbind](https://gist.github.com/bellbind/8c98bb86cfd064d944312b09b98af1b9)
+- [wgld.org by h_doxas](https://wgld.org/)
 
 ## License
 

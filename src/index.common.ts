@@ -11,11 +11,15 @@ export const chromatiq = new Chromatiq(
     // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
-        require("./shaders/sandbox/texture-fbm.glsl").default,
+        require("./shaders/raymarching-mandel.glsl").default,
+        require("./shaders/raymarching-universe.glsl").default,
+        require("./shaders/text-resimulated.glsl").default,
+        require("./shaders/post-effect.glsl").default,
+        // require("./shaders/effects/debug-circle.glsl").default,
     ],
 
     // Bloom
-    0,
+    3,
     5,
     require("./shaders/build-in/bloom-prefilter.glsl").default,
     require("./shaders/build-in/bloom-downsample.glsl").default,

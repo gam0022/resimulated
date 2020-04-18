@@ -1,6 +1,6 @@
 # RE: SIMULATED by gam0022 & sadakkey
 
-SIMULATED by gam0022 & sadakkey
+SIMULATED by [@gam0022](https://twitter.com/gam0022)(Graphics) & [@sadakkey](https://twitter.com/sadakkey)(Music)
 
 A WebGL 64KB Intro
 
@@ -10,7 +10,7 @@ A WebGL 64KB Intro
 
 ## Run
 
-Run on your browser(only tested Latest Chrome).
+Run on your browser (only tested latest Chrome).
 
 - [64KB version](https://gam0022.net/webgl/64k-intro_resimulated.html)
 - [NEORT version](https://neort.io/art/bqa4pgs3p9f6qoqnmujg)

@@ -101,6 +101,7 @@ export class Chromatiq {
             window.document.body.appendChild(canvas);
 
             // webgl2 enabled default from: firefox-51, chrome-56
+            // NOTE: toBlob 等でレンダリング結果を保存するために preserveDrawingBuffer を有効にしています
             const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
             if (!gl) {
                 console.log("WebGL 2 is not supported...");
@@ -152,9 +153,9 @@ export class Chromatiq {
                 gl.enableVertexAttribArray(vert2dId);
                 gl.vertexAttribPointer(vert2dId, count, elem, normalize, stride, offset);
                 gl.bindVertexArray(null);
-                //NOTE: these unbound buffers is not required; works fine if unbound
-                //gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+                // NOTE: these unbound buffers is not required; works fine if unbound
+                // gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             };
 
             const textTexture = createTextTexture(gl);
@@ -212,7 +213,6 @@ export class Chromatiq {
             };
 
             const setupFrameBuffer = (pass: Pass) => {
-                // FIXME: setupFrameBuffer の呼び出し側でやるべき
                 if (pass.type === PassType.FinalImage) {
                     return;
                 }

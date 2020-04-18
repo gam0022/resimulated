@@ -217,6 +217,7 @@ export class Chromatiq {
             };
 
             const setupFrameBuffer = (pass: Pass) => {
+                // NOTE: 最終パスならフレームバッファは不要なので生成しない
                 if (pass.type === PassType.FinalImage) {
                     return;
                 }
@@ -237,20 +238,12 @@ export class Chromatiq {
 
                 // フレームバッファの生成
                 pass.frameBuffer = gl.createFramebuffer();
-
-                // フレームバッファをWebGLにバインド
                 gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
 
                 // フレームバッファ用テクスチャの生成
                 pass.texture = gl.createTexture();
-
-                // フレームバッファ用のテクスチャをバインド
                 gl.bindTexture(gl.TEXTURE_2D, pass.texture);
-
-                // フレームバッファ用のテクスチャにカラー用のメモリ領域を確保
                 gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
-
-                // テクスチャパラメータ
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

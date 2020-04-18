@@ -79,6 +79,8 @@ export class Chromatiq {
         soundShader: string,
         createTextTexture: (gl: WebGL2RenderingContext) => WebGLTexture,
     ) {
+        // NOTE: フィールド参照の this を使うとコードサイズが増えるため、コンストラクタの中で動的にメソッドを定義することで、this の利用を最小限にしています
+        // NOTE: 外部から値を参照・設定する必要があるフィールドのみ、フィールドとして定義する方針です
         this.init = () => {
             this.timeLength = timeLength;
             this.isPlaying = true;
@@ -91,16 +93,16 @@ export class Chromatiq {
                 this.uniforms = {};
             }
 
-            // setup WebAudio
+            // Get WebAudio context
             const audio = this.audioContext = new window.AudioContext();
 
-            // setup WebGL
+            // Get WebGL context
             const canvas = this.canvas = document.createElement("canvas");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             window.document.body.appendChild(canvas);
 
-            // webgl2 enabled default from: firefox-51, chrome-56
+            // WebGL2 enabled default from: firefox-51, chrome-56
             // NOTE: toBlob 等でレンダリング結果を保存するために preserveDrawingBuffer を有効にしています
             const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
             if (!gl) {
@@ -386,7 +388,6 @@ export class Chromatiq {
             }
 
             const initSound = () => {
-                // Sound
                 const sampleLength = Math.ceil(audio.sampleRate * timeLength);
                 const audioBuffer = audio.createBuffer(2, sampleLength, audio.sampleRate);
                 const samples = SOUND_WIDTH * SOUND_HEIGHT;
@@ -463,7 +464,6 @@ export class Chromatiq {
             if (GLOBAL_UNIFORMS) {
                 let currentGroup = "default";
                 const getGlobalUniforms = (fragmentShader: string) => {
-                    // for Debug dat.GUI
                     let reg = /uniform (float|vec3) (g.+);\s*(\/\/ ([\-\d\.-]+))?( ([\-\d\.]+) ([\-\d\.]+))?( [\w\d]+)?/g;
                     let result: RegExpExecArray;
                     while ((result = reg.exec(fragmentShader)) !== null) {
@@ -475,6 +475,7 @@ export class Chromatiq {
                                 initValue: result[4] !== undefined ? parseFloat(result[4]) : 0,
                             };
 
+                            // Get min / max for Debug dat.GUI
                             if (!PRODUCTION) {
                                 uniform.min = result[6] !== undefined ? parseFloat(result[6]) : 0;
                                 uniform.max = result[7] !== undefined ? parseFloat(result[7]) : 1;
@@ -577,7 +578,6 @@ export class Chromatiq {
                 passIndex++;
             })
 
-            // Init Sound
             initSound();
 
             // Rendering Loop

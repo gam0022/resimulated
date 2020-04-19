@@ -60,6 +60,19 @@ It has only simple functions so that it does not depend on the work.
 - GLSL Sound (Shadertoy compatible)
 - Play an Audio file (mp3 / ogg)
 
+### How to Capture Movie
+
+1. `npm run start`
+2. misc/saveImageSequence
+3. misc/saveSound
+4. `ffmpeg.exe -r 60 -i chromatiq%04d.png -i chromatiq.wav -c:v libx264 -preset slow -profile:v high -coder 1 -pix_fmt yuv420p -movflags +faststart -g 30 -bf 2 -c:a aac -b:a 384k -profile:a aac_low -b:v 68M chromatiq_68M.mp4`
+
+#### Links
+
+- [アップロードする動画におすすめのエンコード設定](https://support.google.com/youtube/answer/1722171?hl=ja)
+- [YouTube recommended encoding settings on ffmpeg (+ libx264)](https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
+- [超有益情報 by sasaki_0222](https://twitter.com/sasaki_0222/status/1248910333835530241)
+
 ## Thanks
 
 - [FMS-Cat/until](https://github.com/FMS-Cat/until)
@@ -68,13 +81,6 @@ It has only simple functions so that it does not depend on the work.
 - [[webgl2]example for webgl2 (with glsl3) by bellbind](https://gist.github.com/bellbind/8c98bb86cfd064d944312b09b98af1b9)
 - [How to Convert an AudioBuffer to an Audio File with JavaScript by Russell Good](https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/)
 - [wgld.org by h_doxas](https://wgld.org/)
-
-## How to Capture Movie
-
-1. `npm run start`
-2. misc/saveImageSequence
-3. misc/saveSound
-4. `ffmpeg.exe -r 60 -i chromatiq%04d.png -i chromatiq.wav -c:v libx264 -preset slow -profile:v high -coder 1 -pix_fmt yuv420p -movflags +faststart -g 30 -bf 2 -c:a aac -b:a 384k -profile:a aac_low -b:v 68M chromatiq_68M.mp4`
 
 ## License
 

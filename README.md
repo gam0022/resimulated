@@ -54,11 +54,11 @@ Written in a single TypeScript, but it's still in development. ([source code](ht
 
 It has only simple functions so that it does not depend on the work.
 
-- Rendering multi-pass image shader (as viewport square)
+- Rendering multi-pass image shaders (as viewport square)
 - Build-in bloom post-effect
-- Interface to animate the uniform from a script
+- Interface to animate uniforms from a TypeScript
 - GLSL Sound (Shadertoy compatible)
-- Play Audio files (mp3 / ogg)
+- Play an Audio file (mp3 / ogg)
 
 ## Thanks
 

@@ -512,72 +512,75 @@ export class Chromatiq {
                 getGlobalUniforms(bloomFinalShader);
             }
 
-            // create rendering pipeline
             const imagePasses: Pass[] = [];
-            let passIndex = 0;
-            imageShaders.forEach((shader, i, ary) => {
-                if (i === bloomPassBeginIndex) {
-                    imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
-                        passIndex,
-                        PassType.Bloom,
-                        1
-                    ));
-                    passIndex++;
 
-                    let scale = 1;
-                    for (let j = 0; j < bloomDonwsampleIterations; j++) {
-                        scale *= 0.5;
+            const createRenderingPipeline = () => {
+                let passIndex = 0;
+                imageShaders.forEach((shader, i, ary) => {
+                    if (i === bloomPassBeginIndex) {
                         imagePasses.push(initPass(
-                            loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
+                            loadProgram(imageCommonHeaderShader + bloomPrefilterShader),
                             passIndex,
                             PassType.Bloom,
-                            scale,
+                            1
+                        ));
+                        passIndex++;
+
+                        let scale = 1;
+                        for (let j = 0; j < bloomDonwsampleIterations; j++) {
+                            scale *= 0.5;
+                            imagePasses.push(initPass(
+                                loadProgram(imageCommonHeaderShader + bloomDownsampleShader),
+                                passIndex,
+                                PassType.Bloom,
+                                scale,
+                            ));
+                            passIndex++;
+                        }
+
+                        for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
+                            scale *= 2;
+                            imagePasses.push(initPass(
+                                loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
+                                passIndex,
+                                PassType.BloomUpsample,
+                                scale,
+                            ));
+                            passIndex++;
+                        }
+
+                        imagePasses.push(initPass(
+                            loadProgram(imageCommonHeaderShader + bloomFinalShader),
+                            passIndex,
+                            PassType.BloomUpsample,
+                            1,
                         ));
                         passIndex++;
                     }
 
-                    for (let j = 0; j < bloomDonwsampleIterations - 1; j++) {
-                        scale *= 2;
-                        imagePasses.push(initPass(
-                            loadProgram(imageCommonHeaderShader + bloomUpsampleShader),
-                            passIndex,
-                            PassType.BloomUpsample,
-                            scale,
-                        ));
-                        passIndex++;
+                    let startTime, endTime;
+
+                    if (!PRODUCTION) {
+                        startTime = performance.now();
                     }
 
                     imagePasses.push(initPass(
-                        loadProgram(imageCommonHeaderShader + bloomFinalShader),
+                        loadProgram(imageCommonHeaderShader + shader),
                         passIndex,
-                        PassType.BloomUpsample,
-                        1,
+                        i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
+                        1
                     ));
+
+                    if (!PRODUCTION) {
+                        endTime = performance.now();
+                        console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
+                    }
+
                     passIndex++;
-                }
+                });
+            };
 
-                let startTime, endTime;
-
-                if (!PRODUCTION) {
-                    startTime = performance.now();
-                }
-
-                imagePasses.push(initPass(
-                    loadProgram(imageCommonHeaderShader + shader),
-                    passIndex,
-                    i < ary.length - 1 ? PassType.Image : PassType.FinalImage,
-                    1
-                ));
-
-                if (!PRODUCTION) {
-                    endTime = performance.now();
-                    console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
-                }
-
-                passIndex++;
-            });
-
+            createRenderingPipeline();
             initSound();
 
             // rendering loop

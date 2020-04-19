@@ -26,7 +26,7 @@ Run in browser on your PC! (only tested latest Chrome)
 ### 0: Required
 
 - [node.js v12.14.1](https://nodejs.org/ja/) or higher
-- [ruby 2.6.5p114](https://www.ruby-lang.org/ja/downloads/) or higher
+- [ruby 2.x](https://www.ruby-lang.org/ja/downloads/) or higher
 
 ### 1: Get Started
 

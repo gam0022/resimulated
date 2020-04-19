@@ -182,6 +182,7 @@ export class Chromatiq {
                             const log = gl.getShaderInfoLog(shader);
                             console.log(src, log);
                         } else {
+                            // NOTE: CommonHeaderを考慮してエラーの行番号を変換します
                             const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
                                 const line = parseInt(p2);
                                 if (line <= imageCommonHeaderShaderLineCount) {
@@ -324,7 +325,7 @@ export class Chromatiq {
                         if (key === "iTextTexture") {
                             gl.bindTexture(gl.TEXTURE_2D, textTexture);
                         } else if (!PRODUCTION && this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
-                            // NOTE: 特定パスを強制表示するためのデバッグ用の処理
+                            // NOTE: 特定パスを強制表示するためのデバッグ用の処理です
                             if (this.debugFrameNumber == 30) {
                                 gl.bindTexture(gl.TEXTURE_2D, textTexture);
                             } else {
@@ -575,7 +576,7 @@ export class Chromatiq {
                 }
 
                 passIndex++;
-            })
+            });
 
             initSound();
 

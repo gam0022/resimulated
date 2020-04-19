@@ -53,8 +53,9 @@ export class Chromatiq {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    // NOTE: uniformsの値をクラス外から操作することでアニメーションが可能です
     uniformArray: { key: string, initValue: any, min?: number, max?: number, group?: string }[];
+
+    /** 値をクラス外から操作することでアニメーションが可能です */
     uniforms: { [key: string]: any };
 
     init: () => void;
@@ -64,6 +65,7 @@ export class Chromatiq {
     playSound: () => void;
     stopSound: () => void;
 
+    /** 特定のパスを強制表示するデバッグ用のパラメーターです。imageShaders の index を指定します。 -1 はデバッグを無効。 30 は TextTexture です。 */
     debugFrameNumber: number;
 
     constructor(
@@ -237,11 +239,11 @@ export class Chromatiq {
                     filter = gl.NEAREST;
                 }
 
-                // フレームバッファの生成
+                // フレームバッファを生成します
                 pass.frameBuffer = gl.createFramebuffer();
                 gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
 
-                // フレームバッファ用テクスチャの生成
+                // フレームバッファ用テクスチャを生成します
                 pass.texture = gl.createTexture();
                 gl.bindTexture(gl.TEXTURE_2D, pass.texture);
                 gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
@@ -250,10 +252,10 @@ export class Chromatiq {
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-                // フレームバッファにテクスチャを関連付ける
+                // フレームバッファにテクスチャを関連付けます
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
 
-                // 各種オブジェクトのバインドを解除
+                // 各種オブジェクトのバインドを解除します
                 gl.bindTexture(gl.TEXTURE_2D, null);
                 gl.bindRenderbuffer(gl.RENDERBUFFER, null);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -509,7 +511,7 @@ export class Chromatiq {
                 getGlobalUniforms(bloomFinalShader);
             }
 
-            // create Rendering Pipeline
+            // create rendering pipeline
             const imagePasses: Pass[] = [];
             let passIndex = 0;
             imageShaders.forEach((shader, i, ary) => {

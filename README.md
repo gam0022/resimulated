@@ -70,6 +70,7 @@ It has only simple functions so that it does not depend on the work.
 #### Links
 
 - [アップロードする動画におすすめのエンコード設定](https://support.google.com/youtube/answer/1722171?hl=ja)
+    - 映像ビットレート 2160p（4k）53～68 Mbps
 - [YouTube recommended encoding settings on ffmpeg (+ libx264)](https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
 - [超有益情報 by sasaki_0222](https://twitter.com/sasaki_0222/status/1248910333835530241)
 

@@ -69,6 +69,13 @@ It has only simple functions so that it does not depend on the work.
 - [How to Convert an AudioBuffer to an Audio File with JavaScript by Russell Good](https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file/)
 - [wgld.org by h_doxas](https://wgld.org/)
 
+## How to Capture Movie
+
+1. `npm run start`
+2. misc/saveImageSequence
+3. misc/saveSound
+4. `ffmpeg.exe -r 60 -i chromatiq%04d.png -i chromatiq.wav -c:v libx264 -preset slow -profile:v high -coder 1 -pix_fmt yuv420p -movflags +faststart -g 30 -bf 2 -c:a aac -b:a 384k -profile:a aac_low -b:v 68M chromatiq_68M.mp4`
+
 ## License
 
 [MIT](LICENSE)

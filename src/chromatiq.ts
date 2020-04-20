@@ -53,8 +53,9 @@ export class Chromatiq {
     audioSource: AudioBufferSourceNode;
 
     // global uniforms
-    // NOTE: uniformsの値をクラス外から操作することでアニメーションが可能です
     uniformArray: { key: string, initValue: any, min?: number, max?: number, group?: string }[];
+
+    /** 値をクラス外から操作することでアニメーションが可能です */
     uniforms: { [key: string]: any };
 
     init: () => void;
@@ -64,6 +65,7 @@ export class Chromatiq {
     playSound: () => void;
     stopSound: () => void;
 
+    /** 特定のパスを強制表示するデバッグ用のパラメーターです。imageShaders の index を指定します。 -1 はデバッグを無効。 30 は TextTexture です。 */
     debugFrameNumber: number;
 
     constructor(
@@ -180,6 +182,7 @@ export class Chromatiq {
                             const log = gl.getShaderInfoLog(shader);
                             console.log(src, log);
                         } else {
+                            // NOTE: CommonHeaderを考慮してエラーの行番号を変換します
                             const log = gl.getShaderInfoLog(shader).replace(/(\d+):(\d+)/g, (match: string, p1: string, p2: string) => {
                                 const line = parseInt(p2);
                                 if (line <= imageCommonHeaderShaderLineCount) {
@@ -205,7 +208,7 @@ export class Chromatiq {
                 gl.linkProgram(program);
                 if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
                     console.log(gl.getProgramInfoLog(program));
-                };
+                }
                 return program;
             };
 
@@ -237,11 +240,11 @@ export class Chromatiq {
                     filter = gl.NEAREST;
                 }
 
-                // フレームバッファの生成
+                // フレームバッファを生成します
                 pass.frameBuffer = gl.createFramebuffer();
                 gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
 
-                // フレームバッファ用テクスチャの生成
+                // フレームバッファ用テクスチャを生成します
                 pass.texture = gl.createTexture();
                 gl.bindTexture(gl.TEXTURE_2D, pass.texture);
                 gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, gl.RGBA, type, null);
@@ -250,14 +253,14 @@ export class Chromatiq {
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-                // フレームバッファにテクスチャを関連付ける
+                // フレームバッファにテクスチャを関連付けます
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pass.texture, 0);
 
-                // 各種オブジェクトのバインドを解除
+                // 各種オブジェクトのバインドを解除します
                 gl.bindTexture(gl.TEXTURE_2D, null);
                 gl.bindRenderbuffer(gl.RENDERBUFFER, null);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-            }
+            };
 
             const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
                 setupVAO(program);
@@ -286,7 +289,7 @@ export class Chromatiq {
                 if (GLOBAL_UNIFORMS) {
                     this.uniformArray.forEach(unifrom => {
                         pass.uniforms[unifrom.key] = { type: typeof unifrom.initValue === "number" ? "f" : "v3", value: unifrom.initValue };
-                    })
+                    });
                 }
 
                 pass.locations = createLocations(pass);
@@ -322,7 +325,7 @@ export class Chromatiq {
                         if (key === "iTextTexture") {
                             gl.bindTexture(gl.TEXTURE_2D, textTexture);
                         } else if (!PRODUCTION && this.debugFrameNumber >= 0 && key === "iPrevPass" && pass.type === PassType.FinalImage) {
-                            // NOTE: 特定パスを強制表示するためのデバッグ用の処理
+                            // NOTE: 特定パスを強制表示するためのデバッグ用の処理です
                             if (this.debugFrameNumber == 30) {
                                 gl.bindTexture(gl.TEXTURE_2D, textTexture);
                             } else {
@@ -338,7 +341,7 @@ export class Chromatiq {
                     } else {
                         methods[uniform.type].call(gl, pass.locations[key], uniform.value);
                     }
-                }
+                };
 
                 // draw the buffer with VAO
                 // NOTE: binding vert and index buffer is not required
@@ -364,7 +367,7 @@ export class Chromatiq {
                     pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
                     setupFrameBuffer(pass);
                 });
-            }
+            };
 
             this.playSound = () => {
                 if (!PRODUCTION) {
@@ -376,7 +379,7 @@ export class Chromatiq {
                 }
 
                 this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
-            }
+            };
 
             if (!PRODUCTION) {
                 this.stopSound = () => {
@@ -436,7 +439,7 @@ export class Chromatiq {
 
                 // this.audioSource.loop = false;
                 this.audioSource.connect(audio.destination);
-            }
+            };
 
             this.render = () => {
                 imagePasses.forEach((pass) => {
@@ -451,11 +454,11 @@ export class Chromatiq {
                                     pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
                                 }
                             }
-                        }
+                        };
                     }
                     renderPass(pass);
                 });
-            }
+            };
 
             // get global uniforms
             if (GLOBAL_UNIFORMS) {
@@ -509,7 +512,7 @@ export class Chromatiq {
                 getGlobalUniforms(bloomFinalShader);
             }
 
-            // create Rendering Pipeline
+            // create rendering pipeline
             const imagePasses: Pass[] = [];
             let passIndex = 0;
             imageShaders.forEach((shader, i, ary) => {
@@ -573,7 +576,7 @@ export class Chromatiq {
                 }
 
                 passIndex++;
-            })
+            });
 
             initSound();
 
@@ -616,7 +619,7 @@ export class Chromatiq {
 
             this.play = () => {
                 requestAnimationFrame(update);
-            }
+            };
         }
     }
 }

@@ -26,7 +26,7 @@ Run in browser on your PC! (only tested latest Chrome)
 ### 0: Required
 
 - [node.js v12.14.1](https://nodejs.org/ja/) or higher
-- [ruby 2.6.5p114](https://www.ruby-lang.org/ja/downloads/) or higher
+- [ruby 2.x](https://www.ruby-lang.org/ja/downloads/) or higher
 
 ### 1: Get Started
 
@@ -54,11 +54,25 @@ Written in a single TypeScript, but it's still in development. ([source code](ht
 
 It has only simple functions so that it does not depend on the work.
 
-- Rendering multi-pass image shader (as viewport square)
+- Rendering multi-pass image shaders (as viewport square)
 - Build-in bloom post-effect
-- Interface to animate the uniform from a script
+- Interface to animate uniforms from a TypeScript
 - GLSL Sound (Shadertoy compatible)
-- Play Audio files (mp3 / ogg)
+- Play an Audio file (mp3 / ogg)
+
+### How to Capture Movie
+
+1. `npm run start`
+2. misc/saveImageSequence
+3. misc/saveSound
+4. `ffmpeg.exe -r 60 -i chromatiq%04d.png -i chromatiq.wav -c:v libx264 -preset slow -profile:v high -coder 1 -pix_fmt yuv420p -movflags +faststart -g 30 -bf 2 -c:a aac -b:a 384k -profile:a aac_low -b:v 68M chromatiq_68M.mp4`
+
+#### Links
+
+- [アップロードする動画におすすめのエンコード設定](https://support.google.com/youtube/answer/1722171?hl=ja)
+    - 映像ビットレート 2160p（4k）53～68 Mbps
+- [YouTube recommended encoding settings on ffmpeg (+ libx264)](https://gist.github.com/mikoim/27e4e0dc64e384adbcb91ff10a2d3678)
+- [超有益情報 by sasaki_0222](https://twitter.com/sasaki_0222/status/1248910333835530241)
 
 ## Thanks
 

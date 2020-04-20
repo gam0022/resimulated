@@ -260,7 +260,7 @@ export class Chromatiq {
                 gl.bindTexture(gl.TEXTURE_2D, null);
                 gl.bindRenderbuffer(gl.RENDERBUFFER, null);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-            }
+            };
 
             const initPass = (program: WebGLProgram, index: number, type: PassType, scale: number) => {
                 setupVAO(program);
@@ -367,7 +367,7 @@ export class Chromatiq {
                     pass.uniforms.iResolution.value = [width * pass.scale, height * pass.scale, 0];
                     setupFrameBuffer(pass);
                 });
-            }
+            };
 
             this.playSound = () => {
                 if (!PRODUCTION) {
@@ -379,7 +379,7 @@ export class Chromatiq {
                 }
 
                 this.audioSource.start(this.audioContext.currentTime, this.time % this.timeLength);
-            }
+            };
 
             if (!PRODUCTION) {
                 this.stopSound = () => {
@@ -439,7 +439,7 @@ export class Chromatiq {
 
                 // this.audioSource.loop = false;
                 this.audioSource.connect(audio.destination);
-            }
+            };
 
             this.render = () => {
                 imagePasses.forEach((pass) => {
@@ -458,7 +458,7 @@ export class Chromatiq {
                     }
                     renderPass(pass);
                 });
-            }
+            };
 
             // get global uniforms
             if (GLOBAL_UNIFORMS) {
@@ -619,7 +619,7 @@ export class Chromatiq {
 
             this.play = () => {
                 requestAnimationFrame(update);
-            }
+            };
         }
     }
 }

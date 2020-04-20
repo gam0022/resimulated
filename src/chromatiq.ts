@@ -208,7 +208,7 @@ export class Chromatiq {
                 gl.linkProgram(program);
                 if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
                     console.log(gl.getProgramInfoLog(program));
-                };
+                }
                 return program;
             };
 
@@ -289,7 +289,7 @@ export class Chromatiq {
                 if (GLOBAL_UNIFORMS) {
                     this.uniformArray.forEach(unifrom => {
                         pass.uniforms[unifrom.key] = { type: typeof unifrom.initValue === "number" ? "f" : "v3", value: unifrom.initValue };
-                    })
+                    });
                 }
 
                 pass.locations = createLocations(pass);
@@ -341,7 +341,7 @@ export class Chromatiq {
                     } else {
                         methods[uniform.type].call(gl, pass.locations[key], uniform.value);
                     }
-                }
+                };
 
                 // draw the buffer with VAO
                 // NOTE: binding vert and index buffer is not required
@@ -454,7 +454,7 @@ export class Chromatiq {
                                     pass.uniforms[key].value = [value[0] / 255, value[1] / 255, value[2] / 255];
                                 }
                             }
-                        }
+                        };
                     }
                     renderPass(pass);
                 });

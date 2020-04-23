@@ -390,6 +390,10 @@ float dGomi(vec3 p) {
 
 uniform float gPlaneDistance;  // 0 0 2 menger
 uniform float gMengerLevelY;   // 0 -2 2
+uniform float gMengerScale;    // 3 0 5
+uniform float gMengerOffsetX;  // 1 -5 5
+uniform float gMengerOffsetY;  // 1 -5 5
+uniform float gMengerOffsetZ;  // 1 -5 5
 
 float dMenger(vec3 z0, vec3 offset, float scale) {
     vec4 z = vec4(z0, 1.0);
@@ -418,7 +422,7 @@ float sdPlane(vec3 p, vec4 n) {
 float opSubtraction(float d1, float d2) { return max(-d1, d2); }
 
 float dCutMenger(vec3 p) {
-    float d = dMenger(p, vec3(1.0), 3.0);
+    float d = dMenger(p, vec3(gMengerOffsetX, gMengerOffsetY, gMengerOffsetZ), gMengerScale);
     d = opSubtraction(sdPlane(p, vec4(normalize(vec3(-1.0)), gPlaneDistance)), d);
     return d;
 }

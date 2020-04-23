@@ -393,7 +393,7 @@ uniform float gMengerLevelY;   // 0 -2 2
 
 float dMenger(vec3 z0, vec3 offset, float scale) {
     vec4 z = vec4(z0, 1.0);
-    for (int n = 0; n < (gMengerLevelY > z0.y ? 5 : 4); n++) {
+    for (int n = 0; n < (gMengerLevelY < z0.y ? 5 : 4); n++) {
         z = abs(z);
 
         if (z.x < z.y) z.xy = z.yx;
@@ -417,9 +417,15 @@ float sdPlane(vec3 p, vec4 n) {
 
 float opSubtraction(float d1, float d2) { return max(-d1, d2); }
 
-float map(vec3 p) {
+float dCutMenger(vec3 p) {
     float d = dMenger(p, vec3(1.0), 3.0);
     d = opSubtraction(sdPlane(p, vec4(normalize(vec3(-1.0)), gPlaneDistance)), d);
+    return d;
+}
+
+float map(vec3 p) {
+    float d = dCutMenger(p);
+    d = min(d, dGomi(p));
     return d;
 }
 
@@ -430,7 +436,7 @@ float logicoma(vec2 uv) {
     return d < 0.0 ? 1.0 : 0.0;
 }
 
-uniform vec3 gPlanetPalA;       // 127 127 127
+uniform vec3 gPlanetPalA;       // 127 127 127 planets
 uniform vec3 gPlanetPalB;       // 110 115 115
 uniform vec3 gPlanetPalC;       // 256 178 102
 uniform float gPlanetPalScale;  // 1.2332 1.1 1.3
@@ -453,8 +459,9 @@ float prismbeings(vec2 uv) {
     return float((i >> (int(beat * 4.0) % 8) & j) & 1);
 }
 
-uniform float gF0;                    // 0.95 0 1 lighting
-uniform float gCameraLightIntensity;  // 1 0 10
+uniform float gF0;                         // 0.95 0 1 lighting
+uniform float gCameraLightIntensity;       // 1 0 10
+uniform float gDirectionalLightIntensity;  // 1 0 10
 
 float fresnelSchlick(float f0, float cosTheta) { return f0 + (1.0 - f0) * pow((1.0 - cosTheta), 5.0); }
 
@@ -462,7 +469,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
     float d;
     float distance = 0.0;
     vec3 p = ray.origin;
-    float eps = 0.02;
+    float eps = 0.01;
 
     for (int i = 0; i < 200; i++) {
         d = map(p);
@@ -476,104 +483,14 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
         intersection.distance = distance;
         intersection.hit = true;
         intersection.position = p;
-        intersection.normal = calcNormal(p, map, eps * 0.1);
+        intersection.normal = calcNormal(p, map, eps * 0.01);
         intersection.reflectance = 0.0;
 
-        if (dPlanets(p) < eps) {
-            if (gPlanetsId == PLANETS_MERCURY) {
-                intersection.baseColor = vec3(0.7);
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = vec3(0.0);
-            } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
-                int id;
-                vec2 uv;
-                vec3 dir;
-                vec3 offset;
-
-                for (int i = 0; i < planetNums[int(gPlanetsId)]; i++) {
-                    vec3 center = planetCenters[PLANETS_NUM_MAX * int(gPlanetsId) + i];
-                    offset = p - center;
-                    float d = sdSphere(offset, 1.0);
-                    if (abs(d) < eps * 100.0) {
-                        id = PLANETS_NUM_MAX * int(gPlanetsId) + i;
-                        dir = normalize(offset);
-                        uv = uvSphere(dir);
-                        break;
-                    }
-                }
-
-                float seed = float(id);
-                float h = hPlanetsMix(uv, id);
-                vec3 rand = hash31(seed * gPlanetPalScale);
-                intersection.baseColor = pal(h, gPlanetPalA, gPlanetPalB, gPlanetPalC, rand);
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.8 * rand.x;
-                intersection.emission = vec3(0.0);
-
-                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX) {
-                    intersection.baseColor = vec3(0.05);
-                    intersection.emission = vec3(0.0);
-                    intersection.metallic = 0.9;
-                    intersection.reflectance = 0.9;
-                    intersection.roughness = 0.01;
-                }
-
-                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 1) {
-                    intersection.baseColor = vec3(0.0);
-                    intersection.emission = vec3(0.3, 0.3, 0.5) * prismbeings(dir.xy);
-                    intersection.metallic = 0.9;
-                    intersection.reflectance = 0.9;
-                    intersection.roughness = 0.01;
-                }
-
-                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 4) {
-                    intersection.emission = vec3(0.5, 0.5, 0.8) * logicoma(dir.xy);
-                }
-
-                if (id == int(PLANETS_MIX_B) * PLANETS_NUM_MAX + 2) {
-                    intersection.baseColor = vec3(0.1);
-                    intersection.emission = vec3(0.3, 0.3, 0.5) * yosshin(offset);
-                    intersection.metallic = 0.5;
-                }
-            } else if (gPlanetsId == PLANETS_KANETA) {
-                transformKaneta(p);
-                float h = hKaneta(p);
-                intersection.baseColor = mix(vec3(0.8, 0.5, 0.2), vec3(0.9, 0.95, 0.5), h);
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = vec3(0.0);
-            } else if (gPlanetsId == PLANETS_FMSCAT) {
-                float h = hFmsCat(p);
-                intersection.baseColor = pal(sin(h * remap(beat, 216.0, 220.0, 1.0, 5.0) + 0.25 * beat * TAU), vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 1.0, 1.0), vec3(0.0, 0.33, 0.67));
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = 0.2 * intersection.baseColor;
-            } else if (gPlanetsId == PLANETS_EARTH) {
-                transformEarth(p);
-                vec2 uv;
-                float h = hEarth(p, uv);
-
-                if (h > 0.67) {
-                    // land
-                    intersection.baseColor = mix(vec3(0.03, 0.21, 0.14), vec3(240., 204., 170.) / 255., remapFrom(h, 0.72, 0.99));
-                    intersection.roughness = 0.4;
-                    intersection.metallic = 0.01;
-                    intersection.emission = vec3(0.0);
-                    intersection.emission = vec3(0.07, 0.1, 0.07) * remapFrom(h, 0.67, 0.8);
-                } else {
-                    // sea
-                    intersection.baseColor = mix(vec3(0.01, 0.03, 0.05), vec3(3.0, 18.0, 200.0) / 255.0, remapFrom(h, 0.0, 0.6));
-                    intersection.roughness = 0.1;
-                    intersection.metallic = 0.134;
-                    intersection.emission = vec3(0.1, 0.3, 1.0) * remapFrom(h, 0.1, 0.67);
-                }
-
-                intersection.emission *= fresnelSchlick(0.15, saturate(dot(-ray.direction, intersection.normal)));
-
-                float cloud = fbm(uv, 15.0);
-                intersection.baseColor = mix(intersection.baseColor, vec3(1.5), pow(cloud, 4.0));
-            }
+        if (dCutMenger(p) < eps) {
+            intersection.baseColor = vec3(1.0);
+            intersection.roughness = 0.4;
+            intersection.metallic = 0.1;
+            intersection.emission = vec3(0.0);
         } else {
             // gomi
             intersection.baseColor = vec3(0.7);
@@ -674,6 +591,20 @@ vec3 evalDirectionalLight(inout Intersection i, vec3 v, vec3 lightDir, vec3 radi
     return (diffuse + specular) * radiance * max(0.0, dot(l, n));
 }
 
+uniform float gAoLen;  // 0.15 0 1
+uniform float gAoMul;  // 0.5 0 1
+
+float calcAo(in vec3 p, in vec3 n) {
+    float k = 1.0, occ = 0.0;
+    for (int i = 0; i < 5; i++) {
+        float len = float(i + 1) * gAoLen;
+        float distance = map(n * len + p);
+        occ += (len - distance) * k;
+        k *= gAoMul;
+    }
+    return saturate(1.0 - occ);
+}
+
 // http://www.fractalforums.com/new-theories-and-research/very-simple-formula-for-fractal-patterns/
 float fractal(vec3 p, int n) {
     float strength = 7.0;
@@ -715,7 +646,10 @@ void calcRadiance(inout Intersection intersection, inout Ray ray) {
         intersection.color += evalPointLight(intersection, -ray.direction, camera.eye, gCameraLightIntensity * vec3(80.0, 80.0, 100.0));
 
         vec3 sunColor = vec3(1.0, 0.9, 0.8);
-        intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), sunColor);
+        intersection.color += evalDirectionalLight(intersection, -ray.direction, vec3(-0.48666426339228763, 0.8111071056538127, 0.3244428422615251), gDirectionalLightIntensity * sunColor);
+
+        float ao = calcAo(intersection.position, intersection.normal);
+        intersection.color *= ao;
     } else {
         float rdo = ray.direction.y + 0.6;
         vec2 uv = (ray.direction.xz + ray.direction.xz * 250000.0 / rdo) * 0.000008;

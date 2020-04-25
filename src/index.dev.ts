@@ -13,7 +13,7 @@ window.addEventListener("load", ev => {
     chromatiq.play();
 
     // dat.GUI
-    const gui = new dat.GUI({ width: 1000 });
+    const gui = new dat.GUI();
     gui.useLocalStorage = true;
 
     const config = {
@@ -251,6 +251,7 @@ window.addEventListener("load", ev => {
 
     // SessionStorage
     const saveToSessionStorage = () => {
+        sessionStorage.setItem("guiWidth", gui.width.toString());
         sessionStorage.setItem("debugCamera", config.debugCamera.toString());
         sessionStorage.setItem("debugParams", config.debugParams.toString());
         sessionStorage.setItem("debugDisableReset", config.debugDisableReset.toString());
@@ -273,6 +274,11 @@ window.addEventListener("load", ev => {
     const loadFromSessionStorage = () => {
         const parseBool = (value: string) => {
             return value === "true"
+        }
+
+        const guiWidthStr = sessionStorage.getItem("guiWidth");
+        if (guiWidthStr) {
+            gui.width = parseFloat(guiWidthStr);
         }
 
         const resolutionStr = sessionStorage.getItem("resolution");

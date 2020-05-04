@@ -1,4 +1,3 @@
-// #define STRIP_FIXED
 const float INF = 1e+10;
 const float OFFSET = 0.1;
 
@@ -205,13 +204,13 @@ float dPlanetsMix(vec3 p) {
     return d;
 }
 
-vec2 opU(vec2 d1, vec2 d2) { return (d1.x < d2.x) ? d1 : d2; }
+float opU(float d1, float d2) { return min(d1, d2); }
 
-vec2 opS(vec2 d1, vec2 d2) { return (-d1.x > d2.x) ? vec2(-d1.x, d1.y) : d2; }
+float opS(float d1, float d2) { return max(-d1, d2); }
 
-vec2 opSU(vec2 d1, vec2 d2, float k) {
-    float h = clamp(0.5 + 0.5 * (d2.x - d1.x) / k, 0.0, 1.0);
-    return vec2(mix(d2.x, d1.x, h) - k * h * (1.0 - h), d1.y);
+float opSU(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return mix(d2, d1, h) - k * h * (1.0 - h);
 }
 
 mat2 rot(float th) {
@@ -219,14 +218,9 @@ mat2 rot(float th) {
     return mat2(a, -a.y, a.x);
 }
 
-#define MAT_BODY 1.0
-#define MAT_FACE 2.0
-#define MAT_HAND 3.0
-#define MAT_BROW 4.0
-
 // https://www.shadertoy.com/view/wslSRr
-vec2 thinkingFace(vec3 p) {
-    vec2 face = vec2(sdSphere(p, 1.0), MAT_BODY);
+float thinkingFace(vec3 p) {
+    float face = sdSphere(p, 1.0);
 
     vec3 q = p;
     q.x = abs(q.x);
@@ -235,45 +229,45 @@ vec2 thinkingFace(vec3 p) {
     q.y *= 0.8;
     q.z *= 2.0;
     q.z -= 2.0;
-    vec2 eye = vec2(sdSphere(q, .11) * 0.5, MAT_FACE);
+    float eye = sdSphere(q, .11) * 0.5;
 
     q = p;
     q.x = abs(q.x);
     q.xz *= rot(-.35);
     q.yz *= rot(-0.62 + 0.26 * step(0.0, p.x) + pow(abs(q.x), 1.7) * 0.5);
     q.z -= 1.0;
-    vec2 brow = vec2(sdCapsule(q, vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .05) * 0.5, MAT_BROW);
+    float brow = sdCapsule(q, vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .05) * 0.5;
 
     q = p;
     q.yz *= rot(0.2 + pow(abs(p.x), 1.8));
     q.xy *= rot(-0.25);
     q.z -= 1.0;
-    vec2 mouth = vec2(sdCapsule(q, vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .045), MAT_BROW);
+    float mouth = sdCapsule(q, vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .045);
 
     p -= vec3(-.25, -.73, 1.0);
     p.xy *= rot(0.2);
     q = p;
     q = (q * vec3(1.2, 1.0, 2.0));
     q -= vec3(0.0, 0.01, 0.0);
-    vec2 hand = vec2(sdSphere(q, .3) * 0.5, MAT_HAND);
+    float hand = sdSphere(q, .3) * 0.5;
 
     q = p;
 
-    vec2 finger1 = vec2(sdCapsule(q - vec3(0.3, 0.2, 0.02), vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .07), MAT_HAND);
-    vec2 finger2 = vec2(sdCapsule(q * vec3(1.2, 1.0, .8) - vec3(0.2, 0.06, 0.02), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08), MAT_HAND);
-    vec2 finger3 = vec2(sdCapsule(q * vec3(1.2, 1.0, .8) - vec3(0.15, -0.08, 0.015), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08), MAT_HAND);
-    vec2 finger4 = vec2(sdCapsule(q * vec3(1.2, 1.0, .9) - vec3(0.1, -0.2, -0.01), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08), MAT_HAND);
+    float finger1 = sdCapsule(q - vec3(0.3, 0.2, 0.02), vec3(0.2, 0.0, 0.0), vec3(-.2, 0.0, 0.0), .07);
+    float finger2 = sdCapsule(q * vec3(1.2, 1.0, .8) - vec3(0.2, 0.06, 0.02), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08);
+    float finger3 = sdCapsule(q * vec3(1.2, 1.0, .8) - vec3(0.15, -0.08, 0.015), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08);
+    float finger4 = sdCapsule(q * vec3(1.2, 1.0, .9) - vec3(0.1, -0.2, -0.01), vec3(0.1, 0.0, 0.0), vec3(-.1, 0.0, 0.0), .08);
 
     p -= vec3(-0.1, 0.3, 0.0);
     q = p;
     q.x -= q.y * 0.7;
 
-    vec2 finger5 = vec2(sdCapsule(p, vec3(0.0, -0.2, 0.0) - q, vec3(0.0, 0.2, 0.0), .1 - p.y * 0.15), MAT_HAND);
-    vec2 finger = opU(finger1, opU(finger5, opSU(finger2, opSU(finger3, finger4, 0.035), 0.035)));
+    float finger5 = sdCapsule(p, vec3(0.0, -0.2, 0.0) - q, vec3(0.0, 0.2, 0.0), .1 - p.y * 0.15);
+    float finger = opU(finger1, opU(finger5, opSU(finger2, opSU(finger3, finger4, 0.035), 0.035)));
 
     hand = opSU(hand, finger, 0.02);
 
-    vec2 d = opU(eye, face);
+    float d = opU(eye, face);
     d = opU(brow, d);
     d = opS(mouth, d);
     d = opU(hand, d);
@@ -290,11 +284,7 @@ float hKaneta(vec3 p) {
 float dKaneta(vec3 p) {
     transformKaneta(p);
 
-#ifdef STRIP_FIXED
-    float d = sdSphere(p, 1.0);  // thinkingFace のコンパイルに時間がかかるのでSphereで代用
-#else
-    float d = thinkingFace(p).x;
-#endif
+    float d = thinkingFace(p);
 
     if (d < 1.0) {
         d -= 0.02 * hKaneta(p);

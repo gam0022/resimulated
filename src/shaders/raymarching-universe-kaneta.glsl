@@ -351,17 +351,7 @@ float dEarth(vec3 p) {
 float dPlanets(vec3 p) {
     float d = INF;
 
-    if (gPlanetsId == PLANETS_MERCURY) {
-        // d = min(d, dMercury(p));
-    } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
-        // d = min(d, dPlanetsMix(p));
-    } else if (gPlanetsId == PLANETS_KANETA) {
-        d = min(d, dKaneta(p));
-    } else if (gPlanetsId == PLANETS_FMSCAT) {
-        // d = min(d, dFmsCat(p));
-    } else if (gPlanetsId == PLANETS_EARTH) {
-        // d = min(d, dEarth(p));
-    }
+    d = min(d, dKaneta(p));
 
     return d;
 }

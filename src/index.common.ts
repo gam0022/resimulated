@@ -13,13 +13,14 @@ export const chromatiq = new Chromatiq(
     [
         require("./shaders/raymarching-mandel.glsl").default,
         require("./shaders/raymarching-universe.glsl").default,
+        require("./shaders/raymarching-universe-kaneta.glsl").default,
         require("./shaders/text-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
         // require("./shaders/effects/debug-circle.glsl").default,
     ],
 
     // Bloom
-    3,
+    4,
     5,
     require("./shaders/build-in/bloom-prefilter.glsl").default,
     require("./shaders/build-in/bloom-downsample.glsl").default,

@@ -522,19 +522,6 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
                     intersection.emission = vec3(0.3, 0.3, 0.5) * yosshin(offset);
                     intersection.metallic = 0.5;
                 }
-            } else if (gPlanetsId == PLANETS_KANETA) {
-                transformKaneta(p);
-                float h = hKaneta(p);
-                intersection.baseColor = mix(vec3(0.8, 0.5, 0.2), vec3(0.9, 0.95, 0.5), h);
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = vec3(0.0);
-            } else if (gPlanetsId == PLANETS_FMSCAT) {
-                float h = hFmsCat(p);
-                intersection.baseColor = pal(sin(h * remap(beat, 216.0, 220.0, 1.0, 5.0) + 0.25 * beat * TAU), vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 1.0, 1.0), vec3(0.0, 0.33, 0.67));
-                intersection.roughness = 0.4;
-                intersection.metallic = 0.01;
-                intersection.emission = 0.2 * intersection.baseColor;
             } else if (gPlanetsId == PLANETS_EARTH) {
                 transformEarth(p);
                 vec2 uv;

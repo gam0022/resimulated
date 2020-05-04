@@ -495,8 +495,10 @@ export class Chromatiq {
                             uniform.group = currentGroup;
                         }
 
-                        this.uniformArray.push(uniform);
-                        this.uniforms[uniform.key] = uniform.initValue;
+                        if (!this.uniforms[uniform.key]) {
+                            this.uniformArray.push(uniform);
+                            this.uniforms[uniform.key] = uniform.initValue;
+                        }
                     }
                 };
 

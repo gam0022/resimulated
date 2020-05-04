@@ -354,7 +354,7 @@ float dPlanets(vec3 p) {
     if (gPlanetsId == PLANETS_MERCURY) {
         d = min(d, dMercury(p));
     } else if (gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B) {
-        d = min(d, dPlanetsMix(p));
+        // d = min(d, dPlanetsMix(p));
     } else if (gPlanetsId == PLANETS_FMSCAT) {
         d = min(d, dFmsCat(p));
     } else if (gPlanetsId == PLANETS_EARTH) {
@@ -727,7 +727,7 @@ vec2 distortion(vec2 uv) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    if (gSceneId != SCENE_UNIVERSE || gPlanetsId == PLANETS_KANETA) {
+    if (gSceneId != SCENE_UNIVERSE || gPlanetsId == PLANETS_MIX_A || gPlanetsId == PLANETS_MIX_B || gPlanetsId == PLANETS_KANETA) {
         vec2 uv = fragCoord / iResolution.xy;
         fragColor = texture(iPrevPass, uv);
         return;

@@ -351,7 +351,11 @@ float dEarth(vec3 p) {
 float dPlanets(vec3 p) {
     float d = INF;
 
-    d = min(d, dKaneta(p));
+    if (gPlanetsId == PLANETS_KANETA) {
+        d = min(d, dKaneta(p));
+    } else if (gPlanetsId == PLANETS_FMSCAT) {
+        d = min(d, dFmsCat(p));
+    }
 
     return d;
 }
@@ -719,7 +723,7 @@ vec2 distortion(vec2 uv) {
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    if (gSceneId != SCENE_UNIVERSE || gPlanetsId != PLANETS_KANETA) {
+    if (gSceneId != SCENE_UNIVERSE || (gPlanetsId != PLANETS_KANETA && gPlanetsId != PLANETS_FMSCAT)) {
         vec2 uv = fragCoord / iResolution.xy;
         fragColor = texture(iPrevPass, uv);
         return;

@@ -403,7 +403,7 @@ export class Chromatiq {
 
                 if (!PRODUCTION) {
                     endTime = performance.now();
-                    console.log(`compile soundShader: ${endTime - startTime} ms`);
+                    console.log(`compile soundShader\t${endTime - startTime}\tms`);
                 }
 
                 const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
@@ -572,7 +572,7 @@ export class Chromatiq {
 
                 if (!PRODUCTION) {
                     endTime = performance.now();
-                    console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
+                    console.log(`compile imageShader[${i}]\t${endTime - startTime}\tms`);
                 }
 
                 passIndex++;

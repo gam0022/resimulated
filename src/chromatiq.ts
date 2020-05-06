@@ -403,7 +403,7 @@ export class Chromatiq {
 
                 if (!PRODUCTION) {
                     endTime = performance.now();
-                    console.log(`compile soundShader: ${endTime - startTime} ms`);
+                    console.log(`compile soundShader\t${endTime - startTime}\tms`);
                 }
 
                 const soundPass = initPass(soundProgram, 0, PassType.Sound, 1);
@@ -495,8 +495,10 @@ export class Chromatiq {
                             uniform.group = currentGroup;
                         }
 
-                        this.uniformArray.push(uniform);
-                        this.uniforms[uniform.key] = uniform.initValue;
+                        if (!this.uniforms[uniform.key]) {
+                            this.uniformArray.push(uniform);
+                            this.uniforms[uniform.key] = uniform.initValue;
+                        }
                     }
                 };
 
@@ -572,7 +574,7 @@ export class Chromatiq {
 
                 if (!PRODUCTION) {
                     endTime = performance.now();
-                    console.log(`compile imageShader[${i}]: ${endTime - startTime} ms`);
+                    console.log(`compile imageShader[${i}]\t${endTime - startTime}\tms`);
                 }
 
                 passIndex++;

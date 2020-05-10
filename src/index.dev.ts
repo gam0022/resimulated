@@ -8,9 +8,16 @@ import * as three from 'three';
 const THREE = require('three')
 import 'imports-loader?THREE=three!../node_modules/three/examples/js/controls/OrbitControls.js'
 
+import Stats from 'three/examples/jsm/libs/stats.module';
+
 window.addEventListener("load", ev => {
     chromatiq.init();
     chromatiq.play();
+
+    // stats.js
+    const stats = Stats();
+    stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom);
 
     // dat.GUI
     const gui = new dat.GUI();
@@ -84,8 +91,10 @@ window.addEventListener("load", ev => {
                 timeInput.valueAsNumber = time;
                 chromatiq.time = time;
 
+                stats.begin();
                 animateUniforms(time, config.debugCamera, config.debugDisableReset);
                 chromatiq.render();
+                stats.end();
 
                 const filename = `chromatiq${frame.toString().padStart(4, "0")}.png`;
                 chromatiq.canvas.toBlob(blob => {
@@ -402,6 +411,7 @@ window.addEventListener("load", ev => {
             animateUniforms(time, config.debugCamera, config.debugDisableReset);
         }
 
+        stats.update();
         gui.updateDisplay();
     }
 

@@ -16,7 +16,7 @@ window.addEventListener("load", ev => {
 
     // stats.js
     const stats = Stats();
-    stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
 
     // dat.GUI
@@ -91,10 +91,8 @@ window.addEventListener("load", ev => {
                 timeInput.valueAsNumber = time;
                 chromatiq.time = time;
 
-                stats.begin();
                 animateUniforms(time, config.debugCamera, config.debugDisableReset);
                 chromatiq.render();
-                stats.end();
 
                 const filename = `chromatiq${frame.toString().padStart(4, "0")}.png`;
                 chromatiq.canvas.toBlob(blob => {
@@ -407,10 +405,15 @@ window.addEventListener("load", ev => {
         const fps = 1.0 / timeDelta;
         fpsSpan.innerText = `${fps.toFixed(2)} FPS`;
 
+        stats.begin();
+
         if (!config.debugParams) {
             animateUniforms(time, config.debugCamera, config.debugDisableReset);
         }
+    }
 
+    chromatiq.onPostRender = () => {
+        stats.end();
         stats.update();
         gui.updateDisplay();
     }

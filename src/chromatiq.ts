@@ -45,6 +45,9 @@ export class Chromatiq {
     /** レンダリングの直前に実行されるコールバック関数です。ポーズ中（isPlaying = false）は実行されません */
     onRender: (time: number, timeDelta: number) => void;
 
+    /** レンダリングの直後に実行されるコールバック関数です。ポーズ中（isPlaying = false）は実行されません */
+    onPostRender: () => void;
+
     /** 毎フレーム実行されるコールバック関数です。ポーズ中（isPlaying = false）も実行されます */
     onUpdate: () => void;
 
@@ -605,6 +608,10 @@ export class Chromatiq {
                     }
 
                     this.render();
+
+                    if (!PRODUCTION && this.onPostRender != null) {
+                        this.onPostRender();
+                    }
 
                     if (PRODUCTION) {
                         this.time = (timestamp - startTimestamp) * 0.001;

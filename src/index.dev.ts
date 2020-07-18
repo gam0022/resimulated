@@ -53,7 +53,7 @@ window.addEventListener("load", ev => {
     });
 
     const miscFolder = gui.addFolder("misc");
-    miscFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "3840x2160", "2560x1440", "1920x1080", "1600x900", "1280x720", "512x512"]).onChange(value => {
+    miscFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "3840x2160", "2560x1440", "1920x1080", "1600x900", "1280x720", "512x512", "1024x1024", "2160x2160"]).onChange(value => {
         onResolutionCange();
     });
     miscFolder.add(config, "timeMode", ["time", "beat"]).onChange(value => {

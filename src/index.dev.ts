@@ -27,9 +27,9 @@ window.addEventListener("load", ev => {
         debugCamera: false,
         debugParams: false,
         debugDisableReset: false,
-        resolution: "1920x1080",
+        resolution: "2160x2160",
         timeMode: "beat",
-        bpm: 140,
+        bpm: 60,
     }
 
     const debugFolder = gui.addFolder("debug");

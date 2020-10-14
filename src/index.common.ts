@@ -5,7 +5,7 @@ import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubi
 declare var PRODUCTION: boolean;
 
 export const chromatiq = new Chromatiq(
-    109.714285714,// デモの長さ（秒）
+    4,// デモの長さ（秒）
     require("./shaders/build-in/vertex.glsl").default,
 
     // Image Shaders

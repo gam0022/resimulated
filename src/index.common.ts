@@ -5,22 +5,26 @@ import { mix, clamp, saturate, Vector3, remap, remapFrom, remapTo, easeInOutCubi
 declare var PRODUCTION: boolean;
 
 export const chromatiq = new Chromatiq(
-    109.714285714,// デモの長さ（秒）
+    4,// デモの長さ（秒）
     require("./shaders/build-in/vertex.glsl").default,
 
     // Image Shaders
     require("./shaders/common-header.glsl").default,
     [
+        /*
         require("./shaders/raymarching-mandel.glsl").default,
         require("./shaders/raymarching-universe.glsl").default,
         require("./shaders/raymarching-universe-kaneta-fms-cat.glsl").default,
         require("./shaders/text-resimulated.glsl").default,
         require("./shaders/post-effect.glsl").default,
+        */
+
+        require("./shaders/sandbox/texture-fbm.glsl").default,
         // require("./shaders/effects/debug-circle.glsl").default,
     ],
 
     // Bloom
-    4,
+    0,
     5,
     require("./shaders/build-in/bloom-prefilter.glsl").default,
     require("./shaders/build-in/bloom-downsample.glsl").default,

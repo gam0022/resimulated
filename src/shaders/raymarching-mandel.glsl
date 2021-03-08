@@ -220,7 +220,7 @@ void intersectObjects(inout Intersection intersection, inout Ray ray) {
 
             float edge = calcEdge(p);
             float hue = gEmissiveHue + gEmissiveHueShiftZ * p.z + gEmissiveHueShiftXY * length(p.xy) + gEmissiveHueShiftBeat * beat;
-            intersection.emission = gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower) * saturate(cos(beat * gEmissiveSpeed * TAU - mod(0.5 * intersection.position.z, TAU)));
+            intersection.emission = gEmissiveIntensity * hsv2rgb(vec3(hue, 0.8, 1.0)) * pow(edge, gEdgePower);
             intersection.reflectance = 0.0;
         }
     }

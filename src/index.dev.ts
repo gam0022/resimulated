@@ -27,9 +27,9 @@ window.addEventListener("load", ev => {
         debugCamera: false,
         debugParams: false,
         debugDisableReset: false,
-        resolution: "1920x1080",
+        resolution: "2160x2160",
         timeMode: "beat",
-        bpm: 140,
+        bpm: 60,
     }
 
     const debugFolder = gui.addFolder("debug");
@@ -53,7 +53,7 @@ window.addEventListener("load", ev => {
     });
 
     const miscFolder = gui.addFolder("misc");
-    miscFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "3840x2160", "2560x1440", "1920x1080", "1600x900", "1280x720", "512x512"]).onChange(value => {
+    miscFolder.add(config, "resolution", ["0.5", "0.75", "1.0", "3840x2160", "2560x1440", "1920x1080", "1600x900", "1280x720", "512x512", "1024x1024", "2160x2160"]).onChange(value => {
         onResolutionCange();
     });
     miscFolder.add(config, "timeMode", ["time", "beat"]).onChange(value => {
@@ -68,13 +68,32 @@ window.addEventListener("load", ev => {
         chromatiq.needsUpdate = true;
     });
 
+    // setIntervalを使う方法
+    const sleep = (waitSec: number, callbackFunc: () => void) => {
+        var spanedSec = 0;
+
+        var waitFunc = function () {
+            spanedSec++;
+
+            if (spanedSec >= waitSec) {
+                if (callbackFunc) callbackFunc();
+                return;
+            }
+
+            clearTimeout(id);
+            id = setTimeout(waitFunc, 1000);
+        };
+
+        var id = setTimeout(waitFunc, 1000);
+    }
+
     const saevFunctions = {
         saveImage: () => {
             chromatiq.canvas.toBlob(blob => {
                 saveAs(blob, "chromatiq.png");
             });
         },
-        saveImageSequence: () => {
+        saveImageSequence: (): void => {
             if (chromatiq.isPlaying) {
                 chromatiq.stopSound();
             }
@@ -85,7 +104,7 @@ window.addEventListener("load", ev => {
 
             const fps = 60;
             let frame = 0;
-            const update = (timestamp: number) => {
+            const update = (): void => {
                 const time = frame / fps;
                 timeBar.valueAsNumber = time;
                 timeInput.valueAsNumber = time;
@@ -95,16 +114,18 @@ window.addEventListener("load", ev => {
                 chromatiq.render();
 
                 const filename = `chromatiq${frame.toString().padStart(4, "0")}.png`;
-                chromatiq.canvas.toBlob(blob => {
+                chromatiq.canvas.toBlob((blob) => {
                     saveAs(blob, filename);
 
                     if (frame <= Math.ceil(fps * timeLengthInput.valueAsNumber)) {
-                        requestAnimationFrame(update);
+                        sleep(0.25, () => {
+                            requestAnimationFrame(update);
+                        })
                     }
                 });
 
                 frame++;
-            }
+            };
 
             requestAnimationFrame(update);
         },
